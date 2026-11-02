@@ -99,7 +99,8 @@ consignación, con `dias` ordenados y `grande` verdadero si hay más de un día.
 ### `coincide_deposito` · `{banco, esperado, tolerancia, porcentajes}` → booleano
 Verdadero si para algún `p` de `porcentajes` se cumple
 `abs(100 × banco − p × esperado) ≤ 100 × tolerancia`. Enteros, sin dividir. Cada `p`
-va de 0 a 100, para que el cálculo siga siendo exacto en los dos lenguajes.
+va de 0 a 100, para que el cálculo siga siendo exacto en los dos lenguajes. Para Bold,
+`porcentajes` sale de `empresa_config.bold_porcentajes_deposito` (D-027).
 
 ### `cruces_redeban` · `{filas, tolerancia, max_cruce}` → lista
 Cada fila es `{codigo, franquicia, fecha, esperado, banco}`. Devuelve las mismas

@@ -13,6 +13,7 @@ distinto en el código, el código está mal.
 | Medio de pago | Efectivo, Bold, Redeban, transferencia, Daviplata, Nequi, etc. |
 | Pago | Lo que el punto reporta que recibió, por medio de pago. |
 | Movimiento externo | Lo que realmente llegó según una fuente externa: extracto, liquidación de datáfono o aviso por correo. |
+| Código de recaudo | El código de QR o llave que dice de qué punto es un pago. Una cuenta puede recibir pagos de varios puntos. |
 | Conciliación | El cruce entre un pago reportado y uno o varios movimientos externos. |
 | Propuesta | Una conciliación que el sistema sugiere pero que una persona debe confirmar. |
 | Descuadre | Diferencia entre lo esperado y lo reportado en una jornada, para un medio de pago o en total. |

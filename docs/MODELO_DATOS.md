@@ -1,6 +1,6 @@
 # Modelo de datos
 
-38 tablas en 9 módulos, en Supabase (Postgres). Este documento dice qué guarda
+39 tablas en 7 módulos, en Supabase (Postgres). Este documento dice qué guarda
 cada tabla y por qué. El SQL exacto está en `db/migrations/`.
 
 ## Principios
@@ -55,6 +55,7 @@ erDiagram
   archivo_importado ||--o{ error_importacion : reporta
   punto_venta ||--o{ terminal_datafono : usa
   punto_venta |o--o{ cuenta_recaudo : "recauda en"
+  punto_venta ||--o{ codigo_recaudo : "se reconoce por"
   terminal_datafono |o--o{ movimiento_externo : procesa
   cuenta_recaudo |o--o{ movimiento_externo : recibe
   pago ||--o{ conciliacion : "se cruza"
@@ -109,6 +110,7 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 | `medio_pago` | Efectivo, Bold, Redeban, transferencia… por empresa, cada uno con su tipo: efectivo, tarjeta, transferencia u otro. | 0001 |
 | `terminal_datafono` | Cada datáfono y a qué punto pertenece, con vigencia. | 0001 |
 | `cuenta_recaudo` | Cuentas donde llegan transferencias (solo últimos 4 dígitos). | 0001 |
+| `codigo_recaudo` | Código de QR o llave de cada punto, con vigencia. Dice de qué punto es un pago cuando varios comparten cuenta. | 0001 |
 | `costo_producto` | Costo con vigencia. Necesario para ganancia real. | Fase 2 |
 
 ### Importación

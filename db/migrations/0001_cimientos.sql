@@ -335,6 +335,26 @@ create table public.cuenta_recaudo (
   foreign key (empresa_id, medio_pago_id) references public.medio_pago (empresa_id, id)
 );
 
+-- Código con el que el banco dice de qué punto es un pago, como el del QR o la
+-- llave. Una cuenta puede recibir pagos de varios puntos: el punto no sale de la
+-- cuenta sino de este código. El cruce usa sus últimos 4 dígitos, así que dos
+-- códigos activos no pueden compartirlos: el pago caería en el punto equivocado.
+-- Si un punto cambia de código, se cierra con activo_hasta y se crea otro.
+create table public.codigo_recaudo (
+  id            uuid primary key default gen_random_uuid(),
+  empresa_id    uuid not null references public.empresa (id),
+  punto_id      uuid not null,
+  codigo        text not null check (codigo ~ '^[0-9]{4,}$'),
+  activo_desde  date not null,
+  activo_hasta  date,
+  creado_en     timestamptz not null default now(),
+  check (activo_hasta is null or activo_hasta >= activo_desde),
+  foreign key (empresa_id, punto_id) references public.punto_venta (empresa_id, id)
+);
+create unique index codigo_recaudo_activo_unico
+  on public.codigo_recaudo (empresa_id, right(codigo, 4))
+  where activo_hasta is null;
+
 -- Cómo leer los reportes de cada empresa. mapeo_columnas dice qué columna del
 -- archivo es qué campo del sistema, por ejemplo:
 --   {"fecha": "Fecha Transacción", "valor": "Valor Bruto", "referencia": "Ref"}
@@ -358,6 +378,13 @@ create table public.empresa_config (
   conc_minutos_datafono        int    not null default 10   check (conc_minutos_datafono > 0),
   conc_minutos_transferencia   int    not null default 30   check (conc_minutos_transferencia > 0),
   conc_tolerancia_valor        bigint not null default 1000 check (conc_tolerancia_valor >= 0),
+  -- Qué parte del depósito de Bold se acepta como completa. Normal: solo 100. Si
+  -- Bold le descuenta algo a la empresa, como la cuota de un préstamo, se agrega
+  -- ese porcentaje, por ejemplo {100,90}.
+  bold_porcentajes_deposito    int[]  not null default '{100}'
+                                 check (cardinality(bold_porcentajes_deposito) > 0
+                                        and 0 <= all (bold_porcentajes_deposito)
+                                        and 100 >= all (bold_porcentajes_deposito)),
   -- Descuadres (docs/REGLAS/descuadres.md)
   desc_umbral                  bigint not null default 1000 check (desc_umbral >= 0),
   desc_confianza_min           numeric(3, 2) not null default 0.60
@@ -416,6 +443,8 @@ create index medio_pago_empresa_idx        on public.medio_pago (empresa_id);
 create index terminal_datafono_empresa_idx on public.terminal_datafono (empresa_id);
 create index terminal_datafono_punto_idx   on public.terminal_datafono (punto_id);
 create index cuenta_recaudo_empresa_idx    on public.cuenta_recaudo (empresa_id);
+create index codigo_recaudo_empresa_idx    on public.codigo_recaudo (empresa_id);
+create index codigo_recaudo_punto_idx      on public.codigo_recaudo (punto_id);
 create index perfil_fuente_empresa_idx     on public.perfil_fuente (empresa_id);
 
 
@@ -477,7 +506,7 @@ create policy auditoria_ver on public.auditoria
   using (empresa_id = app.empresa_actual() and app.tiene_rol(array['dueno', 'soporte']));
 
 -- Maestros: las mismas tres políticas en cada tabla. El bloque las crea en un
--- ciclo para no repetir lo mismo diez veces; el resultado es igual a
+-- ciclo para no repetir lo mismo once veces; el resultado es igual a
 -- escribirlas una por una.
 do $$
 declare
@@ -485,7 +514,8 @@ declare
 begin
   foreach t in array array[
     'punto_venta', 'asesora', 'asesora_alias', 'producto', 'producto_alias',
-    'tipo_venta', 'precio_producto', 'medio_pago', 'terminal_datafono', 'cuenta_recaudo'
+    'tipo_venta', 'precio_producto', 'medio_pago', 'terminal_datafono', 'cuenta_recaudo',
+    'codigo_recaudo'
   ]
   loop
     execute format('alter table public.%I enable row level security', t);
@@ -557,7 +587,7 @@ begin
   foreach t in array array[
     'empresa', 'empresa_config', 'usuario', 'punto_venta', 'asesora', 'asesora_alias', 'producto',
     'producto_alias', 'tipo_venta', 'precio_producto', 'medio_pago',
-    'terminal_datafono', 'cuenta_recaudo', 'perfil_fuente'
+    'terminal_datafono', 'cuenta_recaudo', 'codigo_recaudo', 'perfil_fuente'
   ]
   loop
     execute format(

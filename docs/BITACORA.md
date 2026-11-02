@@ -15,6 +15,20 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Códigos de pago y descuento de Bold
+Hecho:
+- 0001: nueva tabla `codigo_recaudo` (D-026) y
+  `empresa_config.bold_porcentajes_deposito` (D-027). Cierra H-52 y H-57. 93 pruebas en
+  verde, con 16 tablas, 45 políticas y 17 triggers. Se quitaron las protecciones nuevas
+  en una copia y las pruebas lo detectaron.
+Falta:
+- Crear `tino-pruebas`, leer 0001 con Claude y aplicarla.
+- Cuando se carguen los maestros (tarea 003): los 11 códigos en `codigo_recaudo` y
+  `{100,90}` en la configuración de Milagros.
+Dudas:
+- Con el 90 %, ese 10 % debería verse como cuota del préstamo, no como plata perdida.
+  Hoy el núcleo solo dice si el depósito coincide; falta definir cómo se muestra.
+
 ## 2026-11-02 · Núcleo de cálculo en Python y TypeScript
 Hecho:
 - Registradas las decisiones D-022 a D-025: dos lenguajes, `.exe` primero, fase 1 a la

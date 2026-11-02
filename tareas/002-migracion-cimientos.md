@@ -22,7 +22,7 @@ y perfiles de fuente, con la separación entre empresas probada.
 - `docs/MODELO_DATOS.md`, `db/migrations/0001_cimientos.sql`
 
 ## Hecho cuando
-- Las 80 pruebas de `tests/rls/0001_pruebas.sql` pasan en local.
+- Las 93 pruebas de `tests/rls/0001_pruebas.sql` pasan en local.
 - En Supabase, un usuario de la empresa A no ve nada de la empresa B.
 - Un cambio en un punto de venta aparece en `auditoria`.
 
@@ -37,14 +37,13 @@ y perfiles de fuente, con la separación entre empresas probada.
 
 ### Avance del 2 nov 2026
 - Jacobo aprobó corregir 0001 antes de aplicarla (D-018). Pasos 1 a 3 hechos: 0001
-  corregida y 80 pruebas en verde en Postgres 16.3. Quedan 15 tablas con RLS, 42
-  políticas y 16 triggers.
+  corregida y 93 pruebas en verde en Postgres 16.3. Quedan 16 tablas con RLS, 45
+  políticas y 17 triggers.
 - Se comprobó que las pruebas sirven: se quitó cada corrección, una por una, en una
   copia, y la suite falló cada vez.
 - Sigue el paso 4 (Jacobo lee la migración) y después el paso 5 en `tino-pruebas`.
   H-05 y H-06 quedaron decididos (D-025) y 0001 ya funciona así.
-- Abierto de 0001: el código de pago por punto (H-52) puede cambiar el modelo antes
-  de aplicar. Conviene decidirlo en el paso 4.
+- 0001 ya incluye `codigo_recaudo` (D-026) y el porcentaje del depósito de Bold (D-027).
 
 ### Plan propuesto (2 nov 2026): espera la aprobación de Jacobo
 
@@ -106,8 +105,7 @@ soporte a cada cliente) y H-12 (¿la base impide vigencias cruzadas?).
 **Paso 5 · Aplicar en `tino-pruebas`** (Jacobo, o Claude si lo autoriza entonces)
 - Solo después de pasos 1 a 4 y con la suite local en verde. Una sola vez, sin
   `00_supabase_simulado.sql`, que allá ya existe.
-- Comprobar justo después: 15 tablas con RLS, 42 políticas, 14 triggers. Los
-  números cambian si se aprueban los cambios del paso 2.
+- Comprobar justo después: 16 tablas con RLS, 45 políticas, 17 triggers.
 - Revisar si `authenticated` tiene TRUNCATE en Supabase (H-07) y quitarlo si lo
   tiene: RLS no aplica a TRUNCATE y el simulador local no refleja eso.
 

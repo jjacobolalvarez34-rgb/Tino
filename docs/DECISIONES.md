@@ -137,6 +137,19 @@ del día. La verificación en minutos llega con el lector de correos.
 2 nov 2026. Decisión de Jacobo. Finanzas no ve la lista de usuarios. Soporte usa una
 cuenta por empresa, y eso se cambia al llegar el segundo cliente (ver P-002).
 
+### D-026 · El punto de un pago sale de su código, no de la cuenta
+2 nov 2026. Decisión de Jacobo, que cierra H-52. Los 11 puntos de Milagros comparten
+cuenta, así que el punto se reconoce por el código del QR o la llave. La tabla
+`codigo_recaudo` los guarda con vigencia, porque un código puede cambiar. La base
+impide que dos códigos activos compartan los últimos 4 dígitos, que es lo que usa el
+cruce: si no, un pago caería en el punto equivocado sin que nadie lo note.
+
+### D-027 · El descuento de Bold es configuración de cada empresa
+2 nov 2026. Jacobo aclaró que el 10 % es la cuota de un préstamo de Milagros con Bold,
+no una comisión. Por eso no va fijo en el código: vive en
+`empresa_config.bold_porcentajes_deposito`, que por defecto solo acepta el 100 %.
+Milagros usa `{100,90}` y lo quita cuando termine el préstamo. Cierra H-57.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

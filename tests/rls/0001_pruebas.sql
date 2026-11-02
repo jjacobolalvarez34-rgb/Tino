@@ -410,7 +410,63 @@ select pg_temp.falla($$insert into public.asesora_alias (empresa_id, asesora_id,
                                'aaaaaaaa-0000-0000-0000-000000000021', 'ange la munoz')$$,
                      '23505', 'Dos formas del mismo nombre no se repiten en la empresa');
 
--- 17. Sin sesión, con anon -------------------------------------------------------
+-- 17. Códigos de pago por punto ---------------------------------------------------
+insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+values ('aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000011',
+        '11110001', '2026-01-01');
+select pg_temp.ok((select count(*) from public.auditoria where tabla = 'codigo_recaudo') = 1,
+                  'El dueño crea un código de pago y queda en auditoría');
+
+select pg_temp.falla($$insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+                       values ('aaaaaaaa-0000-0000-0000-000000000000',
+                               'bbbbbbbb-0000-0000-0000-000000000011', '22220002', '2026-01-01')$$,
+                     '23503', 'Un código de A no apunta a un punto de B');
+select pg_temp.falla($$insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+                       values ('aaaaaaaa-0000-0000-0000-000000000000',
+                               'aaaaaaaa-0000-0000-0000-000000000011', '99990001', '2026-01-01')$$,
+                     '23505', 'Dos códigos activos no comparten los últimos 4 dígitos');
+select pg_temp.falla($$insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+                       values ('aaaaaaaa-0000-0000-0000-000000000000',
+                               'aaaaaaaa-0000-0000-0000-000000000011', 'QR-1', '2026-01-01')$$,
+                     '23514', 'Un código de pago solo lleva dígitos');
+
+update public.codigo_recaudo set activo_hasta = '2026-06-30' where codigo = '11110001';
+insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+values ('aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000011',
+        '99990001', '2026-07-01');
+select pg_temp.ok(true, 'Cerrado un código, otro puede usar esos dígitos');
+
+select pg_temp.como('a0000000-0000-0000-0000-00000000000a');
+select pg_temp.falla($$insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+                       values ('aaaaaaaa-0000-0000-0000-000000000000',
+                               'aaaaaaaa-0000-0000-0000-000000000011', '33330003', '2026-01-01')$$,
+                     '42501', 'La asesora no crea códigos de pago');
+
+select pg_temp.como('b0000000-0000-0000-0000-00000000000d');
+select pg_temp.ok((select count(*) from public.codigo_recaudo) = 0,
+                  'El dueño de B no ve los códigos de pago de A');
+insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
+values ('bbbbbbbb-0000-0000-0000-000000000000', 'bbbbbbbb-0000-0000-0000-000000000011',
+        '99990001', '2026-01-01');
+select pg_temp.ok(true, 'Otra empresa puede tener un código igual');
+
+-- 18. Depósito de Bold por empresa -------------------------------------------------
+select pg_temp.como('a0000000-0000-0000-0000-00000000000d');
+select pg_temp.ok((select bold_porcentajes_deposito from public.empresa_config) = '{100}',
+                  'Por defecto el depósito de Bold debe llegar completo');
+update public.empresa_config set bold_porcentajes_deposito = '{100,90}';
+select pg_temp.ok((select bold_porcentajes_deposito from public.empresa_config) = '{100,90}',
+                  'Una empresa con descuento de Bold lo configura sin tocar código');
+select pg_temp.falla($$update public.empresa_config set bold_porcentajes_deposito = '{150}'$$,
+                     '23514', 'El porcentaje del depósito no pasa de 100');
+select pg_temp.falla($$update public.empresa_config set bold_porcentajes_deposito = '{}'$$,
+                     '23514', 'Debe quedar al menos un porcentaje');
+
+select pg_temp.como('b0000000-0000-0000-0000-00000000000d');
+select pg_temp.ok((select bold_porcentajes_deposito from public.empresa_config) = '{100}',
+                  'El porcentaje de A no cambia el de B');
+
+-- 19. Sin sesión, con anon -------------------------------------------------------
 reset role;
 set role anon;
 select set_config('request.jwt.claims', '', false);
@@ -423,14 +479,14 @@ select pg_temp.falla($$insert into public.punto_venta (empresa_id, codigo, nombr
                        values ('aaaaaaaa-0000-0000-0000-000000000000', 'N1', 'x')$$,
                      '42501', 'anon no escribe');
 
--- 18. Vaciar una tabla -----------------------------------------------------------
+-- 20. Vaciar una tabla -----------------------------------------------------------
 reset role;
 set role authenticated;
 select pg_temp.como('a0000000-0000-0000-0000-00000000000d');
 select pg_temp.falla($$truncate public.punto_venta cascade$$,
                      '42501', 'Nadie vacía una tabla con TRUNCATE');
 
--- 19. Como administrador ---------------------------------------------------------
+-- 21. Como administrador ---------------------------------------------------------
 reset role;
 
 select pg_temp.falla($$delete from auth.users where id = 'a0000000-0000-0000-0000-00000000000a'$$,
@@ -441,7 +497,7 @@ select pg_temp.ok((select count(*) from public.empresa_config
                    where empresa_id = 'cccccccc-0000-0000-0000-000000000000') = 1,
                   'Una empresa nueva también nace con su configuración');
 
--- 20. Estructura: lo que debe cumplir toda tabla ----------------------------------
+-- 22. Estructura: lo que debe cumplir toda tabla ----------------------------------
 select pg_temp.ok(
   not exists (select from pg_tables where schemaname = 'public' and not rowsecurity),
   'Todas las tablas tienen RLS');
