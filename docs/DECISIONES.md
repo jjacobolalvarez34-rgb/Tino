@@ -150,6 +150,13 @@ no una comisión. Por eso no va fijo en el código: vive en
 `empresa_config.bold_porcentajes_deposito`, que por defecto solo acepta el 100 %.
 Milagros usa `{100,90}` y lo quita cuando termine el préstamo. Cierra H-57.
 
+### D-028 · Tablero de ventas en vez de las hojas de Excel de Bold y Redeban
+2 nov 2026. Decisión de Jacobo. Las hojas que arma el conciliador con su plantilla
+las usa solo Milagros, así que no pasan a Tino. De esos reportes se aprovechan los
+datos para un tablero con estadísticas descriptivas. `docs/DESIGN.md` pide evitar
+gráficas que haya que interpretar: por eso son solo barras simples, cada una con su
+tabla, y lo que no se entienda de un vistazo no entra.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

@@ -356,6 +356,164 @@ export function punto_por_referencia(referencia: string, puntos: Punto[]): strin
   return encontrado;
 }
 
+export type Cobro = {
+  fecha: string;
+  hora: number | null;
+  punto: string;
+  proveedor: string;
+  franquicia: string | null;
+  bruto: number;
+  comision: number;
+  retenciones: number;
+  neto: number;
+};
+export type Grupo<T> = {
+  clave: T;
+  cobros: number;
+  bruto: number;
+  comision: number;
+  retenciones: number;
+  neto: number;
+  ticket_promedio: number;
+};
+export type FilaSemana = {
+  clave: number;
+  dias: number;
+  cobros: number;
+  bruto: number;
+  promedio_por_dia: number;
+};
+export type Estadisticas = {
+  totales: Omit<Grupo<string>, "clave"> & {
+    ticket_mediano: number;
+    dias: number;
+    promedio_por_dia: number;
+  };
+  por_punto: Grupo<string>[];
+  por_dia: Grupo<string>[];
+  por_dia_semana: FilaSemana[];
+  por_hora: Grupo<number>[];
+  por_proveedor: Grupo<string>[];
+  por_franquicia: Grupo<string>[];
+  sin_hora: number;
+  dia_pico: string | null;
+  hora_pico: number | null;
+};
+
+// Con el resto y no con `a / b`: la división de JavaScript deja decimales.
+function redondear(a: number, b: number): number {
+  if (b === 0) return 0;
+  const resto = a % b;
+  const cociente = (a - resto) / b;
+  return 2 * resto >= b ? cociente + 1 : cociente;
+}
+
+function agrupar<T extends string | number>(
+  cobros: Cobro[],
+  clave_de: (cobro: Cobro) => T | null,
+): Grupo<T>[] {
+  const grupos = new Map<T, Grupo<T>>();
+  for (const cobro of cobros) {
+    const clave = clave_de(cobro);
+    if (clave === null) continue;
+    let grupo = grupos.get(clave);
+    if (grupo === undefined) {
+      grupo = { clave, cobros: 0, bruto: 0, comision: 0, retenciones: 0, neto: 0, ticket_promedio: 0 };
+      grupos.set(clave, grupo);
+    }
+    grupo.cobros += 1;
+    grupo.bruto += cobro.bruto;
+    grupo.comision += cobro.comision;
+    grupo.retenciones += cobro.retenciones;
+    grupo.neto += cobro.neto;
+  }
+  const salida = [...grupos.values()];
+  for (const grupo of salida) grupo.ticket_promedio = redondear(grupo.bruto, grupo.cobros);
+  return salida;
+}
+
+function por_bruto(grupos: Grupo<string>[]): Grupo<string>[] {
+  return [...grupos].sort((x, y) => y.bruto - x.bruto || por_texto(x.clave, y.clave));
+}
+
+function pico<T>(grupos: Grupo<T>[]): T | null {
+  let mejor: Grupo<T> | null = null;
+  for (const grupo of grupos) {
+    if (mejor === null || grupo.bruto > mejor.bruto) mejor = grupo;
+  }
+  return mejor === null ? null : mejor.clave;
+}
+
+function mediana(valores: number[]): number {
+  const orden = [...valores].sort((x, y) => x - y);
+  const n = orden.length;
+  if (n === 0) return 0;
+  const mitad = (n - n % 2) / 2;
+  if (n % 2 === 1) return orden[mitad];
+  return redondear(orden[mitad - 1] + orden[mitad], 2);
+}
+
+// Lunes es 0, como en el contrato; getUTCDay da domingo como 0.
+function dia_semana(fecha: string): number {
+  return (new Date(leer_fecha(fecha)).getUTCDay() + 6) % 7;
+}
+
+export function estadisticas_ventas(cobros: Cobro[]): Estadisticas {
+  const [suma] = agrupar(cobros, () => "total");
+  const { cobros: cantidad, bruto, comision, retenciones, neto, ticket_promedio } = suma ?? {
+    cobros: 0,
+    bruto: 0,
+    comision: 0,
+    retenciones: 0,
+    neto: 0,
+    ticket_promedio: 0,
+  };
+  const dias = new Set(cobros.map((cobro) => cobro.fecha)).size;
+
+  const por_dia = agrupar(cobros, (cobro) => cobro.fecha).sort((x, y) => por_texto(x.clave, y.clave));
+  const por_hora = agrupar(cobros, (cobro) => cobro.hora).sort((x, y) => x.clave - y.clave);
+
+  const por_dia_semana: FilaSemana[] = Array.from({ length: 7 }, (_, clave) => ({
+    clave,
+    dias: 0,
+    cobros: 0,
+    bruto: 0,
+    promedio_por_dia: 0,
+  }));
+  for (const grupo of por_dia) {
+    const fila = por_dia_semana[dia_semana(grupo.clave)];
+    fila.dias += 1;
+    fila.cobros += grupo.cobros;
+    fila.bruto += grupo.bruto;
+  }
+  for (const fila of por_dia_semana) fila.promedio_por_dia = redondear(fila.bruto, fila.dias);
+
+  return {
+    totales: {
+      cobros: cantidad,
+      bruto,
+      comision,
+      retenciones,
+      neto,
+      ticket_promedio,
+      ticket_mediano: mediana(cobros.map((cobro) => cobro.bruto)),
+      dias,
+      promedio_por_dia: redondear(bruto, dias),
+    },
+    por_punto: por_bruto(agrupar(cobros, (cobro) => cobro.punto)),
+    por_dia,
+    por_dia_semana,
+    por_hora,
+    por_proveedor: agrupar(cobros, (cobro) => cobro.proveedor).sort((x, y) =>
+      por_texto(x.clave, y.clave),
+    ),
+    por_franquicia: por_bruto(agrupar(cobros, (cobro) => cobro.franquicia)),
+    sin_hora: cobros.filter((cobro) => cobro.hora === null).length,
+    dia_pico: pico(por_dia),
+    hora_pico: pico(por_hora),
+  };
+}
+
 type Entrada = Record<string, unknown>;
 type Registro = { parametros: string[]; llamar: (e: Entrada) => unknown };
 
@@ -449,6 +607,10 @@ const FUNCIONES = new Map<string, Registro>([
       parametros: ["referencia", "puntos"],
       llamar: (e) => punto_por_referencia(e.referencia as string, e.puntos as Punto[]),
     },
+  ],
+  [
+    "estadisticas_ventas",
+    { parametros: ["cobros"], llamar: (e) => estadisticas_ventas(e.cobros as Cobro[]) },
   ],
 ]);
 

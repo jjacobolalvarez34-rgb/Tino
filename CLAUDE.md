@@ -89,5 +89,8 @@ quiere entender cada decisión, no solo recibir código.
   `node --experimental-strip-types --test motores/nucleo_ts/test_casos.test.ts`
 - Exigir que los dos lenguajes den lo mismo:
   `python motores/comparar_lenguajes.py`
+- Probar el lector de Bold y Redeban: `python -m unittest ingesta.test_tarjetas`
+- Armar el tablero de ventas:
+  `python panel/tablero/armar.py --puntos puntos.json --salida tablero.html reporte.xlsx`
 - [POR COMPLETAR en la tarea 001: aplicar migraciones en Supabase y levantar el
   programa.]

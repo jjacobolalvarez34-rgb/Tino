@@ -143,6 +143,36 @@ contra los últimos 4 de cada `codigo`. Si dos puntos comparten esos dígitos, g
 último de la lista. Sin coincidencia, `null`. `referencia` es texto: una línea sin
 referencia (`null`) no se manda aquí, va directo a "sin identificar".
 
+### `estadisticas_ventas` · `{cobros}` → resultado
+Estadísticas descriptivas de cobros con tarjeta. Cada cobro es
+`{fecha, hora, punto, proveedor, franquicia, bruto, comision, retenciones, neto}`.
+`hora` es un entero de 0 a 23, o `null` si la fuente no la trae. `franquicia` es texto
+o `null`. Los cuatro montos son enteros mayores o iguales a cero.
+
+**División redondeada:** `redondear(a, b)` con enteros: 0 si `b` es 0. Si no, `q` es el
+cociente entero y `r` el resto, y da `q + 1` si `2 × r ≥ b`, si no `q`.
+
+Un **grupo** es `{clave, cobros, bruto, comision, retenciones, neto, ticket_promedio}`:
+`cobros` cuenta los cobros, los cuatro montos se suman, y `ticket_promedio` es
+`redondear(bruto, cobros)`.
+
+Devuelve:
+- `totales`: un grupo sin `clave`, más `ticket_mediano`, `dias` (fechas distintas) y
+  `promedio_por_dia` (`redondear(bruto, dias)`). Mediana: se ordenan los `bruto`; con
+  cantidad impar, el del medio; con cantidad par, `redondear(suma de los dos del medio, 2)`.
+  Sin cobros, todo en 0.
+- `por_punto`: grupos por `punto`, de mayor a menor `bruto`; si empatan, por `clave`.
+- `por_dia`: grupos por `fecha`, por `clave` ascendente.
+- `por_dia_semana`: siempre 7 filas, lunes (`clave` 0) a domingo (6), con
+  `{clave, dias, cobros, bruto, promedio_por_dia}`. `dias` son las fechas distintas de ese
+  día de la semana con al menos un cobro.
+- `por_hora`: grupos por `hora`, solo horas con cobros y sin `null`, por `clave` ascendente.
+- `por_proveedor`: grupos por `proveedor`, por `clave` ascendente.
+- `por_franquicia`: grupos por `franquicia` sin `null`, ordenados como `por_punto`.
+- `sin_hora`: cuántos cobros tienen `hora` `null`.
+- `dia_pico` y `hora_pico`: la `clave` de mayor `bruto` en `por_dia` y en `por_hora`. Si
+  empatan, la primera de la lista. Sin datos, `null`.
+
 ## Cómo se prueba
 
 - `tests/casos/motor/casos.json`: casos escritos a mano, con datos inventados. Cada

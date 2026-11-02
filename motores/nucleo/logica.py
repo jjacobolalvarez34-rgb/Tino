@@ -211,10 +211,97 @@ def punto_por_referencia(referencia, puntos):
     return por_ultimos4.get(referencia[-4:])
 
 
+def _redondear(a, b):
+    """División entera redondeada. Nunca pasa por float."""
+    if b == 0:
+        return 0
+    q, r = divmod(a, b)
+    return q + 1 if 2 * r >= b else q
+
+
+def _grupos(cobros, clave_de):
+    """Agrupa cobros por una clave y suma lo que cada grupo lleva."""
+    grupos = {}
+    for c in cobros:
+        clave = clave_de(c)
+        if clave is None:
+            continue
+        g = grupos.setdefault(clave, {"clave": clave, "cobros": 0, "bruto": 0, "comision": 0,
+                                      "retenciones": 0, "neto": 0})
+        g["cobros"] += 1
+        for campo in ("bruto", "comision", "retenciones", "neto"):
+            g[campo] += c[campo]
+    for g in grupos.values():
+        g["ticket_promedio"] = _redondear(g["bruto"], g["cobros"])
+    return list(grupos.values())
+
+
+def _por_bruto(grupos):
+    return sorted(grupos, key=lambda g: (-g["bruto"], g["clave"]))
+
+
+def _por_clave(grupos):
+    return sorted(grupos, key=lambda g: g["clave"])
+
+
+def _pico(grupos):
+    """La clave de mayor bruto. Si empatan, la primera de la lista."""
+    mejor = None
+    for g in grupos:
+        if mejor is None or g["bruto"] > mejor["bruto"]:
+            mejor = g
+    return mejor["clave"] if mejor else None
+
+
+def _mediana(valores):
+    orden = sorted(valores)
+    n = len(orden)
+    if n == 0:
+        return 0
+    if n % 2 == 1:
+        return orden[n // 2]
+    return _redondear(orden[n // 2 - 1] + orden[n // 2], 2)
+
+
+def estadisticas_ventas(cobros):
+    """Estadísticas descriptivas de cobros con tarjeta."""
+    suma = _grupos(cobros, lambda c: "total")
+    total = suma[0] if suma else {"cobros": 0, "bruto": 0, "comision": 0, "retenciones": 0,
+                                  "neto": 0, "ticket_promedio": 0}
+    fechas = {c["fecha"] for c in cobros}
+    totales = {k: v for k, v in total.items() if k != "clave"}
+    totales.update(ticket_mediano=_mediana([c["bruto"] for c in cobros]), dias=len(fechas),
+                   promedio_por_dia=_redondear(total["bruto"], len(fechas)))
+
+    semana = [{"clave": i, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0} for i in range(7)]
+    for g in _grupos(cobros, lambda c: c["fecha"]):
+        fila = semana[dt.date.fromisoformat(g["clave"]).weekday()]
+        fila["dias"] += 1
+        fila["cobros"] += g["cobros"]
+        fila["bruto"] += g["bruto"]
+    for fila in semana:
+        fila["promedio_por_dia"] = _redondear(fila["bruto"], fila["dias"])
+
+    por_dia = _por_clave(_grupos(cobros, lambda c: c["fecha"]))
+    por_hora = _por_clave(_grupos(cobros, lambda c: c["hora"]))
+    return {
+        "totales": totales,
+        "por_punto": _por_bruto(_grupos(cobros, lambda c: c["punto"])),
+        "por_dia": por_dia,
+        "por_dia_semana": semana,
+        "por_hora": por_hora,
+        "por_proveedor": _por_clave(_grupos(cobros, lambda c: c["proveedor"])),
+        "por_franquicia": _por_bruto(_grupos(cobros, lambda c: c["franquicia"])),
+        "sin_hora": sum(1 for c in cobros if c["hora"] is None),
+        "dia_pico": _pico(por_dia),
+        "hora_pico": _pico(por_hora),
+    }
+
+
 _FUNCIONES = {f.__name__: f for f in (
     a_pesos, restar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
     bloques_deposito, coincide_deposito, cruces_redeban, estado_dia,
-    leer_linea_transferencia, punto_por_referencia)}
+    leer_linea_transferencia, punto_por_referencia, estadisticas_ventas)}
 
 
 def ejecutar(funcion, entrada):

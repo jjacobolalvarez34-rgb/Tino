@@ -16,6 +16,7 @@ Las reglas visuales (colores, tamaños, márgenes, componentes) están en
 | Conciliación | Lo conciliado solo, lo que está por confirmar y lo que quedó sin pareja | Confirmar y "No es" en cada propuesta |
 | Comisiones y retenciones | Mes por punto: vendido, comisión, retefuente, reteIVA, reteICA y neto | Filtro por Bold o Redeban; copiar como números |
 | Archivos | Zona para subir reportes, historial con "Deshacer" y nombres por resolver | Aviso de archivo repetido; resolver un alias en un toque |
+| Ventas con tarjeta | Vendido, neto, promedio por día, venta típica; tabla por punto; ventas por hora, día de la semana y día. Referencia: `tablero_ventas.html`, con cifras inventadas | Decir que no incluye efectivo ni transferencias; decir que la hora es solo de Bold; copiar como números |
 
 ## App de las asesoras
 

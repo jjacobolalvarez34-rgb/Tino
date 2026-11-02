@@ -68,6 +68,16 @@ def linea_banco(r):
             f"{r.choice(FINALES_RAROS)}")
 
 
+def cobro(r):
+    bruto = monto(r) + r.choice([0, 0, 1, 3])
+    comision, retenciones = bruto // 30, bruto // 90
+    return {"fecha": fecha(r), "hora": r.choice([None, 0, 9, 10, 11, 15, 18, 19, 23]),
+            "punto": r.choice(["Punto 1", "Punto 2", "Ñame", "Ángel", "a", "B"]),
+            "proveedor": r.choice(["bold", "redeban"]), "franquicia": r.choice([None, "VISA", "AMEX", "MASTERCARD"]),
+            "bruto": bruto, "comision": comision, "retenciones": retenciones,
+            "neto": bruto - comision - retenciones}
+
+
 def generar(r):
     vecino = lambda p: {"cubre": r.random() < 0.7, "tiene_excel": r.random() < 0.7,  # noqa: E731
                         "anotado": items(r, p + "a", 5), "externo": items(r, p + "e", 5)}
@@ -98,6 +108,7 @@ def generar(r):
         ("punto_por_referencia", {"referencia": str(r.randint(0, 99999999)),
                                   "puntos": [{"punto": f"P{i}", "codigo": str(r.randint(10000000, 99999999))}
                                              for i in range(r.randint(0, 5))]}),
+        ("estadisticas_ventas", {"cobros": [cobro(r) for _ in range(r.randint(0, 30))]}),
     ])
 
 

@@ -4,7 +4,9 @@ Las pantallas para dueños, encargadas y finanzas. Primero dentro del `.exe`, co
 HTML, CSS y JavaScript sobre Python (D-023). Después en la web, con Next.js y
 TypeScript en Vercel.
 
-Estado: vacía. Las pantallas se construyen cuando exista `tino-pruebas`.
+Estado: `tablero/` arma el tablero de ventas con tarjeta en un solo HTML, desde los
+reportes de Bold y Redeban. El HTML lleva datos del cliente: se guarda fuera del
+repositorio. Las demás pantallas se construyen cuando exista `tino-pruebas`.
 
 ## Reglas
 

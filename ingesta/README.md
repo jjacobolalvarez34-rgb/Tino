@@ -3,7 +3,9 @@
 Todo lo que trae datos de afuera hacia la base: importadores, perfiles de fuente,
 normalizador de nombres y lector de correos.
 
-Estado: vacía. El lenguaje depende de P-001 (`docs/DECISIONES.md`).
+Estado: `tarjetas.py` lee los reportes de Bold y Redeban. Solo se ha probado con
+archivos inventados. Faltan el Excel diario, el PDF del banco y Siigo. Va en Python
+(D-022).
 
 ## Reglas
 

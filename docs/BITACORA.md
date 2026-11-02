@@ -15,6 +15,26 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Tablero de ventas con tarjeta
+Hecho:
+- Lector de Bold y Redeban en `ingesta/tarjetas.py`, en pesos enteros. Lo que no entiende
+  no se cuenta y avisa. 6 pruebas con archivos inventados. Encontraron un error real:
+  el archivo quedaba abierto y Windows lo bloqueaba.
+- `estadisticas_ventas` en el contrato y en los dos lenguajes (D-028). 66 casos, y 0
+  diferencias en la comparación entre Python y TypeScript.
+- Tablero en `panel/tablero/`. Referencia con cifras inventadas:
+  `docs/pantallas/tablero_ventas.html`. Revisado en Edge a 1280 y 375 px, con filtro por
+  punto, avisos, punto sin hora, globo de cada barra y "Copiar como números".
+Falta:
+- Probarlo con reportes reales. Falta el permiso de Jacobo para usar `septiembre/`, y un
+  `puntos.json` con qué datáfono es de cada punto.
+- Solo muestra tarjetas: sin efectivo ni transferencias no son las ventas totales.
+Dudas:
+- Con reportes reales puede salir algo que el lector no espera: los encabezados se
+  copiaron de `core.py`, no de un archivo. Las comisiones del generador de prueba son
+  inventadas.
+- Figtree se carga de internet. Dentro del `.exe` hay que incluir la fuente.
+
 ## 2026-11-02 · Códigos de pago y descuento de Bold
 Hecho:
 - 0001: nueva tabla `codigo_recaudo` (D-026) y

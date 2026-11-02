@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tino · Ventas con tarjeta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --color-marca:#74305F; --color-marca-hover:#5A2449; --color-marca-suave:#F3E4EE; --color-foco:#C99BBB;
+  --color-fondo:#F7F5F7; --color-superficie:#FFFFFF; --color-texto:#22161F; --color-texto-suave:#5E5862;
+  --color-borde:#E2DDE3; --color-divisor:#F0ECF0; --color-revisar:#7A5A00; --color-revisar-fondo:#FBF1CC;
+  --esp-1:4px; --esp-2:8px; --esp-3:12px; --esp-4:16px; --esp-5:20px; --esp-6:24px; --esp-8:32px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--color-fondo);color:var(--color-texto);font-family:Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--color-foco);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.pagina{max-width:1232px;margin:0 auto;padding:var(--esp-6);display:flex;flex-direction:column;gap:var(--esp-6)}
+h1,h2{margin:0;line-height:1.2}
+h1{font-size:28px;font-weight:800}
+h2{font-size:18px;font-weight:700}
+.cabeza{display:flex;align-items:center;gap:var(--esp-3)}
+.cabeza svg{width:40px;height:40px;flex:none}
+.pequeno{font-size:13px;font-weight:500;color:var(--color-texto-suave)}
+.filtros{display:flex;flex-wrap:wrap;gap:var(--esp-2)}
+.filtro{height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--color-borde);background:var(--color-superficie);font-size:14px;font-weight:600;color:var(--color-texto-suave)}
+.filtro:hover{background:var(--color-fondo)}
+.filtro[aria-pressed="true"]{background:var(--color-marca-suave);border-color:var(--color-marca);color:var(--color-marca);font-weight:700}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--esp-4)}
+.tarjeta{background:var(--color-superficie);border:1px solid var(--color-borde);border-radius:12px;padding:var(--esp-5);min-width:0}
+.cifra{display:flex;flex-direction:column;gap:var(--esp-1)}
+.cifra .etiqueta{font-size:13px;font-weight:600;color:var(--color-texto-suave)}
+.cifra .valor{font-size:30px;font-weight:800;letter-spacing:-.01em}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:var(--esp-4)}
+.grafica{display:flex;flex-direction:column;gap:var(--esp-3)}
+.grafica svg{display:block;width:100%;height:auto}
+.barra{fill:var(--color-marca)}
+.zona{fill:transparent;cursor:default}
+.zona:hover+.barra,.zona:focus+.barra{fill:var(--color-marca-hover)}
+.zona:focus{outline:none;stroke:var(--color-foco);stroke-width:3px}
+.linea{stroke:var(--color-divisor);stroke-width:1}
+.base{stroke:var(--color-borde);stroke-width:1}
+.eje{font-size:12px;font-weight:500;fill:var(--color-texto-suave);font-variant-numeric:tabular-nums}
+.pico{font-size:13px;font-weight:700;fill:var(--color-texto);font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--color-marca);min-height:24px}
+.caja{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-texto-suave);font-weight:600;padding:var(--esp-2) 10px;border-bottom:1px solid var(--color-borde);text-align:left;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--color-divisor);white-space:nowrap}
+.d{text-align:right}
+tr.total td{font-weight:800;border-bottom:0}
+.encabezado{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--esp-3)}
+.boton{height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--color-marca);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:var(--esp-2)}
+.boton:hover{background:var(--color-marca-hover)}
+.aviso{border-radius:10px;padding:var(--esp-3) var(--esp-4);font-size:14px;background:var(--color-revisar-fondo);color:var(--color-revisar)}
+.aviso ul{margin:var(--esp-1) 0 0;padding-left:var(--esp-5)}
+#globo{position:fixed;z-index:10;pointer-events:none;background:var(--color-texto);color:#fff;padding:var(--esp-2) var(--esp-3);border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(34,22,31,.2);opacity:0;transition:opacity .15s;font-variant-numeric:tabular-nums}
+#globo.ver{opacity:1}
+#anuncio{position:fixed;left:50%;bottom:var(--esp-6);transform:translateX(-50%);background:var(--color-texto);color:#fff;padding:var(--esp-3) 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+#anuncio.ver{opacity:1}
+@media (max-width:560px){.pagina{padding:var(--esp-5)}.cifra .valor{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="cabeza">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#74305F"/><path d="M50 48 V78" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/><path d="M37 27 L46 36 L64 15" fill="none" stroke="#E9C6DC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <h1>Ventas con tarjeta</h1>
+      <div class="pequeno" id="rango"></div>
+    </div>
+  </header>
+
+  <div class="aviso" id="avisos" hidden></div>
+  <nav class="filtros" id="filtros" aria-label="Filtrar por punto de venta"></nav>
+  <section class="cifras num" id="cifras" aria-label="Resumen"></section>
+
+  <section class="tarjeta">
+    <div class="encabezado" style="margin-bottom:var(--esp-3)">
+      <h2>Ventas por punto</h2>
+      <button class="boton" id="copiar">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        Copiar como números
+      </button>
+    </div>
+    <div class="caja" id="tabla-puntos"></div>
+  </section>
+
+  <div class="rejilla">
+    <section class="tarjeta grafica" id="g-hora"></section>
+    <section class="tarjeta grafica" id="g-semana"></section>
+  </div>
+  <section class="tarjeta grafica" id="g-dia"></section>
+
+  <p class="pequeno" style="margin:0">Solo incluye lo cobrado con datáfono en Bold y Redeban. El efectivo y las transferencias no están aquí.</p>
+</div>
+<div id="globo" role="status"></div>
+<div id="anuncio" role="status" aria-live="polite"></div>
+
+<script id="datos" type="application/json">/*DATOS*/null</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('datos').textContent);
+  const $ = (id) => document.getElementById(id);
+  const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const DIAS_CORTOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  let actual = D.todos;
+
+  const miles = (n) => Math.round(n).toLocaleString('es-CO');
+  // Espacio que no parte: el $ nunca queda en una línea y el número en otra.
+  const pesos = (n) => '$ ' + miles(n);
+  const compacto = (n) => n >= 1e6 ? (n / 1e6).toLocaleString('es-CO', { maximumFractionDigits: 1 }) + ' M'
+    : n >= 1e3 ? miles(n / 1e3) + ' mil' : miles(n);
+  const escapar = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fechaCorta = (f) => { const [, m, d] = f.split('-'); return Number(d) + ' ' + MESES[Number(m) - 1]; };
+  const horaTexto = (h) => String(h).padStart(2, '0') + ':00';
+
+  function diaSemana(f) {
+    const [a, m, d] = f.split('-').map(Number);
+    return (new Date(Date.UTC(a, m - 1, d)).getUTCDay() + 6) % 7;
+  }
+
+  function marcaTecho(maximo) {
+    if (maximo <= 0) return 1;
+    const base = Math.pow(10, Math.floor(Math.log10(maximo)));
+    for (const f of [1, 2, 2.5, 5, 10]) if (f * base >= maximo) return f * base;
+    return 10 * base;
+  }
+
+  // Barras finas, punta redondeada, base recta. Una sola serie: el título la nombra.
+  function columnas(filas, opciones) {
+    // Al ancho real: un viewBox fijo encogería los ejes por debajo de 12 px en el celular.
+    const ancho = Math.max(240, opciones.ancho), alto = 240, izq = 56, der = 8, arriba = 24, abajo = 28;
+    const area = ancho - izq - der, altoArea = alto - arriba - abajo;
+    const techo = marcaTecho(Math.max(0, ...filas.map((f) => f.valor)));
+    const y = (v) => arriba + altoArea * (1 - v / techo);
+    const banda = area / Math.max(filas.length, 1);
+    const grosor = Math.min(24, Math.max(4, banda - 2));
+    const pico = filas.reduce((m, f) => (f.valor > (m ? m.valor : 0) ? f : m), null);
+    const saltoEtiqueta = Math.max(1, Math.ceil(filas.length / Math.floor(area / 48)));
+
+    let s = `<svg viewBox="0 0 ${ancho} ${alto}" role="img" aria-label="${escapar(opciones.resumen)}">`;
+    for (const t of [0, 0.5, 1]) {
+      const yy = y(techo * t);
+      s += `<line class="${t === 0 ? 'base' : 'linea'}" x1="${izq}" x2="${ancho - der}" y1="${yy}" y2="${yy}"/>`;
+      s += `<text class="eje" x="${izq - 8}" y="${yy + 4}" text-anchor="end">${compacto(techo * t)}</text>`;
+    }
+    filas.forEach((f, i) => {
+      const x = izq + banda * i + (banda - grosor) / 2;
+      const yy = y(f.valor), h = Math.max(0, y(0) - yy);
+      const r = Math.min(4, grosor / 2, h);
+      if (i % saltoEtiqueta === 0) {
+        s += `<text class="eje" x="${x + grosor / 2}" y="${alto - 8}" text-anchor="middle">${escapar(f.corto)}</text>`;
+      }
+      s += `<rect class="zona" x="${izq + banda * i}" y="${arriba}" width="${banda}" height="${altoArea}" tabindex="0" aria-label="${escapar(f.detalle.replace(/\n/g, ', '))}" data-globo="${escapar(f.detalle)}"/>`;
+      if (h > 0) {
+        s += `<path class="barra" pointer-events="none" d="M${x} ${y(0)} V${yy + r} Q${x} ${yy} ${x + r} ${yy} H${x + grosor - r} Q${x + grosor} ${yy} ${x + grosor} ${yy + r} V${y(0)} Z"/>`;
+      }
+      if (f === pico) {
+        const cx = Math.min(Math.max(x + grosor / 2, izq + 30), ancho - der - 30);
+        s += `<text class="pico" x="${cx}" y="${yy - 6}" text-anchor="middle">${compacto(f.valor)}</text>`;
+      }
+    });
+    return s + '</svg>';
+  }
+
+  function tablaSimple(titulos, filas) {
+    return `<details><summary>Ver como tabla</summary><div class="caja"><table><thead><tr>`
+      + titulos.map((t, i) => `<th class="${i ? 'd' : ''}">${t}</th>`).join('') + `</tr></thead><tbody>`
+      + filas.map((f) => '<tr>' + f.map((c, i) => `<td class="${i ? 'd' : ''}">${escapar(c)}</td>`).join('') + '</tr>').join('')
+      + `</tbody></table></div></details>`;
+  }
+
+  function bloque(id, titulo, nota, vacio, svg, tabla) {
+    $(id).innerHTML = `<div><h2>${titulo}</h2><div class="pequeno">${nota}</div></div>`
+      + (vacio ? `<p class="pequeno">${vacio}</p>` : svg + tabla);
+  }
+
+  function pintar() {
+    const v = D.vistas[actual], t = v.totales;
+    $('rango').textContent = D.desde ? `${fechaCorta(D.desde)} a ${fechaCorta(D.hasta)} · ${t.dias} días con ventas` : 'Sin datos';
+    $('filtros').innerHTML = [D.todos, ...D.puntos].map((p) =>
+      `<button class="filtro" aria-pressed="${p === actual}" data-punto="${escapar(p)}">${escapar(p)}</button>`).join('');
+
+    const cifra = (etiqueta, valor, ayuda) => `<div class="tarjeta cifra"><span class="etiqueta">${etiqueta}</span><span class="valor">${valor}</span><span class="pequeno">${ayuda}</span></div>`;
+    $('cifras').innerHTML = cifra('Vendido', pesos(t.bruto), `${miles(t.cobros)} cobros`)
+      + cifra('Llegó al banco', pesos(t.neto), `Comisiones ${pesos(t.comision)} · retenciones ${pesos(t.retenciones)}`)
+      + cifra('Promedio por día', pesos(t.promedio_por_dia), v.dia_pico ? `Mejor día: ${fechaCorta(v.dia_pico)}` : 'Sin datos')
+      + cifra('Venta típica', pesos(t.ticket_mediano), `Promedio ${pesos(t.ticket_promedio)}`);
+
+    const filas = v.por_punto.map((g) => `<tr><td><b>${escapar(g.clave)}</b></td><td class="d">${miles(g.cobros)}</td><td class="d">${miles(g.bruto)}</td><td class="d">${miles(g.ticket_promedio)}</td><td class="d">${miles(g.comision)}</td><td class="d">${miles(g.retenciones)}</td><td class="d"><b>${miles(g.neto)}</b></td></tr>`).join('');
+    $('tabla-puntos').innerHTML = `<table style="min-width:640px"><thead><tr><th>Punto</th><th class="d">Cobros</th><th class="d">Vendido</th><th class="d">Promedio</th><th class="d">Comisión</th><th class="d">Retenciones</th><th class="d">Neto</th></tr></thead><tbody>${filas}<tr class="total"><td>Total</td><td class="d">${miles(t.cobros)}</td><td class="d">${miles(t.bruto)}</td><td class="d">${miles(t.ticket_promedio)}</td><td class="d">${miles(t.comision)}</td><td class="d">${miles(t.retenciones)}</td><td class="d">${miles(t.neto)}</td></tr></tbody></table>`;
+
+    const horas = v.por_hora.map((g) => ({ valor: g.bruto, corto: horaTexto(g.clave), detalle: `${horaTexto(g.clave)}\nVendido ${pesos(g.bruto)}\n${miles(g.cobros)} cobros` }));
+    const anchoGrafica = (id) => $(id).clientWidth - 42;
+    const nota = !horas.length ? '' : v.sin_hora ? `Solo Bold. ${miles(v.sin_hora)} cobros de Redeban no entran porque Redeban no trae la hora.` : 'Según la hora de cada cobro.';
+    bloque('g-hora', 'Ventas por hora', nota,
+      horas.length ? '' : 'Este punto no tiene cobros con hora: Redeban no la trae.',
+      columnas(horas, { ancho: anchoGrafica('g-hora'), resumen: `Ventas por hora. La hora más fuerte es ${v.hora_pico === null ? 'ninguna' : horaTexto(v.hora_pico)}.` }),
+      tablaSimple(['Hora', 'Cobros', 'Vendido'], v.por_hora.map((g) => [horaTexto(g.clave), miles(g.cobros), miles(g.bruto)])));
+
+    const semana = v.por_dia_semana.map((g) => ({ valor: g.promedio_por_dia, corto: DIAS_CORTOS[g.clave], detalle: `${DIAS[g.clave]}\nPromedio ${pesos(g.promedio_por_dia)}\n${miles(g.dias)} días con ventas` }));
+    bloque('g-semana', 'Ventas por día de la semana', 'Promedio de un día con ventas.', '',
+      columnas(semana, { ancho: anchoGrafica('g-semana'), resumen: 'Promedio de ventas por día de la semana.' }),
+      tablaSimple(['Día', 'Días con ventas', 'Promedio', 'Vendido'], v.por_dia_semana.map((g) => [DIAS[g.clave], miles(g.dias), miles(g.promedio_por_dia), miles(g.bruto)])));
+
+    const dias = v.por_dia.map((g) => ({ valor: g.bruto, corto: fechaCorta(g.clave), detalle: `${DIAS[diaSemana(g.clave)]} ${fechaCorta(g.clave)}\nVendido ${pesos(g.bruto)}\n${miles(g.cobros)} cobros` }));
+    bloque('g-dia', 'Ventas por día', 'Cada barra es un día con ventas.', dias.length ? '' : 'No hay ventas en este periodo.',
+      columnas(dias, { ancho: anchoGrafica('g-dia'), resumen: `Ventas por día. El mejor día es ${v.dia_pico ? fechaCorta(v.dia_pico) : 'ninguno'}.` }),
+      tablaSimple(['Día', 'Cobros', 'Vendido'], v.por_dia.map((g) => [fechaCorta(g.clave), miles(g.cobros), miles(g.bruto)])));
+  }
+
+  function copiar() {
+    const v = D.vistas[actual], t = v.totales;
+    const filas = [['Punto', 'Cobros', 'Vendido', 'Promedio', 'Comision', 'Retenciones', 'Neto']]
+      .concat(v.por_punto.map((g) => [g.clave, g.cobros, g.bruto, g.ticket_promedio, g.comision, g.retenciones, g.neto]))
+      .concat([['Total', t.cobros, t.bruto, t.ticket_promedio, t.comision, t.retenciones, t.neto]]);
+    const texto = filas.map((f) => f.join('\t')).join('\n');
+    const avisa = (m) => { const a = $('anuncio'); a.textContent = m; a.classList.add('ver'); setTimeout(() => a.classList.remove('ver'), 2400); };
+    const listo = () => avisa('Copiado. Péguelo en Excel: quedan números que se pueden sumar.');
+    // Respaldo: dentro de una ventana de escritorio navigator.clipboard puede no existir.
+    const respaldo = () => {
+      const area = document.createElement('textarea');
+      area.value = texto;
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      area.remove();
+      if (ok) listo(); else avisa('No se pudo copiar. Use la tabla directamente.');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(listo, respaldo);
+    else respaldo();
+  }
+
+  function mostrarGlobo(el, x, y) {
+    const g = $('globo');
+    g.innerHTML = escapar(el.dataset.globo).replace(/\n/g, '<br>');
+    g.classList.add('ver');
+    const r = g.getBoundingClientRect();
+    g.style.left = Math.max(8, Math.min(x + 12, innerWidth - r.width - 8)) + 'px';
+    g.style.top = Math.max(8, y - r.height - 12) + 'px';
+  }
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-punto]');
+    if (b) { actual = b.dataset.punto; pintar(); return; }
+    if (e.target.closest('#copiar')) copiar();
+  });
+  document.addEventListener('pointermove', (e) => {
+    const z = e.target.closest ? e.target.closest('[data-globo]') : null;
+    if (z) mostrarGlobo(z, e.clientX, e.clientY); else $('globo').classList.remove('ver');
+  });
+  document.addEventListener('focusin', (e) => {
+    if (e.target.dataset && e.target.dataset.globo) {
+      const r = e.target.getBoundingClientRect();
+      mostrarGlobo(e.target, r.left + r.width / 2, r.top + 40);
+    }
+  });
+  document.addEventListener('focusout', () => $('globo').classList.remove('ver'));
+  let espera;
+  addEventListener('resize', () => { clearTimeout(espera); espera = setTimeout(pintar, 150); });
+
+  if (D.avisos.length) {
+    const a = $('avisos');
+    a.hidden = false;
+    a.innerHTML = '<b>▲ Revisar los reportes</b><ul>' + D.avisos.map((x) => `<li>${escapar(x)}</li>`).join('') + '</ul>';
+  }
+  pintar();
+})();
+</script>
+</body>
+</html>
