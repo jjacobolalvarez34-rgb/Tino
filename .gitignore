@@ -1,0 +1,30 @@
+# Llaves y configuración local: nunca entran al repositorio
+.env
+.env.*
+!.env.example
+
+# Archivos de clientes: extractos, reportes y Excels reales. Solo entran los
+# casos anonimizados de tests/casos/.
+*.zip
+*.rar
+*.xlsx
+*.xls
+*.csv
+*.pdf
+!tests/casos/**
+
+# Prueba del conciliador que depende del archivo real de agosto y de nombres reales
+motores/conciliador/pruebas_cierre.py
+
+# Dependencias y compilados
+node_modules/
+.next/
+__pycache__/
+*.pyc
+.venv/
+venv/
+build/
+dist/
+
+# Gráfica de graphify: guarda fragmentos de lo que lee
+graphify-out/

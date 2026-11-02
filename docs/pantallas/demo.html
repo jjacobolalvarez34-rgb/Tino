@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tino · Pantallas de referencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --marca:#74305F; --marca-hover:#5A2449; --marca-suave:#F3E4EE; --foco:#C99BBB;
+  --fondo:#F7F5F7; --sup:#FFFFFF; --texto:#22161F; --suave:#5E5862; --borde:#E2DDE3; --divisor:#F0ECF0;
+  --ok:#1C7638; --ok-bg:#E1F2E5; --rev:#7A5A00; --rev-bg:#FBF1CC; --rev-borde:#F0E2A8;
+  --mal:#9A2A0A; --mal-bg:#FDE5DA; --mal-borde:#F6CBB8; --info:#2557A7; --info-bg:#E3ECFA;
+  --neutro:#4F4853; --peligro:#C2410C;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--fondo);color:var(--texto);font-family:Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--foco);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1232px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-right)) 48px max(16px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-size:24px;font-weight:800}
+h2{font-size:18px;font-weight:700}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo-svg{width:40px;height:40px;flex:none;display:block}
+.sub{font-size:13px;color:var(--suave)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.p-ok{color:var(--ok);background:var(--ok-bg)} .p-rev{color:var(--rev);background:var(--rev-bg)}
+.p-mal{color:var(--mal);background:var(--mal-bg)} .p-info{color:var(--info);background:var(--info-bg)}
+.p-neu{color:var(--neutro);background:var(--divisor)}
+
+nav.menu{display:flex;gap:4px;overflow-x:auto;background:var(--sup);border:1px solid var(--borde);border-radius:12px;padding:6px;scrollbar-width:none;position:sticky;top:0;z-index:5}
+nav.menu button{flex:none;border:0;background:transparent;padding:10px 14px;border-radius:8px;font-size:14px;font-weight:600;color:var(--suave);min-height:44px}
+nav.menu button[aria-current="page"]{background:var(--marca-suave);color:var(--marca);font-weight:700}
+
+.card{background:var(--sup);border:1px solid var(--borde);border-radius:12px;padding:20px;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.tile{background:var(--sup);border:1px solid var(--borde);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.tile .lbl{font-size:13px;color:var(--suave);font-weight:600}
+.tile .big{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.tile.alert{background:var(--mal-bg);border-color:var(--mal-borde)} .tile.alert *{color:var(--mal)}
+.tile.focus{border:2px solid var(--marca)} .tile.focus .lbl{color:var(--marca)}
+
+.row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+.main{flex:999 1 600px;min-width:0}
+.side{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px}
+
+.btn{height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--marca);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:var(--marca-hover)}
+.btn.sec{background:var(--sup);color:var(--marca);border:1px solid var(--marca)} .btn.sec:hover{background:var(--marca-suave)}
+.btn.txt{background:transparent;color:var(--marca);padding:0 12px} .btn.txt:hover{background:var(--marca-suave)}
+.btn.danger{background:var(--peligro)} .btn.danger:hover{background:#A3360A}
+.btn.small{height:40px;font-size:14px;padding:0 14px}
+.btn.plain{background:var(--sup);color:var(--texto);border:1px solid var(--borde);font-weight:600}
+.btn.plain:hover{background:var(--fondo)}
+
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chipbtn{height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--borde);background:var(--sup);font-size:14px;font-weight:600}
+.chipbtn[aria-pressed="true"]{background:var(--texto);color:#fff;border-color:var(--texto)}
+.spacer{flex:1}
+
+.tablebox{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--suave);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--borde);text-align:left;white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--divisor)}
+.r{text-align:right}
+tr.total td{font-weight:800;border-bottom:0;padding-top:13px}
+tr.click{cursor:pointer} tr.click:hover{background:var(--fondo)} tr.sel{background:var(--marca-suave)!important}
+
+.item{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;background:var(--sup);border:1px solid var(--borde);border-radius:12px;padding:14px 16px}
+.item.sel{border:2px solid var(--marca);padding:13px 15px}
+.item .head{display:flex;justify-content:space-between;gap:8px;width:100%}
+.neg{color:var(--mal);font-weight:800}
+
+.cmp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cmp div{background:var(--fondo);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cmp div.bad{background:var(--mal-bg)} .cmp div.bad *{color:var(--mal)}
+.cmp span{font-size:12.5px;color:var(--suave)} .cmp b{font-size:18px}
+.bar{height:8px;background:var(--divisor);border-radius:4px;overflow:hidden} .bar i{display:block;height:100%;background:var(--marca);border-radius:4px}
+.ev{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--divisor);border-radius:10px}
+.ev svg{flex:none;margin-top:2px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid var(--divisor);padding-top:16px}
+.note{border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.45}
+
+.tl{display:flex;flex-direction:column}
+.tl .st{display:flex;gap:12px}
+.tl .dot{width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.tl .line{flex:1;width:2px;background:var(--divisor);min-height:16px;margin:0 auto}
+.tl .col{display:flex;flex-direction:column;align-items:center;width:24px}
+.tl .txt{display:flex;flex-direction:column;gap:2px;padding-bottom:14px}
+
+.pend{display:flex;flex-wrap:wrap;align-items:center;gap:16px;border:1px solid var(--divisor);border-radius:10px;padding:14px 16px}
+.pend .c{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.cap{font-size:12px;color:var(--suave);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+.drop{border:2px dashed var(--foco);border-radius:12px;background:var(--sup);padding:28px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.drop.over{background:var(--marca-suave)}
+
+/* phone */
+.phones{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.phone{width:min(360px,100%);height:740px;border-radius:40px;border:10px solid #22161F;background:var(--fondo);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(34,22,31,.18)}
+.ph-top{padding:26px 18px 12px;background:var(--sup);border-bottom:1px solid var(--borde);display:flex;flex-direction:column;gap:4px}
+.ph-body{flex:1;padding:14px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.ph-foot{padding:12px 18px 20px;background:var(--sup);border-top:1px solid var(--borde)}
+.ph-foot .btn{width:100%;height:52px;font-size:17px;border-radius:12px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:14px;font-weight:600}
+.field input{height:50px;border-radius:12px;border:1px solid var(--borde);background:var(--sup);padding:0 14px;font-size:17px;min-width:0;width:100%}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.seg button{height:48px;border-radius:12px;border:1px solid var(--borde);background:var(--sup);font-size:15px;font-weight:600}
+.seg button[aria-pressed="true"]{border:2px solid var(--marca);background:var(--marca-suave);color:var(--marca);font-weight:700}
+.list{background:var(--sup);border:1px solid var(--borde);border-radius:14px;overflow:hidden}
+.list .li{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--divisor);min-height:44px}
+.list .li:last-child{border-bottom:0}
+.list .li.bad{background:var(--mal-bg)} .list .li.bad b,.list .li.bad span{color:var(--mal)}
+
+.toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--texto);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.foot{font-size:13px;color:var(--suave)}
+@media (max-width:560px){ h1{font-size:21px} .tile .big{font-size:24px} .cmp{grid-template-columns:1fr} .card{padding:16px} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo-svg" width="40" height="40" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#74305F"/><path d="M50 48 V78" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/><path d="M37 27 L46 36 L64 15" fill="none" stroke="#E9C6DC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><h1 id="title">Control diario</h1><div class="sub" id="subtitle">Sábado 31 de octubre · 11 puntos</div></div>
+    </div>
+    <span class="pill p-rev">Demo · datos de ejemplo</span>
+  </header>
+
+  <nav class="menu" aria-label="Secciones" id="menu"></nav>
+  <main id="view"></main>
+  <p class="foot">Esta es una demostración con cifras inventadas. En el piloto, todo se llena solo con los Excels de cada punto, Siigo, Bancolombia, Bold y Redeban.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const $ = (s) => document.querySelector(s);
+const f = (n) => Math.round(n).toLocaleString('es-CO');
+const ICON = {
+  copy:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  doc:'<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5E5862" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13h4"/><path d="M10 17h4"/></svg>',
+  swap:'<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5E5862" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>',
+  up:'<svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#74305F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>',
+  okc:'<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1C7638" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>',
+  warn:'<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9A2A0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+  cam:'<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>'
+};
+const pill = { ok:'<span class="pill p-ok">● Cuadrado</span>', rev:'<span class="pill p-rev">▲ Revisar</span>', bad:'<span class="pill p-mal">■ Descuadre</span>' };
+
+/* ---------- datos de ejemplo ---------- */
+const PUNTOS = [
+  ['Punto 1',620000,1480000,910000,'rev'],['Punto 2',410000,980000,525000,'ok'],['Punto 3',380000,1120000,640000,'ok'],
+  ['Punto 4',295000,760000,455000,'bad'],['Punto 5',512000,1340000,720000,'ok'],['Punto 6',268000,690000,310000,'ok'],
+  ['Punto 7',445000,1015000,580000,'ok'],['Punto 8',330000,870000,402000,'ok'],['Punto 9',360000,805000,495000,'bad'],
+  ['Punto 10',298000,640000,350000,'ok'],['Punto 11',402000,935000,610000,'ok']
+];
+const DESC = [
+  { id:'p4', punto:'Punto 4', medio:'Transferencia', hora:'Hoy 14:32', dif:85000, estado:'abierto', causa:'La transferencia no llegó al banco',
+    a:['Reportado por la asesora',455000], b:['Llegó a Bancolombia',370000], conf:90, confTxt:'Alta · 90%',
+    ev:[['Comprobante de 85.000 a las 14:32','Enviado por la asesora desde la app · referencia 4829'],['Ningún aviso de Bancolombia por ese valor','Cuenta terminada en 4521, entre 14:00 y 16:30'],['Extracto del día siguiente','Pendiente · llega mañana y confirma o descarta']] },
+  { id:'ken', punto:'Punto 1', medio:'Tarjeta', hora:'Hoy 18:05', dif:2870, estado:'abierto', causa:'La comisión de Bold no se descontó',
+    a:['Reportado en tarjeta',1480000], b:['Abonado por Bold',1477130], conf:65, confTxt:'Media · 65%',
+    ev:[['3 pagos con tarjeta en el datáfono Bold de Punto 1','La suma de sus comisiones es exactamente 2.870'],['Liquidación de Bold del día','Abono neto 1.477.130 después de comisión']] },
+  { id:'p9', punto:'Punto 9', medio:'Efectivo', hora:'Hoy 19:40', dif:40000, estado:'abierto', causa:'Sin causa clara',
+    a:['Efectivo reportado',360000], b:['Efectivo contado',320000], conf:0, confTxt:'No hay una causa probable',
+    ev:[['No hay gastos de caja registrados','Ni compras, ni retiros, ni consignaciones parciales'],['No hay pagos registrados en otro medio','Ninguna tarjeta o transferencia por 40.000 en el día']] },
+  { id:'p6', punto:'Punto 6', medio:'Tarjeta', hora:'Ayer 16:10', dif:45000, estado:'explicado', causa:'Se registró como tarjeta, pero fue una transferencia',
+    a:['Reportado en tarjeta',735000], b:['Abonado por Redeban',690000], conf:95, confTxt:'Alta · 95% · explicado por la encargada',
+    ev:[['Transferencia de 45.000 a las 16:10','Aviso de Bancolombia sin venta en transferencias que la cubra'],['Nota de la encargada','“La asesora marcó tarjeta por error.”']] }
+];
+const TRANS = [
+  ['14:41','Punto 11',98000,'5102','ok'],['14:38','Punto 3',210000,'5097','ok'],['14:35','Punto 7',62000,'5090','wait'],
+  ['14:32','Punto 4',85000,'4829','bad'],['14:20','Punto 1',1240000,'5071','ok'],['13:58','Punto 5',45000,'5063','ok'],
+  ['13:47','Punto 2',150000,'5055','ok'],['13:31','Punto 8',72500,'5049','ok']
+];
+const CONC = [
+  { id:1, f:'bold', rep:'Punto 5 · 3 pagos con tarjeta', repV:'18:02 · 18:15 · 18:31 · total 312.000', fuente:'Abono Bold', mov:'Datáfono Bold Punto 5', movV:'Abono 302.671 · comisión 9.329', por:'El abono agrupa 3 pagos', conf:'78%' },
+  { id:2, f:'redeban', rep:'Punto 3 · tarjeta 95.000', repV:'15:47', fuente:'Redeban', mov:'Datáfono Redeban Punto 3', movV:'95.000 a las 15:52', por:'5 minutos de diferencia', conf:'82%' },
+  { id:3, f:'banco', rep:'Punto 8 · transferencia 72.500', repV:'13:31 · ref. 5049', fuente:'Bancolombia', mov:'Abono en cuenta ••4521', movV:'72.000 a las 13:33', por:'Faltan 500 pesos', conf:'70%' },
+  { id:4, f:'banco', rep:'Punto 1 · transferencia 1.240.000', repV:'14:20 · ref. 5071', fuente:'Bancolombia', mov:'Dos abonos en cuenta ••4521', movV:'620.000 + 620.000 a las 14:21', por:'Pagó en dos partes', conf:'75%' }
+];
+const COM_BASE = [['Punto 1',38900000],['Punto 2',25400000],['Punto 3',29100000],['Punto 4',19800000],['Punto 5',34700000],['Punto 6',17900000],['Punto 7',26300000],['Punto 8',22600000],['Punto 9',20900000],['Punto 10',16600000],['Punto 11',24300000]];
+
+const S = { view:'inicio', dTab:'abiertos', dSel:'p4', dDone:{}, tTab:'todas', tSel:3, tDone:{}, cTab:'todo', cDone:{}, prov:'ambos',
+  names:{}, files:[
+    ['Punto 3 · octubre.xlsx','Hoy 7:05 · hoja del 30 oct','Excel diario',58,'warn'],['Movimientos_Bancolombia_3010.csv','Hoy 7:10','Extracto Bancolombia',214,'ok'],
+    ['liquidacion_bold_20261030.xlsx','Hoy 7:11','Bold',133,'ok'],['redeban_30oct.xlsx','Hoy 7:12','Redeban',61,'ok'],
+    ['Siigo_ventas_3010.xlsx','Hoy 7:15','Siigo',402,'ok'],['liquidacion_bold_20261030 (1).xlsx','Hoy 7:16','Bold',0,'dup']],
+  app:{ screen:'cierre', metodo:'tarjeta', total:'68.000', desc:'5.000', fact:'FE-18342', count:23, sum:1510000, ef:295000, ta:760000, tr:455000 } };
+
+const VIEWS = [['inicio','Inicio'],['descuadres','Descuadres'],['transferencias','Transferencias'],['conciliacion','Conciliación'],['comisiones','Comisiones y retenciones'],['archivos','Archivos'],['app','App de las asesoras']];
+const SUBS = { inicio:'Sábado 31 de octubre · 11 puntos · actualizado 12:40', descuadres:'Cada diferencia con su causa y sus pruebas', transferencias:'Se revisan cada 5 minutos contra los avisos del banco',
+  conciliacion:'Viernes 30 de octubre · extractos cargados hoy 7:10', comisiones:'Se arma solo con las liquidaciones de Bold y Redeban', archivos:'Reportes que alimentan el sistema', app:'Lo que ven las asesoras en su celular' };
+
+/* ---------- utilidades ---------- */
+let tt;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),2400); }
+function copyTSV(rows){
+  const txt = rows.map(r=>r.join('\t')).join('\n');
+  const done = () => toast('Copiado. Péguelo en Excel: quedan números que se pueden sumar.');
+  const fallback = () => { const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); done();}catch(e){toast('No se pudo copiar en este navegador.');} ta.remove(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+}
+const parse = (s) => parseInt(String(s).replace(/\D/g,''),10) || 0;
+function chips(list, cur, act){ return '<div class="filters">'+list.map(([id,l])=>`<button class="chipbtn" aria-pressed="${cur===id}" data-a="${act}" data-v="${id}">${l}</button>`).join('')+'</div>'; }
+
+/* ---------- vistas ---------- */
+function vInicio(){
+  let se=0,sa=0,sr=0;
+  const rows = PUNTOS.map(p=>{ se+=p[1]; sa+=p[2]; sr+=p[3]; return `<tr><td><b>${p[0]}</b></td><td class="r">${f(p[1])}</td><td class="r">${f(p[2])}</td><td class="r">${f(p[3])}</td><td class="r"><b>${f(p[1]+p[2]+p[3])}</b></td><td>${pill[p[4]]}</td></tr>`; }).join('');
+  const abiertos = DESC.filter(d=>d.estado==='abierto' && !S.dDone[d.id]);
+  return `<div style="display:flex;flex-direction:column;gap:20px">
+  <div class="tiles num">
+    <div class="tile"><span class="lbl">Ventas del día</span><span class="big">$ ${f(se+sa+sr)}</span><span style="font-size:13px;color:var(--ok);font-weight:600">94% de la meta del día</span></div>
+    <div class="tile"><span class="lbl">Pagos conciliados</span><span class="big">212 de 221</span><span class="sub">Bold, Redeban y transferencias</span></div>
+    <button class="tile ${abiertos.length?'alert':''}" data-a="go" data-v="descuadres" style="text-align:left;font:inherit"><span class="lbl">Descuadres abiertos</span><span class="big">${abiertos.length}</span><span style="font-size:13px">Toque para revisarlos →</span></button>
+    <button class="tile" data-a="go" data-v="transferencias" style="text-align:left;font:inherit"><span class="lbl">Transferencias por verificar</span><span class="big">2</span><span style="font-size:13px;color:var(--rev);font-weight:600">1 sospechosa →</span></button>
+  </div>
+  <div class="row">
+    <section class="card main">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px">
+        <h2>Ventas por punto</h2>
+        <button class="btn small" data-a="copyPuntos">${ICON.copy}Copiar como números</button>
+      </div>
+      <div class="tablebox"><table class="num" style="min-width:620px">
+        <thead><tr><th>Punto</th><th class="r">Efectivo</th><th class="r">Tarjeta</th><th class="r">Transferencia</th><th class="r">Total</th><th>Estado</th></tr></thead>
+        <tbody>${rows}<tr class="total"><td>Total</td><td class="r">${f(se)}</td><td class="r">${f(sa)}</td><td class="r">${f(sr)}</td><td class="r">${f(se+sa+sr)}</td><td></td></tr></tbody>
+      </table></div>
+      <p class="sub" style="margin:12px 0 0">El botón copia la tabla sin $ ni puntos, lista para pegar en su Excel.</p>
+    </section>
+    <aside class="side">
+      <section class="card" style="display:flex;flex-direction:column;gap:12px">
+        <h2>Descuadres con causa probable</h2>
+        ${abiertos.length? abiertos.map(d=>`<button class="item" data-a="openDesc" data-v="${d.id}"><span class="head"><b>${d.punto} · ${d.medio}</b><span class="neg num">−${f(d.dif)}</span></span><span style="font-size:13.5px">${d.causa}</span><span class="sub">${d.confTxt}</span></button>`).join('') : '<div class="note p-ok">● No hay descuadres abiertos.</div>'}
+      </section>
+    </aside>
+  </div></div>`;
+}
+
+function vDescuadres(){
+  const all = DESC.map(d=>({...d, estado: S.dDone[d.id]?'explicado':d.estado}));
+  const list = all.filter(d=> S.dTab==='todos' || (S.dTab==='abiertos'? d.estado==='abierto' : d.estado==='explicado'));
+  const selId = list.some(d=>d.id===S.dSel) ? S.dSel : (list[0]&&list[0].id);
+  const s = all.find(d=>d.id===selId);
+  const nA = all.filter(d=>d.estado==='abierto').length, nE = all.length-nA;
+  let detail = '<section class="card main"><p class="sub">No hay descuadres en esta lista.</p></section>';
+  if (s) detail = `<section class="card main" style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px"><div><div class="sub" style="font-weight:600">${s.punto} · ${s.medio} · ${s.hora}</div><h2 style="font-size:22px;font-weight:800">${s.causa}</h2></div><span class="neg num" style="font-size:28px">−${f(s.dif)}</span></div>
+    <div class="cmp num"><div><span>${s.a[0]}</span><b>${f(s.a[1])}</b></div><div><span>${s.b[0]}</span><b>${f(s.b[1])}</b></div><div class="bad"><span>Diferencia</span><b>−${f(s.dif)}</b></div></div>
+    <div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:13.5px"><b>Qué tan seguro está el sistema</b><span class="sub">${s.confTxt}</span></div><div class="bar"><i style="width:${s.conf}%"></i></div></div>
+    <div style="display:flex;flex-direction:column;gap:10px"><h3 style="font-size:15px">Pruebas</h3>${s.ev.map(e=>`<div class="ev">${ICON.doc}<div><b style="font-size:14px">${e[0]}</b><div class="sub">${e[1]}</div></div></div>`).join('')}</div>
+    ${s.estado==='abierto' ? `<div class="actions"><button class="btn" data-a="explain" data-v="${s.id}">Marcar como explicado</button><button class="btn sec" data-a="toast" data-v="Se le avisó a la encargada para que lo revise.">Pedir revisión a la encargada</button><button class="btn txt" data-a="toast" data-v="En el sistema real aquí se escribe una nota.">Agregar nota</button></div>` : '<div class="note p-ok">● Explicado. Queda en el historial con quién lo revisó y cuándo.</div>'}
+  </section>`;
+  return `<div style="display:flex;flex-direction:column;gap:16px">
+    ${chips([['abiertos',`Abiertos · ${nA}`],['explicados',`Explicados · ${nE}`],['todos','Todos']], S.dTab, 'dTab')}
+    <div class="row"><div class="side" style="flex:1 1 320px">${list.map(d=>`<button class="item ${d.id===selId?'sel':''}" data-a="dSel" data-v="${d.id}"><span class="head"><b>${d.punto} · ${d.medio}</b><span class="neg num">−${f(d.dif)}</span></span><span style="font-size:13.5px">${d.causa}</span><span style="display:flex;gap:8px;align-items:center">${d.estado==='abierto'?'<span class="pill p-mal">■ Abierto</span>':'<span class="pill p-ok">● Explicado</span>'}<span class="sub">${d.hora}</span></span></button>`).join('')}</div>${detail}</div></div>`;
+}
+
+function vTransferencias(){
+  const data = TRANS.map((t,i)=>({h:t[0],p:t[1],v:t[2],ref:t[3],e:S.tDone[i]||t[4],i}));
+  const list = data.filter(d=>S.tTab==='todas'||d.e===S.tTab);
+  const sel = data[list.some(d=>d.i===S.tSel)?S.tSel:(list[0]?list[0].i:0)];
+  const est = { ok:'<span class="pill p-ok">● Verificada</span>', wait:'<span class="pill p-info">Esperando banco</span>', bad:'<span class="pill p-mal">■ Sospechosa</span>', conf:'<span class="pill p-ok">● Confirmada a mano</span>', rej:'<span class="pill p-neu">Rechazada</span>' };
+  const banco = { ok:'Aviso recibido', wait:'Esperando', bad:'Sin aviso', conf:'Confirmada con nota', rej:'—' };
+  const st = (ic,bg,fg,t,d)=>`<div class="st"><div class="col"><span class="dot" style="background:${bg};color:${fg}">${ic}</span><span class="line"></span></div><div class="txt"><b style="font-size:14px">${t}</b><span class="sub">${d}</span></div></div>`;
+  const g = ['✓','#E1F2E5','#1C7638'];
+  let steps = st(...g,'Comprobante recibido',sel.h+' · desde la app de la asesora');
+  if (sel.e==='ok') steps += st(...g,'Aviso de Bancolombia','Llegó en menos de 2 minutos · mismo valor y cuenta');
+  else if (sel.e==='wait') steps += st('…','#E3ECFA','#2557A7','Esperando aviso de Bancolombia','Faltan 24 minutos para marcarla como sospechosa');
+  else if (sel.e==='bad') steps += st('!','#FDE5DA','#9A2A0A','Sin aviso de Bancolombia','Pasaron más de 30 minutos sin un aviso por ese valor');
+  else if (sel.e==='conf') steps += st(...g,'Confirmada a mano','Con nota de quien la revisó');
+  else steps += st('×','#F0ECF0','#4F4853','Rechazada','Pasa a descuadres del punto');
+  steps += st('·','#F0ECF0','#5E5862','Extracto','Mañana confirma o descarta definitivamente');
+  return `<div style="display:flex;flex-direction:column;gap:16px">
+  ${chips([['todas','Todas · 48'],['ok','Verificadas'],['wait','Esperando'],['bad','Sospechosas']], S.tTab, 'tTab')}
+  <div class="row">
+    <section class="card main" style="padding:14px 18px"><div class="tablebox"><table class="num" style="min-width:520px">
+      <thead><tr><th>Hora</th><th>Punto</th><th class="r">Valor</th><th>Banco</th><th>Estado</th></tr></thead>
+      <tbody>${list.map(d=>`<tr class="click ${d.i===sel.i?'sel':''}" data-a="tSel" data-v="${d.i}" tabindex="0"><td>${d.h}</td><td><b>${d.p}</b></td><td class="r"><b>${f(d.v)}</b></td><td class="sub">${banco[d.e]}</td><td>${est[d.e]}</td></tr>`).join('') || '<tr><td colspan="5" class="sub">Nada en esta lista.</td></tr>'}</tbody>
+    </table></div><p class="sub" style="margin:10px 0 0">Toque una fila para ver su recorrido.</p></section>
+    <aside class="card side" style="gap:14px">
+      <div><div class="sub" style="font-weight:600">${sel.p} · ${sel.h} · ref. ${sel.ref}</div><div class="num" style="font-size:28px;font-weight:800">$ ${f(sel.v)}</div></div>
+      <div class="tl">${steps}</div>
+      ${sel.e==='bad'?`<div class="note p-mal">El banco no avisó de esta transferencia en 30 minutos. No se aprueba hasta que llegue el aviso o el extracto.</div>
+      <button class="btn" data-a="toast" data-v="Se le pidió el comprobante de nuevo a la asesora.">Pedir el comprobante de nuevo</button>
+      <button class="btn sec" data-a="tConf" data-v="${sel.i}">Confirmar a mano con una nota</button>
+      <button class="btn danger" data-a="tRej" data-v="${sel.i}">Rechazar transferencia</button>`:''}
+    </aside>
+  </div></div>`;
+}
+
+function vConciliacion(){
+  const sums = { todo:[212,3,'$ 18.106.300','$ 18.390.000'], bold:[96,1,'$ 7.820.000','$ 7.832.000'], redeban:[41,0,'$ 3.475.000','$ 3.570.000'], banco:[75,2,'$ 5.811.300','$ 5.997.000'] }[S.cTab];
+  const pend = CONC.filter(p=>!S.cDone[p.id] && (S.cTab==='todo'||p.f===S.cTab));
+  return `<div style="display:flex;flex-direction:column;gap:16px">
+  ${chips([['todo','Todo'],['bold','Bold'],['redeban','Redeban'],['banco','Transferencias Bancolombia']], S.cTab, 'cTab')}
+  <div class="tiles num">
+    <div class="tile"><span class="lbl">Conciliados solos</span><span class="big">${sums[0]}</span><span style="font-size:13px;color:var(--ok);font-weight:600">● Sin intervención</span></div>
+    <div class="tile focus"><span class="lbl">Por confirmar</span><span class="big">${pend.length}</span><span class="sub">El sistema propone, usted decide</span></div>
+    <div class="tile"><span class="lbl">Sin pareja</span><span class="big" style="color:var(--mal)">${sums[1]}</span><span style="font-size:13px;color:var(--mal)">■ Pasan a descuadres</span></div>
+    <div class="tile"><span class="lbl">Valor conciliado</span><span class="big">${sums[2]}</span><span class="sub">de ${sums[3]} reportados</span></div>
+  </div>
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline"><h2>Por confirmar</h2><span class="sub">Nada se confirma solo cuando hay duda</span></div>
+    ${pend.length? pend.map(p=>`<div class="pend"><div class="c"><span class="cap">Reportado</span><b>${p.rep}</b><span class="sub num">${p.repV}</span></div>${ICON.swap}<div class="c"><span class="cap">${p.fuente}</span><b>${p.mov}</b><span class="sub num">${p.movV}</span></div><div class="c" style="flex:1 1 150px"><span style="font-size:13px;font-weight:600">${p.por}</span><span style="font-size:12.5px;color:var(--rev);font-weight:600">▲ Confianza ${p.conf}</span></div><div style="display:flex;gap:8px"><button class="btn small" data-a="cOk" data-v="${p.id}">Confirmar</button><button class="btn small plain" data-a="cNo" data-v="${p.id}">No es</button></div></div>`).join('') : '<div class="note p-ok">● Todo confirmado para esta lista.</div>'}
+  </section></div>`;
+}
+
+function comRows(){
+  const share = {ambos:1,bold:.68,redeban:.32}[S.prov]; const T=[0,0,0,0,0,0];
+  const rows = COM_BASE.map(([n,v])=>{ const b=v*share,c=b*.0299,rf=b*.015,ri=b*.0285,rc=b*.00414,ne=b-c-rf-ri-rc; [b,c,rf,ri,rc,ne].forEach((x,i)=>T[i]+=x); return [n,b,c,rf,ri,rc,ne]; });
+  return {rows,T};
+}
+function vComisiones(){
+  const {rows,T} = comRows();
+  return `<div style="display:flex;flex-direction:column;gap:16px">
+  <div class="filters"><button class="btn small plain" data-a="toast" data-v="En el sistema real aquí se elige el mes.">Octubre 2026 ▾</button>
+    ${[['ambos','Bold y Redeban'],['bold','Solo Bold'],['redeban','Solo Redeban']].map(([id,l])=>`<button class="chipbtn" aria-pressed="${S.prov===id}" data-a="prov" data-v="${id}">${l}</button>`).join('')}
+    <span class="spacer"></span><button class="btn small" data-a="copyCom">${ICON.copy}Copiar como números</button></div>
+  <div class="tiles num">
+    <div class="tile"><span class="lbl">Vendido con tarjeta</span><span class="big">$ ${f(T[0])}</span></div>
+    <div class="tile"><span class="lbl">Comisiones</span><span class="big">$ ${f(T[1])}</span></div>
+    <div class="tile"><span class="lbl">Retenciones</span><span class="big">$ ${f(T[2]+T[3]+T[4])}</span><span class="sub">Para el contador</span></div>
+    <div class="tile"><span class="lbl">Llegó al banco</span><span class="big">$ ${f(T[5])}</span></div>
+  </div>
+  <section class="card"><div class="tablebox"><table class="num" style="min-width:760px">
+    <thead><tr><th>Punto</th><th class="r">Vendido</th><th class="r">Comisión</th><th class="r">Retefuente</th><th class="r">ReteIVA</th><th class="r">ReteICA</th><th class="r">Neto</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr><td><b>${r[0]}</b></td>${r.slice(1).map((x,i)=>`<td class="r"${i===5?' style="font-weight:700"':''}>${f(x)}</td>`).join('')}</tr>`).join('')}
+    <tr class="total"><td>Total</td>${T.map(x=>`<td class="r">${f(x)}</td>`).join('')}</tr></tbody>
+  </table></div><p class="sub" style="margin:12px 0 0">Los valores salen de las liquidaciones de Bold y Redeban. Al copiar se pegan como números enteros.</p></section></div>`;
+}
+
+function vArchivos(){
+  const names = [[1,'CARO M','Punto 3 · hoja del 30 oct · 6 ventas','Carolina M. · código A07'],[2,'leidy','Punto 9 · hoja del 30 oct · 4 ventas','Leidy P. · código A15']].filter(n=>!S.names[n[0]]);
+  const est = { ok:'<span class="pill p-ok">● Cargado</span>', warn: names.length?`<span class="pill p-rev">▲ ${names.length} nombre${names.length>1?'s':''} por resolver</span>`:'<span class="pill p-ok">● Cargado</span>', dup:'<span class="pill p-neu">Ya estaba cargado</span>', undo:'<span class="pill p-neu">Deshecho</span>' };
+  return `<div class="row">
+  <div class="main" style="display:flex;flex-direction:column;gap:20px">
+    <label class="drop" id="drop" for="fileIn">${ICON.up}<b style="font-size:17px">Arrastre aquí los archivos del día</b><span class="sub" style="max-width:520px;font-size:14px">El sistema reconoce solo de qué es cada uno. Si un archivo ya se subió, lo avisa y no duplica la plata.</span><span class="btn">Elegir archivos</span>
+      <span style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center"><span class="pill p-neu">Excel diario</span><span class="pill p-neu">Siigo</span><span class="pill p-neu">Extracto Bancolombia</span><span class="pill p-neu">Bold</span><span class="pill p-neu">Redeban</span></span></label>
+    <input type="file" id="fileIn" multiple hidden>
+    <section class="card"><h2 style="margin-bottom:12px">Últimos archivos</h2><div class="tablebox"><table class="num" style="min-width:560px">
+      <thead><tr><th>Archivo</th><th>De qué es</th><th class="r">Filas</th><th>Estado</th><th></th></tr></thead>
+      <tbody>${S.files.map((a,i)=>`<tr><td style="overflow-wrap:anywhere"><b>${a[0]}</b><div class="sub">${a[1]}</div></td><td>${a[2]}</td><td class="r">${a[3]}</td><td>${est[a[4]]}</td><td class="r">${a[4]==='undo'||a[4]==='dup'?'':`<button class="btn small txt" data-a="undo" data-v="${i}">Deshacer</button>`}</td></tr>`).join('')}</tbody>
+    </table></div></section>
+  </div>
+  <aside class="card side" style="gap:14px">
+    <div><h2>Nombres por resolver</h2><p class="sub" style="margin:4px 0 0;font-size:13.5px">Nombres escritos distinto en el Excel. Se resuelven una vez y el sistema los recuerda.</p></div>
+    ${names.length? names.map(n=>`<div style="border:1px solid var(--divisor);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px"><div><div class="cap">En el Excel dice</div><b style="font-size:16px">“${n[1]}”</b><div class="sub">${n[2]}</div></div><div><div class="cap">¿Es esta asesora?</div><b>${n[3]}</b></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" data-a="name" data-v="${n[0]}">Sí, es ella</button><button class="btn small plain" data-a="toast" data-v="En el sistema real aquí se elige de la lista de asesoras.">Elegir otra</button></div></div>`).join('') : '<div class="note p-ok">● Todos los nombres resueltos.</div>'}
+  </aside></div>`;
+}
+
+function vApp(){
+  const A = S.app; const cobr = Math.max(parse(A.total)-parse(A.desc),0);
+  const cierre = `<div class="phone"><div class="ph-top"><span class="sub" style="font-weight:600">Punto 4 · Sábado 31 oct</span><h2 style="font-size:26px;font-weight:800">Cierre del día</h2></div>
+    <div class="ph-body">
+      <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px;border-radius:14px"><div style="display:flex;justify-content:space-between"><span class="sub" style="font-weight:600;font-size:14px">Ventas registradas</span><span style="font-size:12px;color:var(--ok);font-weight:600">Guardado en el celular</span></div>
+        <span class="num" style="font-size:28px;font-weight:800">$ ${f(A.sum)}</span>
+        <div class="num" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-size:13px"><div><div class="sub">Efectivo</div><b>${f(A.ef)}</b></div><div><div class="sub">Tarjeta</div><b>${f(A.ta)}</b></div><div><div class="sub">Transf.</div><b>${f(A.tr)}</b></div></div></div>
+      <button class="btn" style="height:50px;border-radius:12px" data-a="appGo" data-v="factura">+ Registrar factura Siigo</button>
+      <span class="cap" style="padding-top:4px">Transferencias</span>
+      <div class="list"><div class="li">${ICON.okc}<div><b>150.000</b><div class="sub">11:02 · verificada por el banco</div></div></div><div class="li">${ICON.okc}<div><b>220.000</b><div class="sub">12:47 · verificada por el banco</div></div></div><div class="li bad">${ICON.warn}<div><b>85.000</b><div><span style="font-size:12.5px">14:32 · el banco no la ha confirmado</span></div></div></div></div>
+      <button class="btn sec" style="height:50px;border-radius:12px" data-a="toast" data-v="Aquí se abre la cámara para fotografiar el comprobante.">${ICON.cam}Subir comprobante</button>
+      <div class="note p-rev">Antes de cerrar, revisa la transferencia de 85.000. La encargada recibirá un aviso.</div>
+    </div>
+    <div class="ph-foot"><button class="btn" data-a="toast" data-v="Día cerrado. Ya no se puede editar sin permiso de la encargada.">Cerrar el día</button></div></div>`;
+  const fact = `<div class="phone"><div class="ph-top"><div style="display:flex;justify-content:space-between;align-items:center"><button class="btn txt" style="padding:0;height:44px" data-a="appGo" data-v="cierre">‹ Cierre</button><span class="pill p-info">Sin señal · se guarda aquí</span></div><h2 style="font-size:26px;font-weight:800">Registrar factura</h2><span class="sub">Punto 4 · hoy llevas ${A.count} facturas · $ ${f(A.sum)}</span></div>
+    <div class="ph-body">
+      <div class="field"><label for="fFact">Número de factura Siigo</label><input id="fFact" data-in="fact" value="${A.fact}"></div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"><div class="field"><label for="fTot">Total factura</label><input id="fTot" class="num" inputmode="numeric" data-in="total" value="${A.total}"></div><div class="field"><label for="fDesc">Descuento</label><input id="fDesc" class="num" inputmode="numeric" data-in="desc" value="${A.desc}"></div></div>
+      <div class="card" style="padding:12px 14px;display:flex;justify-content:space-between;align-items:baseline"><span class="sub" style="font-weight:600;font-size:14px">Cobrado de verdad</span><b class="num" id="cobr" style="font-size:22px">$ ${f(cobr)}</b></div>
+      <div><div style="font-size:14px;font-weight:600;margin-bottom:8px">¿Cómo pagó?</div><div class="seg">${[['efectivo','Efectivo'],['tarjeta','Tarjeta'],['transferencia','Transferencia'],['dividido','Dividido']].map(([id,l])=>`<button aria-pressed="${A.metodo===id}" data-a="metodo" data-v="${id}">${l}</button>`).join('')}</div></div>
+      <div class="note p-neu">Sin internet también funciona. Cuando vuelva la señal se envía sola; no hay que registrarla dos veces.</div>
+    </div>
+    <div class="ph-foot"><button class="btn" data-a="saveFact">Guardar factura</button></div></div>`;
+  return `<div class="phones">${A.screen==='cierre'?cierre:fact}</div>`;
+}
+
+/* ---------- render ---------- */
+const R = { inicio:vInicio, descuadres:vDescuadres, transferencias:vTransferencias, conciliacion:vConciliacion, comisiones:vComisiones, archivos:vArchivos, app:vApp };
+function render(){
+  $('#menu').innerHTML = VIEWS.map(([id,l])=>`<button data-a="go" data-v="${id}" ${S.view===id?'aria-current="page"':''}>${l}</button>`).join('');
+  $('#title').textContent = S.view==='inicio' ? 'Control diario' : VIEWS.find(v=>v[0]===S.view)[1];
+  $('#subtitle').textContent = SUBS[S.view];
+  $('#view').innerHTML = R[S.view]();
+  const drop = $('#drop');
+  if (drop){
+    ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+    ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+    drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+    $('#fileIn').addEventListener('change',e=>addFiles(e.target.files));
+  }
+}
+function guess(name){ const n=name.toLowerCase(); if(n.includes('bold'))return'Bold'; if(n.includes('redeban'))return'Redeban'; if(n.includes('banco')||n.includes('movim'))return'Extracto Bancolombia'; if(n.includes('siigo'))return'Siigo'; return'Excel diario'; }
+function addFiles(list){ if(!list||!list.length)return; [...list].forEach(fl=>S.files.unshift([fl.name,'Ahora · demo, no se lee el contenido',guess(fl.name),'—','ok'])); render(); toast('Archivos recibidos. En la demo solo se muestran en la lista.'); }
+
+document.addEventListener('click', (e)=>{
+  const el = e.target.closest('[data-a]'); if(!el) return;
+  const a = el.dataset.a, v = el.dataset.v;
+  switch(a){
+    case 'go': S.view=v; render(); window.scrollTo({top:0}); return;
+    case 'openDesc': S.view='descuadres'; S.dTab='abiertos'; S.dSel=v; render(); window.scrollTo({top:0}); return;
+    case 'dTab': S.dTab=v; break;
+    case 'dSel': S.dSel=v; break;
+    case 'explain': S.dDone[v]=1; toast('Marcado como explicado. Queda en el historial.'); break;
+    case 'tTab': S.tTab=v; break;
+    case 'tSel': S.tSel=+v; break;
+    case 'tConf': S.tDone[v]='conf'; toast('Confirmada a mano. Queda registrado quién la confirmó.'); break;
+    case 'tRej': S.tDone[v]='rej'; toast('Transferencia rechazada. Pasa a descuadres del punto.'); break;
+    case 'cTab': S.cTab=v; break;
+    case 'cOk': S.cDone[v]=1; toast('Confirmado.'); break;
+    case 'cNo': S.cDone[v]=1; toast('Descartado. Queda sin pareja para revisar.'); break;
+    case 'prov': S.prov=v; break;
+    case 'copyPuntos': copyTSV([['Punto','Efectivo','Tarjeta','Transferencia','Total']].concat(PUNTOS.map(p=>[p[0],p[1],p[2],p[3],p[1]+p[2]+p[3]]))); return;
+    case 'copyCom': { const {rows}=comRows(); copyTSV([['Punto','Vendido','Comision','Retefuente','ReteIVA','ReteICA','Neto']].concat(rows.map(r=>[r[0]].concat(r.slice(1).map(x=>Math.round(x)))))); return; }
+    case 'name': S.names[v]=1; toast('Listo. La próxima vez se reconoce sola.'); break;
+    case 'undo': S.files[+v][4]='undo'; toast('Archivo deshecho. Sus datos se quitaron del sistema.'); break;
+    case 'appGo': S.app.screen=v; break;
+    case 'metodo': S.app.metodo=v; break;
+    case 'saveFact': { const c=Math.max(parse(S.app.total)-parse(S.app.desc),0); if(!c){toast('Escribe el total de la factura.');return;} S.app.count++; S.app.sum+=c; const k={efectivo:'ef',tarjeta:'ta',transferencia:'tr',dividido:'ef'}[S.app.metodo]; S.app[k]+=c; S.app.fact='FE-'+(18342+S.app.count-23); S.app.total=''; S.app.desc=''; S.app.screen='cierre'; toast('Factura guardada en el celular.'); break; }
+    case 'toast': toast(v); return;
+    default: return;
+  }
+  render();
+});
+document.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ const el=e.target.closest('tr[data-a]'); if(el) el.click(); } });
+document.addEventListener('input',(e)=>{
+  const k=e.target.dataset.in; if(!k) return;
+  S.app[k]=e.target.value;
+  if(k==='total'||k==='desc'){ const c=$('#cobr'); if(c) c.textContent='$ '+f(Math.max(parse(S.app.total)-parse(S.app.desc),0)); }
+});
+render();
+})();
+</script>
+</body>
+</html>

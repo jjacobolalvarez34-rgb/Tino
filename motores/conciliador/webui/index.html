@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Suite Irina</title>
+<style>
+  /* Pantalla de carga: va en línea para pintarse desde el primer cuadro,
+     antes de que carguen los estilos y scripts de la app. */
+  .splash {
+    position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+    background: #0a0912; color: #f5f3fa; overflow: hidden;
+    font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+    transition: opacity 3s cubic-bezier(.4, 0, .2, 1), filter 3s cubic-bezier(.4, 0, .2, 1),
+                transform 3s cubic-bezier(.4, 0, .2, 1);
+  }
+  .splash.saliendo { opacity: 0; filter: blur(8px); transform: scale(1.04); pointer-events: none; }
+  .splash-glow {
+    position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,108,240,.28), rgba(58,176,255,.10) 40%, transparent 68%);
+    animation: splash-respira 3.2s ease-in-out infinite;
+  }
+  .splash-centro { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .splash-marca {
+    position: relative; width: 84px; height: 84px; border-radius: 24px; display: grid; place-items: center;
+    background: linear-gradient(135deg, #7c6cf0, #3ab0ff); font-size: 34px; font-weight: 700;
+    box-shadow: 0 18px 48px -14px rgba(124,108,240,.8);
+    animation: splash-flota 2.6s ease-in-out infinite;
+  }
+  .splash-marca::before {
+    content: ""; position: absolute; inset: -9px; border-radius: 30px; padding: 2px;
+    background: conic-gradient(from 0deg, transparent 0 55%, #c6f135 70%, #3ab0ff 85%, transparent 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: splash-gira 1.6s linear infinite;
+  }
+  .splash-marca span { animation: splash-late 2.6s ease-in-out infinite; }
+  .splash-titulo { margin-top: 10px; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+  .splash-texto { font-size: 13px; color: #b2aec4; min-height: 18px; transition: opacity .35s ease; }
+  .splash-texto.cambia { opacity: 0; }
+  .splash-texto.error { color: #f0555a; max-width: 460px; text-align: center; line-height: 1.5; }
+  .splash-barra { width: 220px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .splash-barra i {
+    display: block; width: 40%; height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, transparent, #7c6cf0, #3ab0ff, transparent);
+    animation: splash-barre 1.4s cubic-bezier(.65, 0, .35, 1) infinite;
+  }
+  @keyframes splash-respira { 0%, 100% { transform: scale(.92); opacity: .75; } 50% { transform: scale(1.06); opacity: 1; } }
+  @keyframes splash-flota { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  @keyframes splash-gira { to { transform: rotate(360deg); } }
+  @keyframes splash-late { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  @keyframes splash-barre { 0% { transform: translateX(-110%); } 100% { transform: translateX(260%); } }
+</style>
+<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="css/cierre.css" />
+</head>
+<body>
+<div class="splash" id="splash" role="status" aria-live="polite">
+  <div class="splash-glow"></div>
+  <div class="splash-centro">
+    <div class="splash-marca"><span>◆</span></div>
+    <div class="splash-titulo">Suite Irina</div>
+    <div class="splash-texto" id="splashTexto">Iniciando…</div>
+    <div class="splash-barra"><i></i></div>
+  </div>
+</div>
+<div class="ambient"></div>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">◆</div>
+      <div class="brand-text"><b>Suite Irina</b><span>Conciliación &amp; reportes</span></div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <div class="nav-item" data-goto="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+        <span>Inicio</span>
+      </div>
+      <div class="nav-item" data-goto="conciliador">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3v12l-5-3-5 3V3"/><path d="M5 21h14"/></svg>
+        <span>Bold / Redeban</span>
+      </div>
+      <div class="nav-item" data-goto="transferencias">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>
+        <span>Transferencias</span>
+      </div>
+      <div class="nav-item" data-goto="cierre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m9 13 2 2 4-4"/></svg>
+        <span>Cierre del día</span>
+      </div>
+      <div class="nav-item" data-goto="historial">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10"/><path d="M11 19V5"/><path d="M18 19v-7"/><path d="M3 19h18"/></svg>
+        <span>Historial</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="divider"></div>
+      <p class="mini">Bold/Redeban → violeta · Transferencias → celeste · Cierre del día → coral · Historial acumula cada verificación.</p>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <div>
+        <h1 id="topbarTitle">Inicio</h1>
+        <p id="topbarSub">Elige un módulo para empezar.</p>
+        <div class="topbar-accent" id="topbarAccent"></div>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btnBack" style="display:none">← Inicio</button>
+      </div>
+    </div>
+
+    <!-- ================= HOME ================= -->
+    <section class="screen" data-screen="home">
+      <div class="screen-inner wide">
+        <div class="home-hero">
+          <h1>Suite Irina</h1>
+          <p>Herramientas de conciliación y reportes, todas en un solo lugar. Sube tus archivos, genera los reportes y verifica contra el banco — el historial queda registrado solo.</p>
+        </div>
+        <div class="module-grid">
+          <div class="module-card" style="--accent: var(--violet)" data-goto="conciliador">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3v12l-5-3-5 3V3"/><path d="M5 21h14"/></svg></div>
+            <h3>Bold / Redeban</h3>
+            <p>Limpia, ordena y arma las tablas resumen de Bold y Redeban, y verifícalas contra los movimientos de Bancolombia.</p>
+            <div class="module-bullets">
+              <div>Uno o varios archivos vírgenes a la vez</div>
+              <div>Tamaño dinámico por fin de semana / festivos</div>
+              <div>Verificación automática contra el banco</div>
+            </div>
+            <div class="module-cta">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </div>
+
+          <div class="module-card" style="--accent: var(--sky)" data-goto="transferencias">
+            <div class="module-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg></div>
+            <h3>Transferencias</h3>
+            <p>Extrae las transferencias PAGO QR / PAGO LLAVE de los PDF de Bancolombia y arma el Excel por punto de venta.</p>
+            <div class="module-bullets">
+              <div>Un Excel por cada fecha encontrada</div>
+              <div>Formato de dinero y total general incluidos</div>
+              <div>Carpeta de destino a tu elección</div>
+            </div>
+            <div class="module-cta">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </div>
+
+          <div class="module-card" style="--accent: var(--coral)" data-goto="cierre">
+            <div class="module-icon" style="background:var(--coral)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="m9 13 2 2 4-4"/></svg></div>
+            <h3>Cierre del día</h3>
+            <p>Revisa el cierre de ayer de los 11 puntos: encuentra los descuadres y explica sus causas probables, con la evidencia de cada una.</p>
+            <div class="module-bullets">
+              <div>Una fila por punto, con estado y causa principal</div>
+              <div>Revisa fórmulas, continuidad, billetes, precios y ajustes</div>
+              <div>Señales para revisar aunque la caja cuadre</div>
+            </div>
+            <div class="module-cta" style="color:var(--coral)">Abrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </div>
+
+          <div class="module-card" style="--accent: var(--lime)" data-goto="historial">
+            <div class="module-icon" style="background:var(--lime)"><svg viewBox="0 0 24 24" fill="none" stroke="#16150e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V10"/><path d="M11 19V5"/><path d="M18 19v-7"/><path d="M3 19h18"/></svg></div>
+            <h3>Historial &amp; diferencias</h3>
+            <p>Cuántas transferencias fallaron en Bold y Redeban, por punto de venta, y cuánto suma la diferencia acumulada contra lo esperado.</p>
+            <div class="module-cta" style="color:var(--lime)">Ver panel <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONCILIADOR ================= -->
+    <section class="screen" data-screen="conciliador">
+      <div class="screen-inner">
+        <div class="section-title" style="--accent:var(--violet)"><div class="bar" style="background:var(--violet)"></div><h2>Generar reporte</h2></div>
+        <p class="section-sub">Sube tus archivos (Bold, Redeban, o ambos), elige el rango y genera el Excel.</p>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--violet)">1</div>
+            <div style="flex:1">
+              <p class="step-title">Archivo(s) virgen(es)</p>
+              <p class="step-sub">Puedes subir varios de una vez, incluso Bold y Redeban juntos: se generan reportes separados, uno por tipo.</p>
+              <div class="row" style="margin-top:14px">
+                <button class="btn" id="btnUploadFiles">Subir archivo(s) (.xlsx)</button>
+                <button class="btn ghost" id="btnClearFiles">Quitar todos</button>
+              </div>
+              <div class="file-chip-list" id="fileChips"></div>
+              <p class="muted-note" id="filesOmitidas" style="display:none"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--violet)">2</div>
+            <div style="flex:1">
+              <p class="step-title">Carpeta de destino</p>
+              <p class="step-sub">Aquí se guardan el reporte y, si lo generas, el PDF verificado.</p>
+              <div class="row" style="margin-top:14px">
+                <button class="btn ghost" id="btnChooseOutdir">Elegir carpeta</button>
+                <span class="muted-note" id="outdirLabel" style="margin:0"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--violet)">3</div>
+            <div style="flex:1">
+              <p class="step-title">Rango de fechas a incluir</p>
+              <p class="step-sub">Rango de fecha de TRANSACCIÓN. Las fechas fuera del rango no se borran: quedan ocultas en la hoja de datos.</p>
+              <div class="row" style="margin-top:14px">
+                <div class="field"><label class="field-label">Desde</label><select class="input" id="selDesde"></select></div>
+                <div class="field"><label class="field-label">Hasta</label><select class="input" id="selHasta"></select></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="cardHolidays" style="display:none">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--violet)">4</div>
+            <div style="flex:1">
+              <p class="step-title">Festivos (solo Bold)</p>
+              <p class="step-sub">Redeban ya calcula esto solo con su columna de fecha de canje. Haz clic en un día para marcarlo/desmarcarlo festivo.</p>
+              <div class="cal-nav">
+                <button id="calPrev">‹</button><b id="calLabel"></b><button id="calNext">›</button>
+              </div>
+              <div class="mini-cal" id="calGrid"></div>
+              <p class="muted-note" id="holidaysLabel">Festivos marcados: (ninguno)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <button class="btn lg" id="btnGenerate"><span class="btn-label">GENERAR REPORTE</span><span class="spinner"></span></button>
+            <span class="muted-note" id="generateResult" style="margin:0"></span>
+          </div>
+        </div>
+
+        <div class="gap-24"></div>
+        <div class="section-title" style="--accent:var(--lime)"><div class="bar" style="background:var(--lime)"></div><h2>Verificar contra Bancolombia</h2></div>
+        <p class="section-sub">Paso aparte y opcional. Requiere haber generado un reporte arriba.</p>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--sky)">1</div>
+            <div style="flex:1">
+              <p class="step-title">PDF de movimientos de Bancolombia</p>
+              <p class="step-sub">El programa colorea en verde/ámbar/rojo lo que cuadra o no, tanto en el Excel como en una copia marcada del PDF.</p>
+              <div class="row" style="margin-top:14px">
+                <button class="btn sky" id="btnUploadPdf">Subir PDF de Bancolombia</button>
+                <span class="muted-note" id="pdfLabel" style="margin:0">Ninguno.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <button class="btn lime lg" id="btnVerify"><span class="btn-label">GENERAR PDF Y EXCEL VERIFICADOS</span><span class="spinner"></span></button>
+            <span class="muted-note" id="verifyResult" style="margin:0"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TRANSFERENCIAS ================= -->
+    <section class="screen" data-screen="transferencias">
+      <div class="screen-inner">
+        <div class="section-title" style="--accent:var(--sky)"><div class="bar" style="background:var(--sky)"></div><h2>Procesar reportes</h2></div>
+        <p class="section-sub">Sube uno o varios PDF de movimientos, elige la carpeta y genera el Excel.</p>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--sky)">1</div>
+            <div style="flex:1">
+              <p class="step-title">PDF(s) de movimientos de Bancolombia</p>
+              <p class="step-sub">Sube PDF directos o comprimidos (.zip/.rar — se extraen solos). Solo se toman las líneas "PAGO QR" y "PAGO LLAVE" (traen código de punto de venta identificable). Lo demás se maneja aparte.</p>
+              <div class="row" style="margin-top:14px">
+                <button class="btn sky" id="btnUploadTrPdfs">Subir PDF / ZIP / RAR</button>
+                <button class="btn ghost" id="btnClearTr">Quitar todos</button>
+              </div>
+              <div class="file-chip-list" id="trFileChips"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--sky)">2</div>
+            <div style="flex:1">
+              <p class="step-title">Carpeta de destino</p>
+              <p class="step-sub">Por defecto se sugiere Documentos/TRABAJO IRINA/TRANSFERENCIAS, pero puedes elegir cualquier otra.</p>
+              <div class="row" style="margin-top:14px">
+                <button class="btn ghost" id="btnChooseTrOutdir">Elegir carpeta</button>
+                <span class="muted-note" id="trOutdirLabel" style="margin:0"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="background:linear-gradient(160deg,#15131f,#0a0912)">
+          <div class="row">
+            <button class="btn lg" id="btnProcesarTr" style="padding:14px 26px"><span class="btn-label">▶ PROCESAR</span><span class="spinner"></span></button>
+            <span class="muted-note" id="trResult" style="margin:0"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="step-title" style="margin-bottom:10px">Bitácora</p>
+          <div class="log-box" id="trLog"><div class="log-empty">Listo para procesar.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CIERRE DEL DÍA ================= -->
+    <section class="screen" data-screen="cierre">
+      <div class="screen-inner wide">
+        <div class="cierre-tabs" id="cierreTabs" role="tablist">
+          <button class="cierre-tab activa" data-tab="hoy" role="tab">Hoy</button>
+          <button class="cierre-tab" data-tab="punto" role="tab">Punto</button>
+          <button class="cierre-tab" data-tab="asesora" role="tab">Asesora</button>
+          <button class="cierre-tab" data-tab="pendientes" role="tab">Pendientes <span class="tab-badge" id="badgePendientes" hidden>0</span></button>
+        </div>
+
+        <!-- ---------- HOY ---------- -->
+        <div class="cierre-panel" data-panel="hoy">
+        <div class="section-title"><div class="bar" style="background:var(--coral)"></div><h2>¿Qué pasó ayer?</h2></div>
+        <p class="section-sub">Carga el Excel del mes de cada punto, elige el día y dale "Revisar". Cada revisión queda guardada en el historial.</p>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--coral)">1</div>
+            <div style="flex:1">
+              <p class="step-title">Los Sheets de los puntos</p>
+              <p class="step-sub">Directo desde Google Sheets (lo más cómodo) o cargando el Excel del mes descargado. El programa
+                reconoce el punto solo.</p>
+
+              <div class="gs-bloque" id="gsBloque">
+                <p class="gs-titulo">Directo desde Google Sheets <span class="pill muted">solo lectura · sin descargar nada</span></p>
+                <div id="gsEstado"><p class="muted-note">Revisando la conexión…</p></div>
+                <div id="gsAsignacion" hidden></div>
+              </div>
+
+              <div class="row" style="margin-top:14px">
+                <button class="btn ghost" id="btnCierreCargar"><span class="btn-label">O cargar archivos (.xlsx)</span><span class="spinner"></span></button>
+                <button class="btn ghost" id="btnCierreQuitar">Quitar todos</button>
+              </div>
+              <div class="cierre-puntos" id="cierrePuntos"></div>
+              <p class="muted-note" id="cierreLog" hidden></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--sky)">+</div>
+            <div style="flex:1">
+              <p class="step-title">Fuentes opcionales <span class="pill muted" style="margin-left:6px">mejoran la revisión</span></p>
+              <p class="step-sub">Sin ellas el módulo funciona igual. Con Siigo se comparan las unidades vendidas por producto (R20) y, con el reporte
+                "Movimiento ventas y compras" (sirve el del mes entero), también las formas de pago (R21); con lo del banco, las transferencias y consignaciones de cada punto (R30–R32); con
+                los reportes de Bold y Redeban, las ventas con tarjeta (R33). Todas revisan también los días que cuadran.</p>
+              <div class="row" style="margin-top:14px">
+                <button class="btn sky" id="btnCierreSiigo" title="Movimiento ventas y compras (cualquier rango de días) o Ventas por vendedor por producto (un solo día)">Cargar reporte de Siigo (.xlsx)</button>
+                <span class="muted-note" id="cierreSiigoLista" style="margin:0">Ninguno cargado.</span>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn sky" id="btnCierreBanco" title="El PDF de movimientos de Bancolombia (o el .zip tal como se descarga), o el Sheet de control 'Transferencias <mes>' descargado como .xlsx"><span class="btn-label">Cargar banco (PDF o Sheet de transferencias)</span><span class="spinner"></span></button>
+                <span class="muted-note" id="cierreBancoLista" style="margin:0">Nada cargado.</span>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn sky" id="btnCierreTarjetas" title="Los reportes vírgenes de Bold y/o Redeban (.xlsx), los mismos del módulo Bold / Redeban"><span class="btn-label">Cargar Bold / Redeban (.xlsx)</span><span class="spinner"></span></button>
+                <span class="muted-note" id="cierreTarjetasLista" style="margin:0">Nada cargado.</span>
+              </div>
+              <p class="muted-note" style="margin-top:10px">Mapeo de productos Excel ↔ Siigo: <b id="cierreMapeo">—</b>
+                · <button class="link-btn" id="btnCierreMapeo">cambiar mapeo</button></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-row">
+            <div class="step-badge" style="--accent:var(--coral)">2</div>
+            <div style="flex:1">
+              <p class="step-title">Día a revisar</p>
+              <div class="row" style="margin-top:12px">
+                <select class="input" id="cierreFecha" disabled><option>Carga primero los archivos</option></select>
+                <button class="btn lg" style="--accent:var(--coral)" id="btnCierreRevisar" disabled><span class="btn-label">REVISAR</span><span class="spinner"></span></button>
+                <button class="btn ghost" id="btnCierreMes" disabled title="Revisa y guarda todos los días de ese mes que traen los archivos cargados"><span class="btn-label">Revisar todo el mes</span><span class="spinner"></span></button>
+              </div>
+              <p class="muted-note" id="cierreLogMes" hidden></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card flush" id="cierreHoy" hidden>
+          <div class="cierre-hoy-head">
+            <div>
+              <p class="step-title" id="cierreHoyTitulo">¿Qué pasó ayer?</p>
+              <p class="step-sub">Clic en un punto para ver todos los hallazgos y su evidencia.</p>
+            </div>
+            <div class="cierre-resumen" id="cierreResumen"></div>
+          </div>
+          <div class="cierre-tabla-wrap">
+            <table class="cierre-tabla">
+              <thead><tr><th>Punto</th><th>Asesoras</th><th class="num">Venta</th><th class="num">Descuadre</th><th>Estado</th><th>Causa principal</th></tr></thead>
+              <tbody id="cierreFilas"></tbody>
+            </table>
+          </div>
+        </div>
+        </div>
+
+        <!-- ---------- PUNTO ---------- -->
+        <div class="cierre-panel" data-panel="punto" hidden>
+          <div class="section-title"><div class="bar" style="background:var(--coral)"></div><h2>¿Cómo va este punto?</h2></div>
+          <p class="section-sub">Cada día del mes coloreado por estado. Clic en un día para ver su detalle.</p>
+          <div class="card">
+            <div class="filter-row">
+              <div class="field"><label class="field-label">Punto</label><select class="input" id="vpPunto"></select></div>
+              <div class="field"><label class="field-label">Mes</label><select class="input" id="vpMes"></select></div>
+            </div>
+          </div>
+          <div id="vpContenido"><p class="empty-hint">Todavía no hay días revisados. Revisa un día (o "Revisar todo el mes") en la pestaña Hoy.</p></div>
+        </div>
+
+        <!-- ---------- ASESORA ---------- -->
+        <div class="cierre-panel" data-panel="asesora" hidden>
+          <div class="section-title"><div class="bar" style="background:var(--coral)"></div><h2>¿Cómo va cada persona?</h2></div>
+          <p class="section-sub">Días trabajados, descuadres sin explicar y señales para revisar en el mes. Las señales nunca acusan: dicen qué mirar.</p>
+          <div class="card">
+            <div class="filter-row">
+              <div class="field"><label class="field-label">Mes</label><select class="input" id="vaMes"></select></div>
+            </div>
+          </div>
+          <div id="vaContenido"></div>
+        </div>
+
+        <!-- ---------- PENDIENTES ---------- -->
+        <div class="cierre-panel" data-panel="pendientes" hidden>
+          <div class="section-title"><div class="bar" style="background:var(--coral)"></div><h2>Pendientes por revisar</h2></div>
+          <p class="section-sub">Hallazgos sin revisar, del más antiguo al más reciente. Márcalos con una nota cuando los revises.</p>
+          <div class="card">
+            <label class="check"><input type="checkbox" id="pendMenores"> Incluir avisos menores de la planilla (errores de fórmula que se repiten cada día)</label>
+          </div>
+          <div id="pendContenido"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HISTORIAL ================= -->
+    <section class="screen" data-screen="historial">
+      <div class="screen-inner wide">
+        <div class="section-title" style="--accent:var(--lime)"><div class="bar" style="background:var(--lime)"></div><h2>Historial &amp; diferencias</h2></div>
+        <p class="section-sub">Acumulado de cada verificación contra Bancolombia que has corrido. Filtra por fecha si quieres un rango específico.</p>
+
+        <div class="card">
+          <div class="filter-row">
+            <div class="field"><label class="field-label">Desde</label><input type="date" class="input" id="histFrom"></div>
+            <div class="field"><label class="field-label">Hasta</label><input type="date" class="input" id="histTo"></div>
+            <button class="btn ghost" id="btnHistFilter">Aplicar filtro</button>
+            <button class="btn ghost" id="btnHistClear">Quitar filtro</button>
+          </div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="card kpi-tile"><p class="kpi-label">Total esperado (Bold + Redeban)</p><p class="kpi-value" id="kpiTotal">$0</p><p class="kpi-sub" id="kpiTotalSub">&nbsp;</p></div>
+          <div class="card kpi-tile"><p class="kpi-label">Monto que no coincidió</p><p class="kpi-value critical" id="kpiNoCoincidio">$0</p><p class="kpi-sub" id="kpiNoCoincidioSub">&nbsp;</p></div>
+          <div class="card kpi-tile"><p class="kpi-label">Diferencia (esperado − no coincidió)</p><p class="kpi-value good" id="kpiDiferencia">$0</p><p class="kpi-sub">Lo que sí quedó confirmado contra el banco.</p></div>
+          <div class="card kpi-tile"><p class="kpi-label">Veces que no coincidió</p><p class="kpi-value" id="kpiFallidasCount">0</p><p class="kpi-sub" id="kpiFallidasSub">&nbsp;</p></div>
+        </div>
+
+        <div class="card">
+          <p class="step-title">Fallidas por punto de venta — Bold</p>
+          <p class="step-sub">El depósito de Bold llega consolidado por día; cuando el bloque no cuadra, se prorratea entre las tiendas que participaron ese día.</p>
+          <div class="bar-list" id="barListBold"></div>
+        </div>
+
+        <div class="card">
+          <p class="step-title">Fallidas por punto de venta — Redeban</p>
+          <p class="step-sub">Cada franquicia y punto de venta se verifica por separado contra el abono del banco.</p>
+          <div class="bar-list" id="barListRedeban"></div>
+        </div>
+
+        <div class="card">
+          <p class="step-title">Tendencia de fallas en el tiempo</p>
+          <div class="trend-wrap" id="trendWrap"><div class="trend-empty">Aún no hay suficientes verificaciones para mostrar tendencia.</div></div>
+        </div>
+
+        <div class="card">
+          <div class="between">
+            <p class="step-title" style="margin:0">Corridas recientes</p>
+          </div>
+          <div style="overflow-x:auto; margin-top:10px">
+            <table class="runs-table">
+              <thead><tr><th>Fecha</th><th>Revisadas</th><th>Fallidas</th><th>Reporte</th></tr></thead>
+              <tbody id="runsBody"><tr><td colspan="4" class="empty-hint">Sin corridas registradas todavía.</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="js/vendor/anime.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/cierre.js"></script>
+</body>
+</html>

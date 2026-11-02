@@ -1,0 +1,91 @@
+{
+  "_nota": "Umbrales y listas del módulo Cierre del día. Montos en pesos. Se puede editar sin tocar el código; se relee cada vez que se da 'Revisar'.",
+
+  "puntos": [
+    {"id": "PLAZA IMPERIAL", "nombre": "Plaza Imperial", "alias": ["plaza imperial", "cc plaza imperial", "c c plaza imperial", "imperial"]},
+    {"id": "SALITRE PLAZA", "nombre": "Salitre Plaza", "alias": ["salitre plaza", "cc salitre plaza", "salitre"]},
+    {"id": "ALTAVISTA", "nombre": "Altavista", "alias": ["altavista", "cc altavista", "alta vista"]},
+    {"id": "KENNEDY", "nombre": "Kennedy", "alias": ["kennedy", "punto kennedy"]},
+    {"id": "SANTAFE", "nombre": "Santa Fe", "alias": ["santafe", "santa fe", "cc santa fe"]},
+    {"id": "PLAZA CLARO", "nombre": "Plaza Claro", "alias": ["plaza claro", "cc plaza claro"]},
+    {"id": "P DORADO", "nombre": "Portal Dorado", "alias": ["portal dorado", "p dorado", "dorado"]},
+    {"id": "P SUBA", "nombre": "Portal Suba", "alias": ["portal suba", "p suba", "suba"]},
+    {"id": "P AMERICAS", "nombre": "Portal Américas", "alias": ["portal americas", "p americas", "americas"]},
+    {"id": "P SUR", "nombre": "Portal Sur", "alias": ["portal sur", "p sur", "jumbo autop sur", "jumbo autopista sur"]},
+    {"id": "BANDERAS", "nombre": "Banderas", "alias": ["banderas", "portal banderas"]}
+  ],
+
+  "estado": {
+    "tolerancia_cuadra": 100,
+    "porcentaje_para_explicado": 0.8,
+    "reglas_sin_peso_en_estado": ["R05"]
+  },
+
+  "R03_compensacion": {
+    "monto_minimo": 1000,
+    "tolerancia_abs": 500,
+    "tolerancia_pct": 0.25
+  },
+
+  "R04_billete": {
+    "denominaciones": [2000, 5000, 10000, 20000, 50000, 100000],
+    "max_billetes": 3,
+    "tolerancia": 0
+  },
+
+  "R05_precios": {
+    "monto_minimo": 1000,
+    "max_productos": 3,
+    "tolerancia": 0,
+    "max_combinaciones_mostradas": 3
+  },
+
+  "R07_observaciones": {
+    "palabras_ajuste": ["danad", "mal estado", "cambio", "devoluc", "devuelve", "presta", "bodega"]
+  },
+
+  "R09_descuentos": {
+    "palabras_descuento": ["descuento", "desc ", "redencion", "redimi", "leal", "promocion", "promo", "cupon", "aniversario", "%"]
+  },
+
+  "R11_desc_fact": {
+    "saldo_minimo": 500000,
+    "dias_sin_entrega": 5
+  },
+
+  "siigo": {
+    "_nota": "Reporte 'Ventas por vendedor por producto'. Solo se comparan UNIDADES. Los grupos son productos del Excel que en Siigo se facturan con un solo código.",
+    "grupos": [
+      {"siigo": "Empaque Milagros", "excel_empieza_por": ["Empaque Milagros"]},
+      {"siigo": "Sachet Obsequio", "excel_empieza_por": ["Sachet"]},
+      {"siigo": "Doy Pack Regalo", "excel_empieza_por": ["Doy Pack Regalo"]}
+    ],
+    "vendedores_ignorar": ["CATALIMA MOU"],
+    "_nota_formas": "Reporte 'Movimiento ventas y compras' (R21): cómo empieza la FORMA PAGO de Siigo para cada lista del Excel. Transferencias -> lista S; tarjetas -> T + U; addi -> total ADDI de la caja.",
+    "formas_pago": {
+      "transferencias": ["transferencia"],
+      "tarjetas": ["tarjeta"],
+      "addi": ["addi"]
+    },
+    "tolerancia_unidades": 0
+  },
+
+  "banco": {
+    "_nota": "Bancolombia (R30-R32). Una sola cuenta para todos los puntos. Las palabras de consignación se buscan en las líneas del PDF de movimientos.",
+    "palabras_consignacion": ["consig", "deposito"],
+    "tolerancia_consignacion": 0
+  },
+
+  "riesgo": {
+    "_nota": "Señales por asesora en la pantalla Asesora (por mes). Siempre dicen 'revisar', nunca acusan.",
+    "faltantes_repetidos": 2,
+    "factor_sobre_promedio": 1.5,
+    "monto_minimo_senal": 20000
+  },
+
+  "asesoras_alias": {
+    "_nota": "Opcional: 'nombre como aparece' -> 'nombre a usar'. Ej: \"anita\": \"Ana Pérez\"."
+  },
+
+  "prioridad_reglas": ["R10", "R01", "R02", "R09", "R30", "R33", "R20", "R21", "R03", "R07", "R08", "R04", "R05", "R06", "R31", "R32", "R11"]
+}
