@@ -99,8 +99,8 @@ consignación, con `dias` ordenados y `grande` verdadero si hay más de un día.
 ### `coincide_deposito` · `{banco, esperado, tolerancia, porcentajes}` → booleano
 Verdadero si para algún `p` de `porcentajes` se cumple
 `abs(100 × banco − p × esperado) ≤ 100 × tolerancia`. Enteros, sin dividir. Cada `p`
-va de 0 a 100, para que el cálculo siga siendo exacto en los dos lenguajes. Para Bold,
-`porcentajes` sale de `empresa_config.bold_porcentajes_deposito` (D-027).
+va de 0 a 100, para que el cálculo siga siendo exacto en los dos lenguajes. Con el
+reporte actual de Bold basta `[100]`: el depósito ya viene sin el préstamo (D-029).
 
 ### `cruces_redeban` · `{filas, tolerancia, max_cruce}` → lista
 Cada fila es `{codigo, franquicia, fecha, esperado, banco}`. Devuelve las mismas
@@ -147,14 +147,17 @@ referencia (`null`) no se manda aquí, va directo a "sin identificar".
 Estadísticas descriptivas de cobros con tarjeta. Cada cobro es
 `{fecha, hora, punto, proveedor, franquicia, bruto, comision, retenciones, prestamo, neto}`.
 `hora` es un entero de 0 a 23, o `null` si la fuente no la trae. `franquicia` es texto
-o `null`. Los cinco montos son enteros mayores o iguales a cero. `prestamo` es lo que el
-proveedor le descontó a la empresa por un préstamo, y va en 0 si no hay.
+o `null`. Los montos son enteros. `prestamo` es lo que el proveedor le descontó a la
+empresa por un préstamo, y va en 0 si no hay. Una **reversión** es una venta devuelta:
+trae `bruto` negativo. Sus montos restan en todas las sumas, pero no cuenta en `cobros`
+ni en la mediana, porque no es una venta.
 
-**División redondeada:** `redondear(a, b)` con enteros: 0 si `b` es 0. Si no, `q` es el
-cociente entero y `r` el resto, y da `q + 1` si `2 × r ≥ b`, si no `q`.
+**División redondeada:** `redondear(a, b)` con enteros y `b` mayor o igual a 0: 0 si `b`
+es 0. Si `a` es negativo, da `−redondear(−a, b)`. Si no, `q` es el cociente entero y `r`
+el resto, y da `q + 1` si `2 × r ≥ b`, si no `q`.
 
 Un **grupo** es `{clave, cobros, bruto, comision, retenciones, prestamo, neto, ticket_promedio}`:
-`cobros` cuenta los cobros, los cinco montos se suman, y `ticket_promedio` es
+`cobros` cuenta los cobros con `bruto` mayor o igual a 0, los cinco montos se suman, y `ticket_promedio` es
 `redondear(bruto, cobros)`.
 
 Devuelve:

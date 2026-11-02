@@ -21,17 +21,25 @@ from nucleo.logica import estadisticas_ventas  # noqa: E402
 
 PLANTILLA = Path(__file__).with_name("plantilla.html")
 TODOS = "Todos los puntos"
+TODO_EL_PERIODO = "todo"
 
 
 def armar_datos(cobros, avisos):
-    """Una vista por punto y una con todos, ya calculadas: la pantalla no calcula."""
+    """Una vista por periodo y punto, ya calculada: la pantalla no calcula."""
     puntos = sorted({c["punto"] for c in cobros})
-    vistas = {TODOS: estadisticas_ventas(cobros)}
-    for punto in puntos:
-        vistas[punto] = estadisticas_ventas([c for c in cobros if c["punto"] == punto])
-    fechas = sorted(c["fecha"] for c in cobros)
-    return {"todos": TODOS, "puntos": puntos, "vistas": vistas, "avisos": avisos,
-            "desde": fechas[0] if fechas else None, "hasta": fechas[-1] if fechas else None}
+    meses = sorted({c["fecha"][:7] for c in cobros})
+    vistas, por_mes = {}, {}
+    for punto in [TODOS] + puntos:
+        del_punto = [c for c in cobros if punto == TODOS or c["punto"] == punto]
+        vistas[f"{TODO_EL_PERIODO}|{punto}"] = estadisticas_ventas(del_punto)
+        por_mes[punto] = []
+        for mes in meses:
+            del_mes = [c for c in del_punto if c["fecha"].startswith(mes)]
+            v = estadisticas_ventas(del_mes)
+            vistas[f"{mes}|{punto}"] = v
+            por_mes[punto].append({"clave": mes, **v["totales"]})
+    return {"todos": TODOS, "todo_el_periodo": TODO_EL_PERIODO, "puntos": puntos, "meses": meses,
+            "vistas": vistas, "por_mes": por_mes, "avisos": avisos}
 
 
 def escribir(datos, salida):
@@ -49,11 +57,13 @@ def main():
     a = args.parse_args()
 
     puntos = json.loads(Path(a.puntos).read_text(encoding="utf-8"))
-    cobros, avisos = [], []
+    lotes, avisos = [], []
     for archivo in a.archivos:
         leidos, sus_avisos = tarjetas.leer(archivo, puntos)
-        cobros += leidos
+        lotes.append(leidos)
         avisos += [f"{Path(archivo).name}: {x}" for x in sus_avisos]
+    # El mismo mes puede venir en varios archivos: no se cuenta dos veces.
+    cobros = tarjetas.unir_reportes(lotes)
 
     escribir(armar_datos(cobros, avisos), a.salida)
     print(f"{len(cobros)} cobros de {len(a.archivos)} archivo(s). Tablero en {a.salida}")

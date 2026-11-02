@@ -450,23 +450,7 @@ values ('bbbbbbbb-0000-0000-0000-000000000000', 'bbbbbbbb-0000-0000-0000-0000000
         '99990001', '2026-01-01');
 select pg_temp.ok(true, 'Otra empresa puede tener un código igual');
 
--- 18. Depósito de Bold por empresa -------------------------------------------------
-select pg_temp.como('a0000000-0000-0000-0000-00000000000d');
-select pg_temp.ok((select bold_porcentajes_deposito from public.empresa_config) = '{100}',
-                  'Por defecto el depósito de Bold debe llegar completo');
-update public.empresa_config set bold_porcentajes_deposito = '{100,90}';
-select pg_temp.ok((select bold_porcentajes_deposito from public.empresa_config) = '{100,90}',
-                  'Una empresa con descuento de Bold lo configura sin tocar código');
-select pg_temp.falla($$update public.empresa_config set bold_porcentajes_deposito = '{150}'$$,
-                     '23514', 'El porcentaje del depósito no pasa de 100');
-select pg_temp.falla($$update public.empresa_config set bold_porcentajes_deposito = '{}'$$,
-                     '23514', 'Debe quedar al menos un porcentaje');
-
-select pg_temp.como('b0000000-0000-0000-0000-00000000000d');
-select pg_temp.ok((select bold_porcentajes_deposito from public.empresa_config) = '{100}',
-                  'El porcentaje de A no cambia el de B');
-
--- 19. Sin sesión, con anon -------------------------------------------------------
+-- 18. Sin sesión, con anon -------------------------------------------------------
 reset role;
 set role anon;
 select set_config('request.jwt.claims', '', false);
@@ -479,14 +463,14 @@ select pg_temp.falla($$insert into public.punto_venta (empresa_id, codigo, nombr
                        values ('aaaaaaaa-0000-0000-0000-000000000000', 'N1', 'x')$$,
                      '42501', 'anon no escribe');
 
--- 20. Vaciar una tabla -----------------------------------------------------------
+-- 19. Vaciar una tabla -----------------------------------------------------------
 reset role;
 set role authenticated;
 select pg_temp.como('a0000000-0000-0000-0000-00000000000d');
 select pg_temp.falla($$truncate public.punto_venta cascade$$,
                      '42501', 'Nadie vacía una tabla con TRUNCATE');
 
--- 21. Como administrador ---------------------------------------------------------
+-- 20. Como administrador ---------------------------------------------------------
 reset role;
 
 select pg_temp.falla($$delete from auth.users where id = 'a0000000-0000-0000-0000-00000000000a'$$,
@@ -497,7 +481,7 @@ select pg_temp.ok((select count(*) from public.empresa_config
                    where empresa_id = 'cccccccc-0000-0000-0000-000000000000') = 1,
                   'Una empresa nueva también nace con su configuración');
 
--- 22. Estructura: lo que debe cumplir toda tabla ----------------------------------
+-- 21. Estructura: lo que debe cumplir toda tabla ----------------------------------
 select pg_temp.ok(
   not exists (select from pg_tables where schemaname = 'public' and not rowsecurity),
   'Todas las tablas tienen RLS');

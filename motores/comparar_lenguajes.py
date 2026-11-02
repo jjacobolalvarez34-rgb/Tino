@@ -72,6 +72,8 @@ def cobro(r):
     bruto = monto(r) + r.choice([0, 0, 1, 3])
     comision, retenciones = bruto // 30, bruto // 90
     prestamo = r.choice([0, 0, bruto // 10])
+    if r.random() < 0.05:  # reversión: la venta devuelta resta en todo
+        bruto, comision, retenciones, prestamo = -bruto, -comision, -retenciones, 0
     return {"fecha": fecha(r), "hora": r.choice([None, 0, 9, 10, 11, 15, 18, 19, 23]),
             "punto": r.choice(["Punto 1", "Punto 2", "Ñame", "Ángel", "a", "B"]),
             "proveedor": r.choice(["bold", "redeban"]), "franquicia": r.choice([None, "VISA", "AMEX", "MASTERCARD"]),

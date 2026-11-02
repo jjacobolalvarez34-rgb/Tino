@@ -378,13 +378,6 @@ create table public.empresa_config (
   conc_minutos_datafono        int    not null default 10   check (conc_minutos_datafono > 0),
   conc_minutos_transferencia   int    not null default 30   check (conc_minutos_transferencia > 0),
   conc_tolerancia_valor        bigint not null default 1000 check (conc_tolerancia_valor >= 0),
-  -- Qué parte del depósito de Bold se acepta como completa. Normal: solo 100. Si
-  -- Bold le descuenta algo a la empresa, como la cuota de un préstamo, se agrega
-  -- ese porcentaje, por ejemplo {100,90}.
-  bold_porcentajes_deposito    int[]  not null default '{100}'
-                                 check (cardinality(bold_porcentajes_deposito) > 0
-                                        and 0 <= all (bold_porcentajes_deposito)
-                                        and 100 >= all (bold_porcentajes_deposito)),
   -- Descuadres (docs/REGLAS/descuadres.md)
   desc_umbral                  bigint not null default 1000 check (desc_umbral >= 0),
   desc_confianza_min           numeric(3, 2) not null default 0.60

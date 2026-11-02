@@ -11,6 +11,13 @@ el proyecto de pruebas.
 Jacobo López dirige el proyecto y revisa todo. Trabaja como "vibe engineer":
 quiere entender cada decisión, no solo recibir código.
 
+## Este computador
+
+- Solo se trabaja en el disco D:. No se escribe nada en C:, que está casi lleno: un
+  crasheo el 2 nov 2026 ocurrió con C: al 99 %. Temporales y copias de trabajo van
+  en `D:\Repositorios\Tino-datos\trabajo\`, y `TEMP` y `TMP` deben apuntar ahí.
+- Un solo proceso pesado a la vez.
+
 ## Antes de escribir código
 
 1. Lee, en este orden: `docs/VISION.md`, `docs/ARQUITECTURA.md`,

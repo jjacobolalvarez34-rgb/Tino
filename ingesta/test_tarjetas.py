@@ -71,6 +71,15 @@ class Lector(unittest.TestCase):
         self.assertEqual((cobros[0]["prestamo"], cobros[0]["franquicia"], cobros[0]["neto"]), (9600, "VISA", 86400))
         self.assertNotIn("Persona Inventada", str(cobros))
 
+    def test_formato_anterior_no_cuenta_cobros_no_realizados(self):
+        encabezado = ["ESTADO ACTUAL" if c == "OPERACIÓN" else c for c in BOLD]
+        ruta = libro(self.carpeta / "e.xlsx", encabezado, [
+            ["Tienda Uno", dt.datetime(2026, 3, 2, 10, 0), "COBRO EXITOSO", 0, 0, 40000, 0, 0, 0, 0, 0, 0, 40000],
+            ["Tienda Uno", dt.datetime(2026, 3, 2, 11, 0), "COBRO NO REALIZADO", 0, 0, 90000, 0, 0, 0, 0, 0, 0, 0],
+        ])
+        cobros, _ = tarjetas.leer(ruta, PUNTOS)
+        self.assertEqual([c["bruto"] for c in cobros], [40000])
+
     def test_redeban_sin_hora_y_con_negativos(self):
         ruta = libro(self.carpeta / "r.xlsx", REDEBAN, [
             ["0000011", "visa", "20261030", "20261102", 84000, 16000, 100000, -2500, -1500, -285, -41, 95674],
@@ -81,6 +90,51 @@ class Lector(unittest.TestCase):
                                    "franquicia": "VISA", "bruto": 100000, "comision": 2500,
                                    "retenciones": 1826, "prestamo": 0, "neto": 95674}])
         self.assertIn("99", avisos[0])
+
+    def test_reversion_de_redeban_resta(self):
+        ruta = libro(self.carpeta / "r.xlsx", REDEBAN, [
+            ["0000011", "VISA", "20260505", "20260506", 0, 0, 100000, -2500, -1500, -285, -41, 95674],
+            ["0000011", "VISA", "20260505", "20260506", 0, 0, -32000, 535, 403, 766, 111, -30185],
+        ])
+        cobros, avisos = tarjetas.leer(ruta, PUNTOS)
+        self.assertEqual(avisos, [])
+        self.assertEqual((cobros[1]["bruto"], cobros[1]["comision"], cobros[1]["retenciones"], cobros[1]["neto"]),
+                         (-32000, -535, -1280, -30185))
+        self.assertEqual(sum(c["bruto"] for c in cobros), 68000)
+
+    def test_fila_de_totales_no_tumba_el_lector(self):
+        ruta = libro(self.carpeta / "b.xlsx", BOLD, [
+            ["Tienda Uno", dt.datetime(2026, 10, 30, 14, 32), "COBRO EXITOSO", 0, 0, 100000, 0, 0, 0, 0, 0, 0, 100000],
+            ["NOMBRE DEL DATÁFONO", "FECHA", "COBRO EXITOSO", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ["Tienda Uno", 529267.8, "COBRO EXITOSO", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ])
+        cobros, avisos = tarjetas.leer(ruta, PUNTOS)
+        self.assertEqual(len(cobros), 1)
+        self.assertIn("2 fila(s)", avisos[0])
+
+    def test_encabezado_repetido_a_la_derecha_no_gana(self):
+        encabezado = REDEBAN + ["VALOR COMISION", "VALOR NETO"]
+        ruta = libro(self.carpeta / "r.xlsx", encabezado, [
+            ["0000011", "VISA", "20261104", "20261105", 0, 0, 35000, -700, -400, -100, -50, 33750, 99999, 88888]])
+        cobros, _ = tarjetas.leer(ruta, PUNTOS)
+        self.assertEqual((cobros[0]["comision"], cobros[0]["neto"]), (700, 33750))
+
+    def test_datos_en_otra_hoja(self):
+        ruta = self.carpeta / "h.xlsx"
+        wb = openpyxl.Workbook()
+        wb.active.append(["Resumen a mano"])
+        hoja = wb.create_sheet("TRANSACCIONES")
+        hoja.append(BOLD)
+        hoja.append(["Tienda Uno", dt.datetime(2026, 10, 30, 14, 32), "COBRO EXITOSO", 0, 0, 5000, 0, 0, 0, 0, 0, 0, 5000])
+        wb.save(ruta)
+        self.assertEqual(len(tarjetas.leer(ruta, PUNTOS)[0]), 1)
+
+    def test_unir_reportes_no_cuenta_dos_veces(self):
+        cobro = lambda fecha, i: {"proveedor": "bold", "fecha": fecha, "id": i}  # noqa: E731
+        mes_parcial = [cobro("2026-09-01", 1), cobro("2026-09-02", 2)]
+        mes_completo = [cobro("2026-09-01", 1), cobro("2026-09-02", 2), cobro("2026-09-02", 3), cobro("2026-09-03", 4)]
+        unidos = tarjetas.unir_reportes([mes_parcial, mes_completo, mes_parcial])
+        self.assertEqual([c["id"] for c in unidos], [1, 2, 3, 4])
 
     def test_valor_que_no_se_entiende_no_se_cuenta_y_avisa(self):
         ruta = libro(self.carpeta / "b.xlsx", BOLD, [

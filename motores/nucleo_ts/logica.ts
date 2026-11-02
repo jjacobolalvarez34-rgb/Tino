@@ -405,6 +405,8 @@ export type Estadisticas = {
 // Con el resto y no con `a / b`: la división de JavaScript deja decimales.
 function redondear(a: number, b: number): number {
   if (b === 0) return 0;
+  // 0 - y no el signo solo: -0 no es igual a 0 en una comparación estricta.
+  if (a < 0) return 0 - redondear(-a, b);
   const resto = a % b;
   const cociente = (a - resto) / b;
   return 2 * resto >= b ? cociente + 1 : cociente;
@@ -432,7 +434,8 @@ function agrupar<T extends string | number>(
       };
       grupos.set(clave, grupo);
     }
-    grupo.cobros += 1;
+    // Una reversión resta plata, pero no es una venta.
+    grupo.cobros += cobro.bruto >= 0 ? 1 : 0;
     grupo.bruto += cobro.bruto;
     grupo.comision += cobro.comision;
     grupo.retenciones += cobro.retenciones;
@@ -510,7 +513,7 @@ export function estadisticas_ventas(cobros: Cobro[]): Estadisticas {
       prestamo,
       neto,
       ticket_promedio,
-      ticket_mediano: mediana(cobros.map((cobro) => cobro.bruto)),
+      ticket_mediano: mediana(cobros.map((cobro) => cobro.bruto).filter((bruto) => bruto >= 0)),
       dias,
       promedio_por_dia: redondear(bruto, dias),
     },

@@ -77,6 +77,7 @@ tr.total td{font-weight:800;border-bottom:0}
   </header>
 
   <div class="aviso" id="avisos" hidden></div>
+  <nav class="filtros" id="periodos" aria-label="Filtrar por periodo"></nav>
   <nav class="filtros" id="filtros" aria-label="Filtrar por punto de venta"></nav>
   <section class="cifras num" id="cifras" aria-label="Resumen"></section>
 
@@ -111,6 +112,9 @@ tr.total td{font-weight:800;border-bottom:0}
   const DIAS_CORTOS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   let actual = D.todos;
+  // Con varios meses arranca en el más reciente, no en toda la historia.
+  let periodo = D.meses.length > 1 ? D.meses[D.meses.length - 1] : D.todo_el_periodo;
+  const mesCorto = (m) => { const [a, n] = m.split('-'); return MESES[Number(n) - 1] + ' ' + a.slice(2); };
 
   const miles = (n) => Math.round(n).toLocaleString('es-CO');
   // Espacio que no parte: el $ nunca queda en una línea y el número en otra.
@@ -119,6 +123,7 @@ tr.total td{font-weight:800;border-bottom:0}
     : n >= 1e3 ? miles(n / 1e3) + ' mil' : miles(n);
   const escapar = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fechaCorta = (f) => { const [, m, d] = f.split('-'); return Number(d) + ' ' + MESES[Number(m) - 1]; };
+  const fechaLarga = (f) => fechaCorta(f) + ' ' + f.slice(2, 4);
   const horaTexto = (h) => String(h).padStart(2, '0') + ':00';
 
   function diaSemana(f) {
@@ -183,8 +188,12 @@ tr.total td{font-weight:800;border-bottom:0}
   }
 
   function pintar() {
-    const v = D.vistas[actual], t = v.totales;
-    $('rango').textContent = D.desde ? `${fechaCorta(D.desde)} a ${fechaCorta(D.hasta)} · ${t.dias} días con ventas` : 'Sin datos';
+    const v = D.vistas[periodo + '|' + actual], t = v.totales;
+    const primero = v.por_dia[0], ultimo = v.por_dia[v.por_dia.length - 1];
+    $('rango').textContent = primero ? `${fechaLarga(primero.clave)} a ${fechaLarga(ultimo.clave)} · ${miles(t.dias)} días con ventas` : 'Sin ventas en este periodo';
+    $('periodos').hidden = D.meses.length < 2;
+    $('periodos').innerHTML = [D.todo_el_periodo, ...D.meses].reverse().map((p) =>
+      `<button class="filtro" aria-pressed="${p === periodo}" data-periodo="${escapar(p)}">${p === D.todo_el_periodo ? 'Todo' : mesCorto(p)}</button>`).join('');
     $('filtros').innerHTML = [D.todos, ...D.puntos].map((p) =>
       `<button class="filtro" aria-pressed="${p === actual}" data-punto="${escapar(p)}">${escapar(p)}</button>`).join('');
 
@@ -212,14 +221,22 @@ tr.total td{font-weight:800;border-bottom:0}
       columnas(semana, { ancho: anchoGrafica('g-semana'), resumen: 'Promedio de ventas por día de la semana.' }),
       tablaSimple(['Día', 'Días con ventas', 'Promedio', 'Vendido'], v.por_dia_semana.map((g) => [DIAS[g.clave], miles(g.dias), miles(g.promedio_por_dia), miles(g.bruto)])));
 
-    const dias = v.por_dia.map((g) => ({ valor: g.bruto, corto: fechaCorta(g.clave), detalle: `${DIAS[diaSemana(g.clave)]} ${fechaCorta(g.clave)}\nVendido ${pesos(g.bruto)}\n${miles(g.cobros)} cobros` }));
-    bloque('g-dia', 'Ventas por día', 'Cada barra es un día con ventas.', dias.length ? '' : 'No hay ventas en este periodo.',
-      columnas(dias, { ancho: anchoGrafica('g-dia'), resumen: `Ventas por día. El mejor día es ${v.dia_pico ? fechaCorta(v.dia_pico) : 'ninguno'}.` }),
-      tablaSimple(['Día', 'Cobros', 'Vendido'], v.por_dia.map((g) => [fechaCorta(g.clave), miles(g.cobros), miles(g.bruto)])));
+    if (periodo === D.todo_el_periodo) {
+      const filasMes = D.por_mes[actual];
+      const barras = filasMes.map((g) => ({ valor: g.bruto, corto: mesCorto(g.clave), detalle: `${mesCorto(g.clave)}\nVendido ${pesos(g.bruto)}\n${miles(g.cobros)} cobros` }));
+      bloque('g-dia', 'Ventas por mes', 'Cada barra es un mes.', '',
+        columnas(barras, { ancho: anchoGrafica('g-dia'), resumen: 'Ventas por mes.' }),
+        tablaSimple(['Mes', 'Cobros', 'Vendido'], filasMes.map((g) => [mesCorto(g.clave), miles(g.cobros), miles(g.bruto)])));
+    } else {
+      const dias = v.por_dia.map((g) => ({ valor: g.bruto, corto: fechaCorta(g.clave), detalle: `${DIAS[diaSemana(g.clave)]} ${fechaCorta(g.clave)}\nVendido ${pesos(g.bruto)}\n${miles(g.cobros)} cobros` }));
+      bloque('g-dia', 'Ventas por día', 'Cada barra es un día con ventas.', dias.length ? '' : 'No hay ventas en este periodo.',
+        columnas(dias, { ancho: anchoGrafica('g-dia'), resumen: `Ventas por día. El mejor día es ${v.dia_pico ? fechaCorta(v.dia_pico) : 'ninguno'}.` }),
+        tablaSimple(['Día', 'Cobros', 'Vendido'], v.por_dia.map((g) => [fechaCorta(g.clave), miles(g.cobros), miles(g.bruto)])));
+    }
   }
 
   function copiar() {
-    const v = D.vistas[actual], t = v.totales;
+    const v = D.vistas[periodo + '|' + actual], t = v.totales;
     const filas = [['Punto', 'Cobros', 'Vendido', 'Promedio', 'Comision', 'Retenciones', 'Prestamo', 'Neto']]
       .concat(v.por_punto.map((g) => [g.clave, g.cobros, g.bruto, g.ticket_promedio, g.comision, g.retenciones, g.prestamo, g.neto]))
       .concat([['Total', t.cobros, t.bruto, t.ticket_promedio, t.comision, t.retenciones, t.prestamo, t.neto]]);
@@ -254,6 +271,8 @@ tr.total td{font-weight:800;border-bottom:0}
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-punto]');
     if (b) { actual = b.dataset.punto; pintar(); return; }
+    const p = e.target.closest('[data-periodo]');
+    if (p) { periodo = p.dataset.periodo; pintar(); return; }
     if (e.target.closest('#copiar')) copiar();
   });
   document.addEventListener('pointermove', (e) => {

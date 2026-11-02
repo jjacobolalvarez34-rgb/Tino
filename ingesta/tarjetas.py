@@ -28,7 +28,9 @@ class FormatoNoReconocido(Exception):
 COLUMNAS_BOLD = {
     "datafono": ("NOMBRE DEL DATÁFONO",),
     "fecha": ("FECHA",),
-    "operacion": ("OPERACIÓN",),
+    # El formato anterior la llama ESTADO ACTUAL. Sin leerla, un cobro no realizado
+    # contaría como venta.
+    "operacion": ("OPERACIÓN", "ESTADO ACTUAL"),
     "total": ("VALOR TOTAL",),
     "retefuente": ("VALOR RETE FUENTE",),
     "reteiva": ("VALOR RETE IVA",),
@@ -70,9 +72,21 @@ def _encabezados(hoja, buscadas):
         for col in range(1, hoja.max_column + 1):
             valor = hoja.cell(fila, col).value
             if valor is not None:
-                mapa[str(valor).strip().upper()] = col
+                # El primero gana: los archivos procesados traen a la derecha otra
+                # tabla con los mismos títulos.
+                mapa.setdefault(str(valor).strip().upper(), col)
         if any(nombre in mapa for nombre in buscadas):
             return fila, mapa
+    return None, {}
+
+
+def _hoja_del_reporte(ruta, buscadas):
+    """Los datos no siempre están en la primera hoja de un archivo ya trabajado."""
+    libro = openpyxl.load_workbook(ruta, data_only=True)
+    for hoja in libro.worksheets:
+        inicio, mapa = _encabezados(hoja, buscadas)
+        if inicio is not None:
+            return hoja, inicio, mapa
     raise FormatoNoReconocido("No se encontró la fila de encabezados.")
 
 
@@ -113,20 +127,19 @@ def _fecha_redeban(valor):
 def _cobro(fila, avisos, **campos):
     """Arma el cobro, o avisa y lo deja por fuera. Nada se descarta en silencio."""
     montos = {k: campos[k] for k in ("bruto", "comision", "retenciones", "prestamo", "neto")}
-    if any(v is None or v < 0 for v in montos.values()):
-        avisos.append(f"Fila {fila}: valores que no se entienden o negativos; no se cuenta.")
+    if any(v is None for v in montos.values()):
+        avisos.append(f"Fila {fila}: valores que no se entienden; no se cuenta.")
         return None
     return campos
 
 
 def leer_bold(ruta, puntos):
     """Devuelve (cobros, avisos). Solo cuentan los COBRO EXITOSO."""
-    hoja = openpyxl.load_workbook(ruta, data_only=True, read_only=False).worksheets[0]
-    inicio, mapa = _encabezados(hoja, {"NOMBRE DEL DATÁFONO"})
+    hoja, inicio, mapa = _hoja_del_reporte(ruta, {"NOMBRE DEL DATÁFONO"})
     col = _columnas(mapa, COLUMNAS_BOLD, "Bold", OPCIONALES_BOLD)
     por_nombre = {str(k).strip().upper(): v for k, v in puntos.get("bold", {}).items()}
 
-    cobros, avisos, omitidas, desconocidos = [], [], 0, set()
+    cobros, avisos, omitidas, desconocidos, raras = [], [], 0, set(), 0
     for f in range(inicio + 1, hoja.max_row + 1):
         celda = lambda campo: hoja.cell(f, col[campo]).value  # noqa: E731
         datafono, fecha = celda("datafono"), celda("fecha")
@@ -137,12 +150,17 @@ def leer_bold(ruta, puntos):
             if operacion is not None and str(operacion).strip().upper() != "COBRO EXITOSO":
                 omitidas += 1
                 continue
+        # Un archivo ya trabajado puede traer totales o encabezados repetidos en medio.
+        try:
+            dia, hora = _fecha_y_hora(fecha)
+        except ValueError:
+            raras += 1
+            continue
         nombre = str(datafono).strip().upper().rstrip(".").strip()
         punto = por_nombre.get(nombre)
         if punto is None:
             desconocidos.add(str(datafono).strip())
             continue
-        dia, hora = _fecha_y_hora(fecha)
         partes = [_pesos(celda(c)) for c in ("retefuente", "reteiva", "reteica")]
         comisiones = [_pesos(celda(c)) for c in ("comision_pct", "comision_fija")]
         franquicia = celda("franquicia") if col["franquicia"] else None
@@ -159,17 +177,18 @@ def leer_bold(ruta, puntos):
         avisos.append(f"{omitidas} operación(es) que no son COBRO EXITOSO no se cuentan.")
     if desconocidos:
         avisos.append("Datáfonos sin punto asignado, no se cuentan: " + ", ".join(sorted(desconocidos)) + ".")
+    if raras:
+        avisos.append(f"{raras} fila(s) sin fecha válida, como totales, no se cuentan.")
     return cobros, avisos
 
 
 def leer_redeban(ruta, puntos):
     """Devuelve (cobros, avisos). Redeban trae fecha pero no hora."""
-    hoja = openpyxl.load_workbook(ruta, data_only=True, read_only=False).worksheets[0]
-    inicio, mapa = _encabezados(hoja, {"CODIGO ESTABLECIMIENTO"})
+    hoja, inicio, mapa = _hoja_del_reporte(ruta, {"CODIGO ESTABLECIMIENTO"})
     col = _columnas(mapa, COLUMNAS_REDEBAN, "Redeban")
     por_codigo = {str(k)[-2:]: v for k, v in puntos.get("redeban", {}).items()}
 
-    cobros, avisos, desconocidos = [], [], set()
+    cobros, avisos, desconocidos, raras = [], [], set(), 0
     for f in range(inicio + 1, hoja.max_row + 1):
         celda = lambda campo: hoja.cell(f, col[campo]).value  # noqa: E731
         establecimiento, franquicia = celda("establecimiento"), celda("franquicia")
@@ -180,20 +199,30 @@ def leer_redeban(ruta, puntos):
         if punto is None:
             desconocidos.add(codigo)
             continue
-        # Redeban trae comisión y retenciones en negativo.
+        try:
+            fecha = _fecha_redeban(celda("fecha"))
+        except ValueError:
+            raras += 1
+            continue
+        # Redeban trae comisión y retenciones en negativo. En una reversión vienen en
+        # positivo porque las devuelve: para Tino restan, igual que la venta.
+        bruto = _pesos(celda("total"))
+        signo = -1 if bruto is not None and bruto < 0 else 1
         comision = _pesos(celda("comision"))
         partes = [_pesos(celda(c)) for c in ("retefuente", "reteiva", "reteica")]
-        cobro = _cobro(f, avisos, fecha=_fecha_redeban(celda("fecha")), hora=None, punto=punto,
+        cobro = _cobro(f, avisos, fecha=fecha, hora=None, punto=punto,
                        proveedor="redeban", franquicia=str(franquicia).strip().upper(),
-                       bruto=_pesos(celda("total")),
-                       comision=None if comision is None else abs(comision),
-                       retenciones=None if None in partes else sum(abs(p) for p in partes),
+                       bruto=bruto,
+                       comision=None if comision is None else signo * abs(comision),
+                       retenciones=None if None in partes else signo * sum(abs(p) for p in partes),
                        prestamo=0, neto=_pesos(celda("neto")))
         if cobro:
             cobros.append(cobro)
     if desconocidos:
         avisos.append("Establecimientos sin punto asignado, no se cuentan: "
                       + ", ".join(sorted(desconocidos)) + ".")
+    if raras:
+        avisos.append(f"{raras} fila(s) sin fecha válida, como totales, no se cuentan.")
     return cobros, avisos
 
 
@@ -202,7 +231,8 @@ def leer(ruta, puntos):
     # read_only deja el archivo abierto, y en Windows eso lo bloquea: hay que cerrarlo.
     libro = openpyxl.load_workbook(ruta, data_only=True, read_only=True)
     try:
-        filas = list(libro.worksheets[0].iter_rows(min_row=1, max_row=8, values_only=True))
+        filas = [fila for hoja in libro.worksheets
+                 for fila in hoja.iter_rows(min_row=1, max_row=8, values_only=True)]
     finally:
         libro.close()
     for fila in filas:
@@ -212,3 +242,20 @@ def leer(ruta, puntos):
         if "CODIGO ESTABLECIMIENTO" in texto and "FRANQUICIA" in texto:
             return leer_redeban(ruta, puntos)
     raise FormatoNoReconocido("El archivo no parece un reporte de Bold ni de Redeban.")
+
+
+def unir_reportes(lotes):
+    """Une reportes que se traslapan sin contar dos veces.
+
+    El mismo mes suele estar descargado varias veces, a veces incompleto. Para cada día
+    de cada proveedor se queda con el reporte que más cobros trae de ese día.
+    """
+    mejor = {}
+    for cobros in lotes:
+        por_dia = {}
+        for c in cobros:
+            por_dia.setdefault((c["proveedor"], c["fecha"]), []).append(c)
+        for clave, delDia in por_dia.items():
+            if clave not in mejor or len(delDia) > len(mejor[clave]):
+                mejor[clave] = delDia
+    return [c for clave in sorted(mejor) for c in mejor[clave]]

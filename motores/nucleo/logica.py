@@ -215,6 +215,8 @@ def _redondear(a, b):
     """División entera redondeada. Nunca pasa por float."""
     if b == 0:
         return 0
+    if a < 0:
+        return -_redondear(-a, b)
     q, r = divmod(a, b)
     return q + 1 if 2 * r >= b else q
 
@@ -228,7 +230,8 @@ def _grupos(cobros, clave_de):
             continue
         g = grupos.setdefault(clave, {"clave": clave, "cobros": 0, "bruto": 0, "comision": 0,
                                       "retenciones": 0, "prestamo": 0, "neto": 0})
-        g["cobros"] += 1
+        # Una reversión resta plata, pero no es una venta.
+        g["cobros"] += 1 if c["bruto"] >= 0 else 0
         for campo in ("bruto", "comision", "retenciones", "prestamo", "neto"):
             g[campo] += c[campo]
     for g in grupos.values():
@@ -270,7 +273,7 @@ def estadisticas_ventas(cobros):
                                   "prestamo": 0, "neto": 0, "ticket_promedio": 0}
     fechas = {c["fecha"] for c in cobros}
     totales = {k: v for k, v in total.items() if k != "clave"}
-    totales.update(ticket_mediano=_mediana([c["bruto"] for c in cobros]), dias=len(fechas),
+    totales.update(ticket_mediano=_mediana([c["bruto"] for c in cobros if c["bruto"] >= 0]), dias=len(fechas),
                    promedio_por_dia=_redondear(total["bruto"], len(fechas)))
 
     semana = [{"clave": i, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0} for i in range(7)]

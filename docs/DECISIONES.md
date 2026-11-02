@@ -145,6 +145,7 @@ impide que dos códigos activos compartan los últimos 4 dígitos, que es lo que
 cruce: si no, un pago caería en el punto equivocado sin que nadie lo note.
 
 ### D-027 · El descuento de Bold es configuración de cada empresa
+Reemplazada por D-029: el porcentaje resultó innecesario.
 2 nov 2026. Jacobo aclaró que el 10 % es la cuota de un préstamo de Milagros con Bold,
 no una comisión. Por eso no va fijo en el código: vive en
 `empresa_config.bold_porcentajes_deposito`, que por defecto solo acepta el 100 %.
@@ -160,6 +161,12 @@ las usa solo Milagros, así que no pasan a Tino. De esos reportes se aprovechan 
 datos para un tablero con estadísticas descriptivas. `docs/DESIGN.md` pide evitar
 gráficas que haya que interpretar: por eso son solo barras simples, cada una con su
 tabla, y lo que no se entienda de un vistazo no entra.
+
+### D-029 · El préstamo de Bold se lee del reporte, no se configura
+2 nov 2026. Reemplaza a D-027. El reporte trae `DEDUCCIÓN DEL PRÉSTAMO` por cobro y su
+depósito ya viene descontado. Contra el extracto de septiembre, ningún bloque necesitó
+el 90 %. Por eso `empresa_config.bold_porcentajes_deposito` salió de 0001 antes de
+aplicarla: era un parche para un dato que el reporte ya trae exacto.
 
 ## Pendientes
 

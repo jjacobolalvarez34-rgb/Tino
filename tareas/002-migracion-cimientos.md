@@ -22,7 +22,7 @@ y perfiles de fuente, con la separación entre empresas probada.
 - `docs/MODELO_DATOS.md`, `db/migrations/0001_cimientos.sql`
 
 ## Hecho cuando
-- Las 93 pruebas de `tests/rls/0001_pruebas.sql` pasan en local.
+- Las 88 pruebas de `tests/rls/0001_pruebas.sql` pasan en local.
 - En Supabase, un usuario de la empresa A no ve nada de la empresa B.
 - Un cambio en un punto de venta aparece en `auditoria`.
 
@@ -37,13 +37,13 @@ y perfiles de fuente, con la separación entre empresas probada.
 
 ### Avance del 2 nov 2026
 - Jacobo aprobó corregir 0001 antes de aplicarla (D-018). Pasos 1 a 3 hechos: 0001
-  corregida y 93 pruebas en verde en Postgres 16.3. Quedan 16 tablas con RLS, 45
+  corregida y 88 pruebas en verde en Postgres 16.3. Quedan 16 tablas con RLS, 45
   políticas y 17 triggers.
 - Se comprobó que las pruebas sirven: se quitó cada corrección, una por una, en una
   copia, y la suite falló cada vez.
 - Sigue el paso 4 (Jacobo lee la migración) y después el paso 5 en `tino-pruebas`.
   H-05 y H-06 quedaron decididos (D-025) y 0001 ya funciona así.
-- 0001 ya incluye `codigo_recaudo` (D-026) y el porcentaje del depósito de Bold (D-027).
+- 0001 ya incluye `codigo_recaudo` (D-026). El porcentaje de Bold salió (D-029).
 
 ### Plan propuesto (2 nov 2026): espera la aprobación de Jacobo
 

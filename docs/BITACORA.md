@@ -15,6 +15,35 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Lector probado contra todo el historial de reportes
+Hecho:
+- Con permiso de Jacobo, el lector pasó por 142 reportes de Bold y Redeban, de mayo de
+  2025 a septiembre de 2026, comparados contra `core.py`. Los fallos enseñaron más que
+  los aciertos, y quedaron corregidos con su prueba:
+  - Las `REVERSION` de Redeban son ventas devueltas y restan. Antes se descartaban y se
+    sumaba de más. Entraron al contrato y a los dos lenguajes.
+  - El formato anterior de Bold usa `ESTADO ACTUAL` en vez de `OPERACIÓN`. Sin leerla, un
+    `COBRO NO REALIZADO` contaba como venta. **El conciliador actual tiene ese error**: no
+    se corrigió ahí, porque es la referencia.
+  - Encabezados repetidos a la derecha, datos en otra hoja, y totales o encabezados en
+    medio de los datos ya no tumban el lector.
+- `unir_reportes` evita contar dos veces cuando un mes está descargado varias veces.
+- El tablero ya tiene filtro por mes y una gráfica por mes para ver todo el periodo.
+- Depósitos de Bold de septiembre contra el extracto: ningún bloque necesitó el 90 %, así
+  que `bold_porcentajes_deposito` salió de 0001 (D-029). 88 pruebas de permisos en verde.
+- El computador se crasheó con C: al 99 %, con dos procesos pesados a la vez. Nada se
+  perdió. Se agregó la regla de trabajar solo en D: en `CLAUDE.md`.
+Falta:
+- Terminar la comparación de depósitos de Bold contra todos los extractos: se cortó con
+  el crasheo.
+Dudas:
+- Dos bloques de septiembre llegaron con menos de lo que dice el reporte. Uno coincide
+  exacto con un descuento de préstamo; puede ser casualidad. El otro no tiene explicación.
+- El préstamo es una cuota mensual: Bold retiene el 10 % del depósito hasta completarla.
+  Agosto y septiembre traen un valor idéntico que no es capital ni intereses, y va primero.
+  El reporte no dice qué es. Jacobo puede verlo en el contrato del préstamo.
+- Tres nombres de datáfono de 2025 sin punto asignado. Jacobo debe decir de quién son.
+
 ## 2026-11-02 · Primera prueba con reportes reales de Bold y Redeban
 Hecho:
 - Con permiso de Jacobo, se leyeron los reportes de septiembre de Bold y Redeban en su
