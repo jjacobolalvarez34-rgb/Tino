@@ -365,6 +365,7 @@ export type Cobro = {
   bruto: number;
   comision: number;
   retenciones: number;
+  prestamo: number;
   neto: number;
 };
 export type Grupo<T> = {
@@ -373,6 +374,7 @@ export type Grupo<T> = {
   bruto: number;
   comision: number;
   retenciones: number;
+  prestamo: number;
   neto: number;
   ticket_promedio: number;
 };
@@ -418,13 +420,23 @@ function agrupar<T extends string | number>(
     if (clave === null) continue;
     let grupo = grupos.get(clave);
     if (grupo === undefined) {
-      grupo = { clave, cobros: 0, bruto: 0, comision: 0, retenciones: 0, neto: 0, ticket_promedio: 0 };
+      grupo = {
+        clave,
+        cobros: 0,
+        bruto: 0,
+        comision: 0,
+        retenciones: 0,
+        prestamo: 0,
+        neto: 0,
+        ticket_promedio: 0,
+      };
       grupos.set(clave, grupo);
     }
     grupo.cobros += 1;
     grupo.bruto += cobro.bruto;
     grupo.comision += cobro.comision;
     grupo.retenciones += cobro.retenciones;
+    grupo.prestamo += cobro.prestamo;
     grupo.neto += cobro.neto;
   }
   const salida = [...grupos.values()];
@@ -460,11 +472,12 @@ function dia_semana(fecha: string): number {
 
 export function estadisticas_ventas(cobros: Cobro[]): Estadisticas {
   const [suma] = agrupar(cobros, () => "total");
-  const { cobros: cantidad, bruto, comision, retenciones, neto, ticket_promedio } = suma ?? {
+  const { cobros: cantidad, bruto, comision, retenciones, prestamo, neto, ticket_promedio } = suma ?? {
     cobros: 0,
     bruto: 0,
     comision: 0,
     retenciones: 0,
+    prestamo: 0,
     neto: 0,
     ticket_promedio: 0,
   };
@@ -494,6 +507,7 @@ export function estadisticas_ventas(cobros: Cobro[]): Estadisticas {
       bruto,
       comision,
       retenciones,
+      prestamo,
       neto,
       ticket_promedio,
       ticket_mediano: mediana(cobros.map((cobro) => cobro.bruto)),

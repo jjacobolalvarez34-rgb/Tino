@@ -169,9 +169,28 @@
   {"funcion": "punto_por_referencia", "nombre": "si se repiten gana el ultimo",
    "entrada": {"referencia": "00000001", "puntos": [{"punto": "P1", "codigo": "11110001"}, {"punto": "P2", "codigo": "22220001"}]}, "esperado": "P2"},
 
+  {"funcion": "estadisticas_ventas", "nombre": "un cobro con descuento del prestamo",
+   "entrada": {"cobros": [
+     {"fecha": "2026-09-16", "hora": 12, "punto": "P1", "proveedor": "bold", "franquicia": "VISA", "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400}]},
+   "esperado": {
+     "totales": {"cobros": 1, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400, "ticket_promedio": 100000, "ticket_mediano": 100000, "dias": 1, "promedio_por_dia": 100000},
+     "por_punto": [{"clave": "P1", "cobros": 1, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400, "ticket_promedio": 100000}],
+     "por_dia": [{"clave": "2026-09-16", "cobros": 1, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400, "ticket_promedio": 100000}],
+     "por_dia_semana": [
+       {"clave": 0, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
+       {"clave": 1, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
+       {"clave": 2, "dias": 1, "cobros": 1, "bruto": 100000, "promedio_por_dia": 100000},
+       {"clave": 3, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
+       {"clave": 4, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
+       {"clave": 5, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
+       {"clave": 6, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0}],
+     "por_hora": [{"clave": 12, "cobros": 1, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400, "ticket_promedio": 100000}],
+     "por_proveedor": [{"clave": "bold", "cobros": 1, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400, "ticket_promedio": 100000}],
+     "por_franquicia": [{"clave": "VISA", "cobros": 1, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 9600, "neto": 86400, "ticket_promedio": 100000}],
+     "sin_hora": 0, "dia_pico": "2026-09-16", "hora_pico": 12}},
   {"funcion": "estadisticas_ventas", "nombre": "sin cobros",
    "entrada": {"cobros": []},
-   "esperado": {"totales": {"cobros": 0, "bruto": 0, "comision": 0, "retenciones": 0, "neto": 0, "ticket_promedio": 0, "ticket_mediano": 0, "dias": 0, "promedio_por_dia": 0},
+   "esperado": {"totales": {"cobros": 0, "bruto": 0, "comision": 0, "retenciones": 0, "prestamo": 0, "neto": 0, "ticket_promedio": 0, "ticket_mediano": 0, "dias": 0, "promedio_por_dia": 0},
                 "por_punto": [], "por_dia": [],
                 "por_dia_semana": [
                   {"clave": 0, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
@@ -184,19 +203,19 @@
                 "por_hora": [], "por_proveedor": [], "por_franquicia": [], "sin_hora": 0, "dia_pico": null, "hora_pico": null}},
   {"funcion": "estadisticas_ventas", "nombre": "dos dias con Bold y Redeban",
    "entrada": {"cobros": [
-     {"fecha": "2026-10-30", "hora": 10, "punto": "P1", "proveedor": "bold", "franquicia": null, "bruto": 100000, "comision": 3000, "retenciones": 1000, "neto": 96000},
-     {"fecha": "2026-10-30", "hora": 18, "punto": "P2", "proveedor": "bold", "franquicia": null, "bruto": 50000, "comision": 1500, "retenciones": 500, "neto": 48000},
-     {"fecha": "2026-10-31", "hora": 10, "punto": "P1", "proveedor": "bold", "franquicia": null, "bruto": 30000, "comision": 900, "retenciones": 300, "neto": 28800},
-     {"fecha": "2026-10-31", "hora": null, "punto": "P3", "proveedor": "redeban", "franquicia": "VISA", "bruto": 20001, "comision": 600, "retenciones": 200, "neto": 19201}]},
+     {"fecha": "2026-10-30", "hora": 10, "punto": "P1", "proveedor": "bold", "franquicia": null, "bruto": 100000, "comision": 3000, "retenciones": 1000, "prestamo": 0, "neto": 96000},
+     {"fecha": "2026-10-30", "hora": 18, "punto": "P2", "proveedor": "bold", "franquicia": null, "bruto": 50000, "comision": 1500, "retenciones": 500, "prestamo": 0, "neto": 48000},
+     {"fecha": "2026-10-31", "hora": 10, "punto": "P1", "proveedor": "bold", "franquicia": null, "bruto": 30000, "comision": 900, "retenciones": 300, "prestamo": 0, "neto": 28800},
+     {"fecha": "2026-10-31", "hora": null, "punto": "P3", "proveedor": "redeban", "franquicia": "VISA", "bruto": 20001, "comision": 600, "retenciones": 200, "prestamo": 0, "neto": 19201}]},
    "esperado": {
-     "totales": {"cobros": 4, "bruto": 200001, "comision": 6000, "retenciones": 2000, "neto": 192001, "ticket_promedio": 50000, "ticket_mediano": 40000, "dias": 2, "promedio_por_dia": 100001},
+     "totales": {"cobros": 4, "bruto": 200001, "comision": 6000, "retenciones": 2000, "prestamo": 0, "neto": 192001, "ticket_promedio": 50000, "ticket_mediano": 40000, "dias": 2, "promedio_por_dia": 100001},
      "por_punto": [
-       {"clave": "P1", "cobros": 2, "bruto": 130000, "comision": 3900, "retenciones": 1300, "neto": 124800, "ticket_promedio": 65000},
-       {"clave": "P2", "cobros": 1, "bruto": 50000, "comision": 1500, "retenciones": 500, "neto": 48000, "ticket_promedio": 50000},
-       {"clave": "P3", "cobros": 1, "bruto": 20001, "comision": 600, "retenciones": 200, "neto": 19201, "ticket_promedio": 20001}],
+       {"clave": "P1", "cobros": 2, "bruto": 130000, "comision": 3900, "retenciones": 1300, "prestamo": 0, "neto": 124800, "ticket_promedio": 65000},
+       {"clave": "P2", "cobros": 1, "bruto": 50000, "comision": 1500, "retenciones": 500, "prestamo": 0, "neto": 48000, "ticket_promedio": 50000},
+       {"clave": "P3", "cobros": 1, "bruto": 20001, "comision": 600, "retenciones": 200, "prestamo": 0, "neto": 19201, "ticket_promedio": 20001}],
      "por_dia": [
-       {"clave": "2026-10-30", "cobros": 2, "bruto": 150000, "comision": 4500, "retenciones": 1500, "neto": 144000, "ticket_promedio": 75000},
-       {"clave": "2026-10-31", "cobros": 2, "bruto": 50001, "comision": 1500, "retenciones": 500, "neto": 48001, "ticket_promedio": 25001}],
+       {"clave": "2026-10-30", "cobros": 2, "bruto": 150000, "comision": 4500, "retenciones": 1500, "prestamo": 0, "neto": 144000, "ticket_promedio": 75000},
+       {"clave": "2026-10-31", "cobros": 2, "bruto": 50001, "comision": 1500, "retenciones": 500, "prestamo": 0, "neto": 48001, "ticket_promedio": 25001}],
      "por_dia_semana": [
        {"clave": 0, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
        {"clave": 1, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0},
@@ -206,12 +225,12 @@
        {"clave": 5, "dias": 1, "cobros": 2, "bruto": 50001, "promedio_por_dia": 50001},
        {"clave": 6, "dias": 0, "cobros": 0, "bruto": 0, "promedio_por_dia": 0}],
      "por_hora": [
-       {"clave": 10, "cobros": 2, "bruto": 130000, "comision": 3900, "retenciones": 1300, "neto": 124800, "ticket_promedio": 65000},
-       {"clave": 18, "cobros": 1, "bruto": 50000, "comision": 1500, "retenciones": 500, "neto": 48000, "ticket_promedio": 50000}],
+       {"clave": 10, "cobros": 2, "bruto": 130000, "comision": 3900, "retenciones": 1300, "prestamo": 0, "neto": 124800, "ticket_promedio": 65000},
+       {"clave": 18, "cobros": 1, "bruto": 50000, "comision": 1500, "retenciones": 500, "prestamo": 0, "neto": 48000, "ticket_promedio": 50000}],
      "por_proveedor": [
-       {"clave": "bold", "cobros": 3, "bruto": 180000, "comision": 5400, "retenciones": 1800, "neto": 172800, "ticket_promedio": 60000},
-       {"clave": "redeban", "cobros": 1, "bruto": 20001, "comision": 600, "retenciones": 200, "neto": 19201, "ticket_promedio": 20001}],
+       {"clave": "bold", "cobros": 3, "bruto": 180000, "comision": 5400, "retenciones": 1800, "prestamo": 0, "neto": 172800, "ticket_promedio": 60000},
+       {"clave": "redeban", "cobros": 1, "bruto": 20001, "comision": 600, "retenciones": 200, "prestamo": 0, "neto": 19201, "ticket_promedio": 20001}],
      "por_franquicia": [
-       {"clave": "VISA", "cobros": 1, "bruto": 20001, "comision": 600, "retenciones": 200, "neto": 19201, "ticket_promedio": 20001}],
+       {"clave": "VISA", "cobros": 1, "bruto": 20001, "comision": 600, "retenciones": 200, "prestamo": 0, "neto": 19201, "ticket_promedio": 20001}],
      "sin_hora": 1, "dia_pico": "2026-10-30", "hora_pico": 10}}
 ]

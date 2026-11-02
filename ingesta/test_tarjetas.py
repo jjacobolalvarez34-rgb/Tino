@@ -51,7 +51,7 @@ class Lector(unittest.TestCase):
         cobros, avisos = tarjetas.leer(ruta, PUNTOS)
         self.assertEqual(cobros, [{"fecha": "2026-10-30", "hora": 14, "punto": "Punto 1", "proveedor": "bold",
                                    "franquicia": None, "bruto": 100000, "comision": 2990,
-                                   "retenciones": 1827, "neto": 95183}])
+                                   "retenciones": 1827, "prestamo": 0, "neto": 95183}])
         self.assertEqual(len(avisos), 2)
 
     def test_bold_formato_clasico_sin_operacion(self):
@@ -62,6 +62,15 @@ class Lector(unittest.TestCase):
         cobros, _ = tarjetas.leer(ruta, PUNTOS)
         self.assertEqual((cobros[0]["punto"], cobros[0]["hora"], cobros[0]["neto"]), ("Punto 2", 9, 19400))
 
+    def test_bold_con_prestamo_y_franquicia(self):
+        encabezado = BOLD + ["DEDUCCIÓN DEL PRÉSTAMO", "FRANQUICIA", "NOMBRE DEL PAGADOR"]
+        ruta = libro(self.carpeta / "p.xlsx", encabezado, [
+            ["Tienda Uno", dt.datetime(2026, 9, 16, 12, 0), "COBRO EXITOSO", 0, 0, 100000, 1000, 0, 0, 3000, 0,
+             13600, 86400, 9600, "visa", "Persona Inventada"]])
+        cobros, _ = tarjetas.leer(ruta, PUNTOS)
+        self.assertEqual((cobros[0]["prestamo"], cobros[0]["franquicia"], cobros[0]["neto"]), (9600, "VISA", 86400))
+        self.assertNotIn("Persona Inventada", str(cobros))
+
     def test_redeban_sin_hora_y_con_negativos(self):
         ruta = libro(self.carpeta / "r.xlsx", REDEBAN, [
             ["0000011", "visa", "20261030", "20261102", 84000, 16000, 100000, -2500, -1500, -285, -41, 95674],
@@ -70,7 +79,7 @@ class Lector(unittest.TestCase):
         cobros, avisos = tarjetas.leer(ruta, PUNTOS)
         self.assertEqual(cobros, [{"fecha": "2026-10-30", "hora": None, "punto": "Punto 3", "proveedor": "redeban",
                                    "franquicia": "VISA", "bruto": 100000, "comision": 2500,
-                                   "retenciones": 1826, "neto": 95674}])
+                                   "retenciones": 1826, "prestamo": 0, "neto": 95674}])
         self.assertIn("99", avisos[0])
 
     def test_valor_que_no_se_entiende_no_se_cuenta_y_avisa(self):

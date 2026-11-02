@@ -227,9 +227,9 @@ def _grupos(cobros, clave_de):
         if clave is None:
             continue
         g = grupos.setdefault(clave, {"clave": clave, "cobros": 0, "bruto": 0, "comision": 0,
-                                      "retenciones": 0, "neto": 0})
+                                      "retenciones": 0, "prestamo": 0, "neto": 0})
         g["cobros"] += 1
-        for campo in ("bruto", "comision", "retenciones", "neto"):
+        for campo in ("bruto", "comision", "retenciones", "prestamo", "neto"):
             g[campo] += c[campo]
     for g in grupos.values():
         g["ticket_promedio"] = _redondear(g["bruto"], g["cobros"])
@@ -267,7 +267,7 @@ def estadisticas_ventas(cobros):
     """Estadísticas descriptivas de cobros con tarjeta."""
     suma = _grupos(cobros, lambda c: "total")
     total = suma[0] if suma else {"cobros": 0, "bruto": 0, "comision": 0, "retenciones": 0,
-                                  "neto": 0, "ticket_promedio": 0}
+                                  "prestamo": 0, "neto": 0, "ticket_promedio": 0}
     fechas = {c["fecha"] for c in cobros}
     totales = {k: v for k, v in total.items() if k != "clave"}
     totales.update(ticket_mediano=_mediana([c["bruto"] for c in cobros]), dias=len(fechas),

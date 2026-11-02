@@ -145,15 +145,16 @@ referencia (`null`) no se manda aquí, va directo a "sin identificar".
 
 ### `estadisticas_ventas` · `{cobros}` → resultado
 Estadísticas descriptivas de cobros con tarjeta. Cada cobro es
-`{fecha, hora, punto, proveedor, franquicia, bruto, comision, retenciones, neto}`.
+`{fecha, hora, punto, proveedor, franquicia, bruto, comision, retenciones, prestamo, neto}`.
 `hora` es un entero de 0 a 23, o `null` si la fuente no la trae. `franquicia` es texto
-o `null`. Los cuatro montos son enteros mayores o iguales a cero.
+o `null`. Los cinco montos son enteros mayores o iguales a cero. `prestamo` es lo que el
+proveedor le descontó a la empresa por un préstamo, y va en 0 si no hay.
 
 **División redondeada:** `redondear(a, b)` con enteros: 0 si `b` es 0. Si no, `q` es el
 cociente entero y `r` el resto, y da `q + 1` si `2 × r ≥ b`, si no `q`.
 
-Un **grupo** es `{clave, cobros, bruto, comision, retenciones, neto, ticket_promedio}`:
-`cobros` cuenta los cobros, los cuatro montos se suman, y `ticket_promedio` es
+Un **grupo** es `{clave, cobros, bruto, comision, retenciones, prestamo, neto, ticket_promedio}`:
+`cobros` cuenta los cobros, los cinco montos se suman, y `ticket_promedio` es
 `redondear(bruto, cobros)`.
 
 Devuelve:

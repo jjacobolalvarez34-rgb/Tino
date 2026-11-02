@@ -149,6 +149,10 @@ cruce: si no, un pago caería en el punto equivocado sin que nadie lo note.
 no una comisión. Por eso no va fijo en el código: vive en
 `empresa_config.bold_porcentajes_deposito`, que por defecto solo acepta el 100 %.
 Milagros usa `{100,90}` y lo quita cuando termine el préstamo. Cierra H-57.
+Actualización del mismo día: el reporte de Bold trae la columna `DEDUCCIÓN DEL PRÉSTAMO`,
+con el valor exacto de cada cobro, y `DEPOSITO EN SALDO DE VENTAS` ya viene descontado.
+Si los depósitos coinciden contra el extracto, este porcentaje sobra y se quita de 0001
+antes de aplicarla. Falta comprobarlo con el extracto de Bancolombia.
 
 ### D-028 · Tablero de ventas en vez de las hojas de Excel de Bold y Redeban
 2 nov 2026. Decisión de Jacobo. Las hojas que arma el conciliador con su plantilla

@@ -36,6 +36,8 @@ COLUMNAS_BOLD = {
     "comision_pct": ("% COMISIÓN BOLD",),
     "comision_fija": ("COMISIÓN BOLD FIJA",),
     "deposito": ("DEPOSITO EN CUENTA BOLD", "DEPOSITO EN SALDO DE VENTAS"),
+    "prestamo": ("DEDUCCIÓN DEL PRÉSTAMO",),
+    "franquicia": ("FRANQUICIA",),
 }
 COLUMNAS_REDEBAN = {
     "establecimiento": ("CODIGO ESTABLECIMIENTO",),
@@ -48,7 +50,9 @@ COLUMNAS_REDEBAN = {
     "reteica": ("VALOR RTE ICA",),
     "neto": ("VALOR NETO",),
 }
-OPCIONALES = {"operacion"}
+# Bold cambia de formato: estas columnas no siempre vienen. Solo se leen las de plata;
+# el nombre y el documento de quien paga se quedan en el archivo.
+OPCIONALES_BOLD = {"operacion", "prestamo", "franquicia"}
 
 
 def _pesos(valor):
@@ -72,11 +76,11 @@ def _encabezados(hoja, buscadas):
     raise FormatoNoReconocido("No se encontró la fila de encabezados.")
 
 
-def _columnas(mapa, esperadas, fuente):
+def _columnas(mapa, esperadas, fuente, opcionales=()):
     columnas, faltan = {}, []
     for campo, nombres in esperadas.items():
         columnas[campo] = next((mapa[n] for n in nombres if n in mapa), None)
-        if columnas[campo] is None and campo not in OPCIONALES:
+        if columnas[campo] is None and campo not in opcionales:
             faltan.append(campo)
     if faltan:
         raise FormatoNoReconocido(f"El archivo de {fuente} no trae las columnas: {', '.join(faltan)}.")
@@ -108,7 +112,7 @@ def _fecha_redeban(valor):
 
 def _cobro(fila, avisos, **campos):
     """Arma el cobro, o avisa y lo deja por fuera. Nada se descarta en silencio."""
-    montos = {k: campos[k] for k in ("bruto", "comision", "retenciones", "neto")}
+    montos = {k: campos[k] for k in ("bruto", "comision", "retenciones", "prestamo", "neto")}
     if any(v is None or v < 0 for v in montos.values()):
         avisos.append(f"Fila {fila}: valores que no se entienden o negativos; no se cuenta.")
         return None
@@ -119,7 +123,7 @@ def leer_bold(ruta, puntos):
     """Devuelve (cobros, avisos). Solo cuentan los COBRO EXITOSO."""
     hoja = openpyxl.load_workbook(ruta, data_only=True, read_only=False).worksheets[0]
     inicio, mapa = _encabezados(hoja, {"NOMBRE DEL DATÁFONO"})
-    col = _columnas(mapa, COLUMNAS_BOLD, "Bold")
+    col = _columnas(mapa, COLUMNAS_BOLD, "Bold", OPCIONALES_BOLD)
     por_nombre = {str(k).strip().upper(): v for k, v in puntos.get("bold", {}).items()}
 
     cobros, avisos, omitidas, desconocidos = [], [], 0, set()
@@ -141,10 +145,13 @@ def leer_bold(ruta, puntos):
         dia, hora = _fecha_y_hora(fecha)
         partes = [_pesos(celda(c)) for c in ("retefuente", "reteiva", "reteica")]
         comisiones = [_pesos(celda(c)) for c in ("comision_pct", "comision_fija")]
-        cobro = _cobro(f, avisos, fecha=dia, hora=hora, punto=punto, proveedor="bold", franquicia=None,
+        franquicia = celda("franquicia") if col["franquicia"] else None
+        cobro = _cobro(f, avisos, fecha=dia, hora=hora, punto=punto, proveedor="bold",
+                       franquicia=str(franquicia).strip().upper() if franquicia else None,
                        bruto=_pesos(celda("total")),
                        comision=None if None in comisiones else sum(comisiones),
                        retenciones=None if None in partes else sum(partes),
+                       prestamo=_pesos(celda("prestamo")) if col["prestamo"] else 0,
                        neto=_pesos(celda("deposito")))
         if cobro:
             cobros.append(cobro)
@@ -181,7 +188,7 @@ def leer_redeban(ruta, puntos):
                        bruto=_pesos(celda("total")),
                        comision=None if comision is None else abs(comision),
                        retenciones=None if None in partes else sum(abs(p) for p in partes),
-                       neto=_pesos(celda("neto")))
+                       prestamo=0, neto=_pesos(celda("neto")))
         if cobro:
             cobros.append(cobro)
     if desconocidos:

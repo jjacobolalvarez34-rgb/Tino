@@ -190,12 +190,14 @@ tr.total td{font-weight:800;border-bottom:0}
 
     const cifra = (etiqueta, valor, ayuda) => `<div class="tarjeta cifra"><span class="etiqueta">${etiqueta}</span><span class="valor">${valor}</span><span class="pequeno">${ayuda}</span></div>`;
     $('cifras').innerHTML = cifra('Vendido', pesos(t.bruto), `${miles(t.cobros)} cobros`)
-      + cifra('Llegó al banco', pesos(t.neto), `Comisiones ${pesos(t.comision)} · retenciones ${pesos(t.retenciones)}`)
+      + cifra('Llegó al banco', pesos(t.neto), `Comisiones ${pesos(t.comision)} · retenciones ${pesos(t.retenciones)}`
+        + (t.prestamo ? ` · préstamo ${pesos(t.prestamo)}` : ''))
       + cifra('Promedio por día', pesos(t.promedio_por_dia), v.dia_pico ? `Mejor día: ${fechaCorta(v.dia_pico)}` : 'Sin datos')
       + cifra('Venta típica', pesos(t.ticket_mediano), `Promedio ${pesos(t.ticket_promedio)}`);
 
-    const filas = v.por_punto.map((g) => `<tr><td><b>${escapar(g.clave)}</b></td><td class="d">${miles(g.cobros)}</td><td class="d">${miles(g.bruto)}</td><td class="d">${miles(g.ticket_promedio)}</td><td class="d">${miles(g.comision)}</td><td class="d">${miles(g.retenciones)}</td><td class="d"><b>${miles(g.neto)}</b></td></tr>`).join('');
-    $('tabla-puntos').innerHTML = `<table style="min-width:640px"><thead><tr><th>Punto</th><th class="d">Cobros</th><th class="d">Vendido</th><th class="d">Promedio</th><th class="d">Comisión</th><th class="d">Retenciones</th><th class="d">Neto</th></tr></thead><tbody>${filas}<tr class="total"><td>Total</td><td class="d">${miles(t.cobros)}</td><td class="d">${miles(t.bruto)}</td><td class="d">${miles(t.ticket_promedio)}</td><td class="d">${miles(t.comision)}</td><td class="d">${miles(t.retenciones)}</td><td class="d">${miles(t.neto)}</td></tr></tbody></table>`;
+    const conPrestamo = t.prestamo > 0;
+    const filas = v.por_punto.map((g) => `<tr><td><b>${escapar(g.clave)}</b></td><td class="d">${miles(g.cobros)}</td><td class="d">${miles(g.bruto)}</td><td class="d">${miles(g.ticket_promedio)}</td><td class="d">${miles(g.comision)}</td><td class="d">${miles(g.retenciones)}</td>${conPrestamo ? `<td class="d">${miles(g.prestamo)}</td>` : ''}<td class="d"><b>${miles(g.neto)}</b></td></tr>`).join('');
+    $('tabla-puntos').innerHTML = `<table style="min-width:640px"><thead><tr><th>Punto</th><th class="d">Cobros</th><th class="d">Vendido</th><th class="d">Promedio</th><th class="d">Comisión</th><th class="d">Retenciones</th>${conPrestamo ? '<th class="d">Préstamo</th>' : ''}<th class="d">Neto</th></tr></thead><tbody>${filas}<tr class="total"><td>Total</td><td class="d">${miles(t.cobros)}</td><td class="d">${miles(t.bruto)}</td><td class="d">${miles(t.ticket_promedio)}</td><td class="d">${miles(t.comision)}</td><td class="d">${miles(t.retenciones)}</td>${conPrestamo ? `<td class="d">${miles(t.prestamo)}</td>` : ''}<td class="d">${miles(t.neto)}</td></tr></tbody></table>`;
 
     const horas = v.por_hora.map((g) => ({ valor: g.bruto, corto: horaTexto(g.clave), detalle: `${horaTexto(g.clave)}\nVendido ${pesos(g.bruto)}\n${miles(g.cobros)} cobros` }));
     const anchoGrafica = (id) => $(id).clientWidth - 42;
@@ -218,9 +220,9 @@ tr.total td{font-weight:800;border-bottom:0}
 
   function copiar() {
     const v = D.vistas[actual], t = v.totales;
-    const filas = [['Punto', 'Cobros', 'Vendido', 'Promedio', 'Comision', 'Retenciones', 'Neto']]
-      .concat(v.por_punto.map((g) => [g.clave, g.cobros, g.bruto, g.ticket_promedio, g.comision, g.retenciones, g.neto]))
-      .concat([['Total', t.cobros, t.bruto, t.ticket_promedio, t.comision, t.retenciones, t.neto]]);
+    const filas = [['Punto', 'Cobros', 'Vendido', 'Promedio', 'Comision', 'Retenciones', 'Prestamo', 'Neto']]
+      .concat(v.por_punto.map((g) => [g.clave, g.cobros, g.bruto, g.ticket_promedio, g.comision, g.retenciones, g.prestamo, g.neto]))
+      .concat([['Total', t.cobros, t.bruto, t.ticket_promedio, t.comision, t.retenciones, t.prestamo, t.neto]]);
     const texto = filas.map((f) => f.join('\t')).join('\n');
     const avisa = (m) => { const a = $('anuncio'); a.textContent = m; a.classList.add('ver'); setTimeout(() => a.classList.remove('ver'), 2400); };
     const listo = () => avisa('Copiado. Péguelo en Excel: quedan números que se pueden sumar.');

@@ -31,15 +31,20 @@ def reporte_bold(ruta, r):
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.append(["NOMBRE DEL DATÁFONO", "FECHA", "OPERACIÓN", "VALOR TOTAL", "VALOR RETE FUENTE", "VALOR RETE IVA",
-               "VALOR RETE ICA", "% COMISIÓN BOLD", "COMISIÓN BOLD FIJA", "DEPOSITO EN CUENTA BOLD"])
+               "VALOR RETE ICA", "% COMISIÓN BOLD", "COMISIÓN BOLD FIJA", "DEPOSITO EN CUENTA BOLD",
+               "DEDUCCIÓN DEL PRÉSTAMO", "FRANQUICIA"])
     for dia in range(DIAS):
         fecha = INICIO + dt.timedelta(days=dia)
         for datafono, fuerza in (("Datafono A", 26), ("Datafono B", 18), ("Datafono C", 13)):
             for _ in range(int(fuerza * PESO_SEMANA[fecha.weekday()] * r.uniform(0.75, 1.25))):
                 valor = r.choice(VALORES)
                 comision, rf, ri, rc = valor * 299 // 10000, valor * 15 // 1000, valor * 3 // 1000, valor * 4 // 1000
+                # Algunos días, un préstamo inventado descuenta parte de cada depósito.
+                prestamo = valor // 10 if 16 <= fecha.day <= 21 else 0
                 ws.append([datafono, dt.datetime.combine(fecha, dt.time(r.choice(HORAS), r.randint(0, 59))),
-                           "COBRO EXITOSO", valor, rf, ri, rc, comision, 0, valor - comision - rf - ri - rc])
+                           "COBRO EXITOSO", valor, rf, ri, rc, comision, 0,
+                           valor - comision - rf - ri - rc - prestamo, prestamo,
+                           r.choice(["VISA", "MASTERCARD"])])
     wb.save(ruta)
 
 

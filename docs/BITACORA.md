@@ -15,6 +15,33 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Primera prueba con reportes reales de Bold y Redeban
+Hecho:
+- Con permiso de Jacobo, se leyeron los reportes de septiembre de Bold y Redeban en su
+  PC. El tablero real y `puntos.json` quedaron en `D:\Repositorios\Tino-datos\`, fuera
+  del repositorio. No se abrieron los archivos de Siigo ni el PDF del banco.
+- Contra `core.py` sobre los mismos archivos: mismos cobros, vendido idéntico y neto
+  casi igual. Cada cobro cuadra con máximo 2 pesos de diferencia por redondeo.
+- Los datos reales mostraron algo que los inventados no podían: el reporte de Bold trae
+  `DEDUCCIÓN DEL PRÉSTAMO`, `ABONO A CAPITAL` e `INTERESES`. El préstamo ahora es un campo
+  propio en el contrato, los dos lenguajes y el tablero. 67 casos y 0 diferencias.
+- Bold también trae `FRANQUICIA`, y el tablero ya la lee.
+- Se revisó que ningún nombre, documento, número de tarjeta ni código de autorización
+  haya llegado al tablero real.
+Falta:
+- Comprobar los depósitos contra el extracto: decide si `bold_porcentajes_deposito`
+  sobra (D-027). Necesita permiso para abrir el PDF del banco.
+Dudas:
+- `ABONO A CAPITAL` más `INTERESES` no suman toda la `DEDUCCIÓN DEL PRÉSTAMO`. ¿Qué es lo demás?
+- El reporte de Redeban va por fecha de consignación, así que "septiembre" trae cobros
+  del 31 de agosto y deja por fuera los últimos días. Comparar meses exige otro corte.
+- Un punto no aparece en ningún reporte. ¿Pasa tarjetas por otro lado?
+- Varios puntos de Bold tienen muy pocos cobros en el mes. Jacobo debe confirmar si es normal.
+- `TIPO TARJETA` sí distingue débito y crédito, aunque el conciliador dice que no. Serviría
+  para comparar contra las listas de débito y crédito del Excel por separado.
+- Los reportes de Bold traen nombres y documentos de clientes. No se leen, y por eso esos
+  archivos no entran al repositorio aunque sea público (D-020, H-49).
+
 ## 2026-11-02 · Tablero de ventas con tarjeta
 Hecho:
 - Lector de Bold y Redeban en `ingesta/tarjetas.py`, en pesos enteros. Lo que no entiende
