@@ -83,5 +83,11 @@ quiere entender cada decisión, no solo recibir código.
 
 - Probar migraciones y permisos en un Postgres local (nunca en Supabase):
   `./tests/rls/correr.sh "postgresql://postgres@localhost:5432/postgres"`
+- Probar el núcleo en Python, desde `motores/`:
+  `python -m unittest nucleo.test_casos`
+- Probar el núcleo en TypeScript:
+  `node --experimental-strip-types --test motores/nucleo_ts/test_casos.test.ts`
+- Exigir que los dos lenguajes den lo mismo:
+  `python motores/comparar_lenguajes.py`
 - [POR COMPLETAR en la tarea 001: aplicar migraciones en Supabase y levantar el
-  panel.]
+  programa.]

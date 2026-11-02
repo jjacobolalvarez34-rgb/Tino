@@ -162,6 +162,7 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 | Acción | Dueño | Encargada | Finanzas | Asesora | Soporte |
 | --- | --- | --- | --- | --- | --- |
 | Ver datos de su empresa | Todo | Todo | Todo | Su punto y maestros | Todo |
+| Ver la lista de usuarios | Sí | Sí | No | No | Sí |
 | Editar maestros | Sí | Sí | No | No | Sí |
 | Configurar perfiles de fuente | Sí | No | No | No | Sí |
 | Subir archivos | Sí | Sí | Sí | No | Sí |

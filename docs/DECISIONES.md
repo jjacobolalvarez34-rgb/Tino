@@ -63,6 +63,8 @@ asesora. La tabla `venta` acepta ambos; `venta_detalle` se llena solo cuando hay
 detalle.
 
 ### D-014 · App nativa en una fase posterior
+Reemplazada en parte por D-023: primero va el `.exe`. Sigue en pie que la app no se
+construye todavía y que la venta inicial no depende de ella.
 30 oct 2026. La app actual no convenció por lenta. La venta inicial no depende de
 la app: el sistema lee los Excels que ya existen. La app nativa (Expo) guardará
 en el celular los últimos días de su punto como respaldo.
@@ -111,12 +113,31 @@ código": trae los puntos y sus códigos.
 2 nov 2026. Decisión de Jacobo. `tino-produccion` se crea después. Cambia lo que
 pedía la tarea 001.
 
-## Pendientes
+### D-022 · La lógica de la plata existe en Python y en TypeScript
+2 nov 2026. Decisión de Jacobo, que cierra P-001. Python mueve el `.exe` y conserva
+lo que ya funciona. TypeScript queda construido desde ya para que pasar a la web no
+sea empezar de cero. El riesgo es que los dos lleguen a dar resultados distintos, y
+por eso `motores/CONTRATO.md` define cada función, los dos corren los mismos casos
+y `motores/comparar_lenguajes.py` exige que coincidan. Costo: cada cambio de lógica
+se hace dos veces.
 
-### P-001 · Lenguaje de importadores y motores
-Si el conciliador actual está en Python, los motores siguen en Python como un
-proceso programado, y el panel va en TypeScript. Si está en TypeScript, todo va
-en TypeScript. Decidir al traer el conciliador al repositorio.
+### D-023 · Primero un `.exe`; la web y el celular después
+2 nov 2026. Decisión de Jacobo. Programa de escritorio en Python con pantallas
+HTML, CSS y JavaScript, como el conciliador actual. Supabase sigue siendo la fuente
+de verdad (D-003). La llave de servicio no va dentro del `.exe`: cualquiera podría
+sacarla. El programa entra con el usuario de cada persona, así que RLS aplica
+siempre. Se pierde por ahora: celular, Mac y que el cruce corra solo.
+
+### D-024 · La fase 1 revisa a la mañana siguiente
+2 nov 2026. Confirmado por Jacobo. Se revisa el día anterior con el Excel, el
+extracto, Siigo, Bold y Redeban, como hace hoy el conciliador. Sin app y sin cierre
+del día. La verificación en minutos llega con el lector de correos.
+
+### D-025 · Permisos de finanzas y soporte
+2 nov 2026. Decisión de Jacobo. Finanzas no ve la lista de usuarios. Soporte usa una
+cuenta por empresa, y eso se cambia al llegar el segundo cliente (ver P-002).
+
+## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?
 Un contador podría atender a varias empresas. Hoy cada usuario pertenece a una

@@ -22,7 +22,7 @@ y perfiles de fuente, con la separación entre empresas probada.
 - `docs/MODELO_DATOS.md`, `db/migrations/0001_cimientos.sql`
 
 ## Hecho cuando
-- Las 79 pruebas de `tests/rls/0001_pruebas.sql` pasan en local.
+- Las 80 pruebas de `tests/rls/0001_pruebas.sql` pasan en local.
 - En Supabase, un usuario de la empresa A no ve nada de la empresa B.
 - Un cambio en un punto de venta aparece en `auditoria`.
 
@@ -37,12 +37,12 @@ y perfiles de fuente, con la separación entre empresas probada.
 
 ### Avance del 2 nov 2026
 - Jacobo aprobó corregir 0001 antes de aplicarla (D-018). Pasos 1 a 3 hechos: 0001
-  corregida y 79 pruebas en verde en Postgres 16.3. Quedan 15 tablas con RLS, 42
+  corregida y 80 pruebas en verde en Postgres 16.3. Quedan 15 tablas con RLS, 42
   políticas y 16 triggers.
 - Se comprobó que las pruebas sirven: se quitó cada corrección, una por una, en una
   copia, y la suite falló cada vez.
 - Sigue el paso 4 (Jacobo lee la migración) y después el paso 5 en `tino-pruebas`.
-  H-05 y H-06 siguen abiertos: 0001 deja lo más restrictivo mientras se deciden.
+  H-05 y H-06 quedaron decididos (D-025) y 0001 ya funciona así.
 - Abierto de 0001: el código de pago por punto (H-52) puede cambiar el modelo antes
   de aplicar. Conviene decidirlo en el paso 4.
 

@@ -1,0 +1,222 @@
+# -*- coding: utf-8 -*-
+"""Núcleo de cálculo: la lógica que decide sobre la plata.
+
+Implementa motores/CONTRATO.md. Solo pesos enteros, sin leer archivos ni base de
+datos, y sin valores fijos: tolerancias y porcentajes llegan como parámetro.
+La misma lógica vive en motores/nucleo_ts/. Si cambias algo aquí, cambia primero
+el contrato y sus casos.
+"""
+import datetime as dt
+import re
+from itertools import combinations
+
+# Por encima de esto, 100 × monto deja de ser exacto en TypeScript.
+MAXIMO_PESOS = 90_000_000_000_000
+
+# \Z y no $: en Python, $ también acepta un salto de línea al final.
+_RE_PESOS = re.compile(r"^-?[0-9,]*[0-9](\.[0-9]+)?\Z", re.ASCII)
+_RE_LINEA = re.compile(
+    r"^(?P<fecha>[0-9]{4}/[0-9]{2}/[0-9]{2})\s+"
+    r"(?P<tipo>PAGO QR|PAGO LLAVE)\s+"
+    r"(?P<resto>.*)\Z", re.ASCII)
+_RE_VALOR = re.compile(
+    r"(-?[0-9.]*[0-9],[0-9]{3}(?:,[0-9]{3})*\.[0-9]{2}|-?[0-9]+\.[0-9]{2})\s*\Z", re.ASCII)
+_RE_REFERENCIA = re.compile(r"\b([0-9]{7,10})\b", re.ASCII)
+
+# Solo espacios ASCII: strip() sin argumento también quita otros, como el NBSP.
+_ESPACIOS = " \t\n\r\f\v"
+
+
+def a_pesos(texto):
+    """Texto del valor -> pesos enteros, sin pasar por float."""
+    if not _RE_PESOS.match(texto):
+        return None
+    negativo = texto.startswith("-")
+    limpio = texto.lstrip("-").replace(",", "")
+    entero, _, decimales = limpio.partition(".")
+    pesos = int(entero)
+    if decimales and decimales[0] >= "5":
+        pesos += 1
+    if pesos > MAXIMO_PESOS:
+        return None
+    return -pesos if negativo else pesos
+
+
+def restar(a, b):
+    """Empareja dos listas monto por monto, contando repeticiones."""
+    pendientes = {}
+    for item in b:
+        pendientes.setdefault(item["monto"], []).append(item)
+    sobran_a = []
+    for item in a:
+        grupo = pendientes.get(item["monto"])
+        if grupo:
+            grupo.pop()
+        else:
+            sobran_a.append(item)
+    sobran_b = [item for grupo in pendientes.values() for item in grupo]
+    return {"sobran_a": sobran_a, "sobran_b": sobran_b}
+
+
+def parecidos(a, b):
+    """¿Pudo ser un error de digitación? 35.900 vs 39.500, 36.900 o 3.590."""
+    sa, sb = str(a), str(b)
+    if sa == sb:
+        return False
+    if len(sa) == len(sb):
+        if sorted(sa) == sorted(sb):
+            return True
+        return sum(1 for x, y in zip(sa, sb) if x != y) == 1
+    return a * 10 == b or b * 10 == a
+
+
+def sobrantes_vecinos(vecinos):
+    """Lo que le sobra a los días vecinos. Usar el día entero daría falsos "llegó
+    otro día" con montos que se repiten a diario."""
+    ext_sobra, excel_sobra = [], []
+    for v in vecinos:
+        if not v["cubre"]:
+            if v["tiene_excel"]:
+                excel_sobra += v["anotado"]
+            continue
+        if not v["tiene_excel"]:
+            ext_sobra += v["externo"]
+            continue
+        r = restar(v["anotado"], v["externo"])
+        ext_sobra += r["sobran_b"]
+        excel_sobra += r["sobran_a"]
+    return {"ext_sobra": ext_sobra, "excel_sobra": excel_sobra}
+
+
+def _a_otro_dia(pendientes, vecinos, donde, otro_dia):
+    """Separa lo que aparece en un día vecino de lo que sigue sin aparecer."""
+    sigue = restar(pendientes, vecinos)["sobran_a"]
+    # Por id y no por monto: con montos repetidos, restar señalaría la fila equivocada.
+    siguen = {i["id"] for i in sigue}
+    otro_dia += [{"donde": donde, "monto": i["monto"], "id": i["id"]}
+                 for i in pendientes if i["id"] not in siguen]
+    return sigue
+
+
+def cruzar(anotado, externo, ext_vecinos, excel_vecinos):
+    """Lo anotado en el día contra lo externo (banco o datáfono)."""
+    r = restar(anotado, externo)
+    no_llegaron, no_anotadas = r["sobran_a"], r["sobran_b"]
+
+    otro_dia = []
+    if no_llegaron:
+        no_llegaron = _a_otro_dia(no_llegaron, ext_vecinos, "externo_otro_dia", otro_dia)
+    if no_anotadas:
+        no_anotadas = _a_otro_dia(no_anotadas, excel_vecinos, "anotado_otro_dia", otro_dia)
+
+    mal_digitadas = []
+    for item in list(no_llegaron):
+        par = next((x for x in no_anotadas if parecidos(item["monto"], x["monto"])), None)
+        if par:
+            mal_digitadas.append({"anotado": item, "externo": par})
+            no_llegaron.remove(item)
+            no_anotadas.remove(par)
+
+    return {"no_llegaron": no_llegaron, "no_anotadas": no_anotadas,
+            "otro_dia": otro_dia, "mal_digitadas": mal_digitadas}
+
+
+def dia_habil_siguiente(fecha, festivos):
+    d = dt.date.fromisoformat(fecha)
+    while True:
+        d += dt.timedelta(days=1)
+        # weekday(): sábado = 5, domingo = 6. El viernes sí es día hábil.
+        if d.weekday() < 5 and d.isoformat() not in festivos:
+            return d.isoformat()
+
+
+def bloques_deposito(fechas, festivos):
+    """Agrupa días de venta por el día en que se consignan."""
+    por_consignacion = {}
+    for f in set(fechas):
+        por_consignacion.setdefault(dia_habil_siguiente(f, festivos), []).append(f)
+    return [{"consignacion": c, "dias": sorted(por_consignacion[c]),
+             "grande": len(por_consignacion[c]) > 1}
+            for c in sorted(por_consignacion)]
+
+
+def coincide_deposito(banco, esperado, tolerancia, porcentajes):
+    return any(abs(100 * banco - p * esperado) <= 100 * tolerancia for p in porcentajes)
+
+
+def cruces_redeban(filas, tolerancia, max_cruce):
+    """Filas que cuadran solas, y grupos que solo cuadran juntos porque el banco
+    repartió el abono en dos fechas."""
+    salida = [{**f, "coincide": abs(f["banco"] - f["esperado"]) <= tolerancia,
+               "sin_datos": f["banco"] == 0 and f["esperado"] == 0,
+               "cruzado": False, "cruza_con": []} for f in filas]
+
+    grupos = {}
+    for i, f in enumerate(salida):
+        if not f["coincide"] and not f["sin_datos"]:
+            grupos.setdefault((f["codigo"], f["franquicia"]), []).append(i)
+
+    for indices in grupos.values():
+        if len(indices) < 2:
+            continue
+        for n in range(2, min(max_cruce, len(indices)) + 1):
+            for combo in combinations(indices, n):
+                if any(salida[i]["cruzado"] for i in combo):
+                    continue
+                banco = sum(salida[i]["banco"] for i in combo)
+                esperado = sum(salida[i]["esperado"] for i in combo)
+                if abs(banco - esperado) <= tolerancia:
+                    fechas = [salida[i]["fecha"] for i in combo]
+                    for i in combo:
+                        salida[i]["cruzado"] = True
+                        salida[i]["cruza_con"] = list(fechas)
+    return salida
+
+
+def estado_dia(descuadre, causas, tolerancia_cuadra, porcentaje_explicado, reglas_sin_peso):
+    """Las causas son hipótesis alternativas: cuenta la que más explica, no la suma."""
+    magnitud = abs(descuadre)
+    mayor = max((abs(c["monto"]) for c in causas
+                 if c["monto"] != 0 and c["regla"] not in reglas_sin_peso), default=0)
+    explicado = min(magnitud, mayor)
+    if magnitud <= tolerancia_cuadra:
+        estado = "cuadra"
+    elif 100 * explicado >= porcentaje_explicado * magnitud:
+        estado = "explicado"
+    else:
+        estado = "sin_explicar"
+    signo = 1 if descuadre >= 0 else -1
+    return {"estado": estado, "explicado": signo * explicado,
+            "sin_explicar": descuadre - signo * explicado}
+
+
+def leer_linea_transferencia(linea):
+    """Una línea del movimiento de Bancolombia: PAGO QR o PAGO LLAVE."""
+    m = _RE_LINEA.match(linea.strip(_ESPACIOS))
+    if not m:
+        return None
+    valor = _RE_VALOR.search(m.group("resto"))
+    if not valor:
+        return None
+    pesos = a_pesos(valor.group(1))
+    if pesos is None:
+        return None
+    refs = _RE_REFERENCIA.findall(m.group("resto")[:valor.start()])
+    return {"fecha": m.group("fecha").replace("/", "-"), "tipo": m.group("tipo"),
+            "referencia": refs[0] if refs else None, "valor": pesos}
+
+
+def punto_por_referencia(referencia, puntos):
+    por_ultimos4 = {p["codigo"][-4:]: p["punto"] for p in puntos}
+    return por_ultimos4.get(referencia[-4:])
+
+
+_FUNCIONES = {f.__name__: f for f in (
+    a_pesos, restar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
+    bloques_deposito, coincide_deposito, cruces_redeban, estado_dia,
+    leer_linea_transferencia, punto_por_referencia)}
+
+
+def ejecutar(funcion, entrada):
+    """Punto de entrada común con TypeScript: nombre de la función y parámetros."""
+    return _FUNCIONES[funcion](**entrada)

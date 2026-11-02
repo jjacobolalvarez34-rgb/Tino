@@ -3,9 +3,12 @@
 Los procesos que leen de la base, deciden y escriben el resultado: conciliador,
 verificador de transferencias y detector de descuadres.
 
-Estado: `conciliador/` es el programa actual, copiado sin cambiar su lógica (tarea
-001). Todavía es la app de escritorio de Milagros, no el motor del producto. El
-lenguaje definitivo depende de P-001 (`docs/DECISIONES.md`).
+- `CONTRATO.md`: qué debe hacer cada función de cálculo. Se cambia primero.
+- `nucleo/`: la lógica de la plata en Python. La usa el `.exe`.
+- `nucleo_ts/`: la misma lógica en TypeScript, lista para la web (D-022).
+- `comparar_lenguajes.py`: exige que los dos den exactamente lo mismo.
+- `conciliador/`: el programa actual de Milagros, copiado sin cambiar su lógica
+  (tarea 001). Es la referencia, no el motor del producto.
 
 ## Reglas
 
@@ -15,8 +18,9 @@ lenguaje definitivo depende de P-001 (`docs/DECISIONES.md`).
 - Lo dudoso queda como `propuesta`. Nada dudoso se confirma solo.
 - Si no hay causa clara de un descuadre, se dice "sin causa clara".
 - Dinero en pesos enteros. Comisiones y retenciones se toman de las liquidaciones.
-- Estos procesos usan la llave de servicio, que se salta RLS: cada consulta filtra
-  por `empresa_id` de forma explícita.
+- El `.exe` entra con el usuario de cada persona, nunca con la llave de servicio
+  (D-023). Un proceso de servidor que la use debe filtrar por `empresa_id` de forma
+  explícita, porque esa llave se salta RLS.
 
 ## Leer antes
 

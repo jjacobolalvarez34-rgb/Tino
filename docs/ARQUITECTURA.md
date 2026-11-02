@@ -52,7 +52,8 @@ flowchart LR
 | Conciliador | Cruza pagos reportados con movimientos reales | 80 % |
 | Verificador de transferencias | Comprobante contra aviso del banco en minutos; el extracto confirma | Nuevo |
 | Detector de descuadres | Diferencias por día, punto y medio de pago, con causa y pruebas | En progreso |
-| Panel web | Las pantallas de `docs/DESIGN.md` con datos reales | Diseñado |
+| Programa de escritorio | Las pantallas de `docs/DESIGN.md` con datos reales, en un `.exe` (D-023) | Diseñado |
+| Panel web | Las mismas pantallas en la web | Fase posterior |
 | Excel y Sheets | Copiar como números y pestañas que se llenan solas | Nuevo |
 | Alertas | Descuadres grandes y transferencias sospechosas | Nuevo |
 | Respaldo | Copia nocturna y prueba de restauración mensual | Nuevo |
@@ -63,10 +64,11 @@ flowchart LR
 | Capa | Elección | Por qué |
 | --- | --- | --- |
 | Base de datos | Supabase (Postgres) | Ya la conoces; RLS para separar empresas; autenticación incluida |
-| Panel web | Next.js con TypeScript en Vercel | Rápido de desplegar, buen soporte en Claude Code |
-| Íconos | Lucide | Igual en web y en la app nativa |
-| App nativa | Expo (React Native) con SQLite local | Un solo código para Android e iPhone; funciona sin señal |
-| Importadores y motores | [POR DECIDIR, ver P-001 en DECISIONES.md] | Depende del lenguaje del conciliador actual |
+| Programa de escritorio | Python con pywebview, empacado como `.exe` | Es como funciona el conciliador actual y no necesita servidor |
+| Panel web (después) | Next.js con TypeScript en Vercel | Rápido de desplegar, buen soporte en Claude Code |
+| Íconos | Lucide | Igual en todas las plataformas |
+| App nativa (después) | Expo (React Native) con SQLite local | Un solo código para Android e iPhone; funciona sin señal |
+| Importadores y motores | Python, con la lógica de la plata también en TypeScript | D-022; `motores/CONTRATO.md` exige que los dos den lo mismo |
 
 ## Entornos
 
@@ -108,8 +110,8 @@ tino/
   tareas/          una tarea por paso del plan
   db/migrations/   SQL numerado, nunca se edita uno aplicado
   ingesta/         importadores y perfiles
-  motores/         conciliador, verificador, descuadres
-  panel/           Next.js
+  motores/         contrato, núcleo en Python y en TypeScript, conciliador actual
+  panel/           pantallas: `.exe` primero, web después
   app/             Expo (fase posterior)
   tests/casos/     días reales anonimizados como casos de control
 ```

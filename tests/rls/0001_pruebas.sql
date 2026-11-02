@@ -279,6 +279,8 @@ select pg_temp.falla($$insert into public.perfil_fuente (empresa_id, fuente, nom
                        values ('aaaaaaaa-0000-0000-0000-000000000000', 'banco', 'x')$$,
                      '42501', 'Finanzas no configura perfiles de fuente');
 select pg_temp.ok((select count(*) from public.auditoria) = 0, 'Finanzas no ve la auditoría');
+select pg_temp.ok((select count(*) from public.usuario) = 1,
+                  'Finanzas no ve la lista de usuarios, solo a sí misma (D-025)');
 
 select pg_temp.como('a0000000-0000-0000-0000-00000000000c');
 insert into public.perfil_fuente (empresa_id, fuente, nombre)

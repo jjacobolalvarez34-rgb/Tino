@@ -1,8 +1,10 @@
 # panel
 
-El panel web para dueños, encargadas y finanzas. Next.js con TypeScript, en Vercel.
+Las pantallas para dueños, encargadas y finanzas. Primero dentro del `.exe`, con
+HTML, CSS y JavaScript sobre Python (D-023). Después en la web, con Next.js y
+TypeScript en Vercel.
 
-Estado: vacía. El proyecto de Next.js todavía no se ha creado.
+Estado: vacía. Las pantallas se construyen cuando exista `tino-pruebas`.
 
 ## Reglas
 

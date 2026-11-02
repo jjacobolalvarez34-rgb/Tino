@@ -15,6 +15,38 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Núcleo de cálculo en Python y TypeScript
+Hecho:
+- Registradas las decisiones D-022 a D-025: dos lenguajes, `.exe` primero, fase 1 a la
+  mañana siguiente, permisos de finanzas y soporte. Cierra P-001, H-05, H-06, H-27 y
+  H-53. Documentos ajustados: arquitectura, modelo, visión y comandos.
+- Tarea 005 hecha: `motores/CONTRATO.md`, núcleo en `motores/nucleo/` (Python) y
+  `motores/nucleo_ts/` (TypeScript, escrito por un agente solo desde el contrato), 12
+  funciones y 64 casos con datos inventados que corren los dos.
+- Resultados: 0 diferencias en 300.000 comparaciones entre lenguajes, incluidas
+  entradas raras a propósito. 0 diferencias en 120.000 comparaciones del Python contra
+  las funciones reales del conciliador. TypeScript pasa `tsc --strict`, corrido desde
+  una carpeta temporal porque el repositorio no lleva dependencias.
+- Se metieron 7 errores a propósito en una copia y la comparación detectó los 7.
+- El agente encontró 12 huecos del contrato. Quedaron definidos y en los dos lenguajes.
+  Uno era un error heredado del conciliador: en `cruzar`, con montos repetidos, una
+  fila salía dos veces y otra desaparecía. Los montos daban bien, pero señalaba la fila
+  equivocada. Se corrigió en el núcleo; `motores/conciliador/` sigue igual.
+- `tests/rls/0001_pruebas.sql` sube a 80 pruebas: finanzas no ve la lista de usuarios.
+
+Falta:
+- El `.exe` no existe todavía. Solo está la lógica: faltan los lectores (Excel, Bold,
+  Redeban, PDF del banco, Siigo), las reglas de nivel 1, la conexión a Supabase y las
+  pantallas.
+- Nada se ha probado con datos reales: el núcleo solo ha visto datos inventados.
+- `tino-pruebas` lo crea Jacobo. Mientras tanto no se aplica 0001.
+
+Dudas:
+- Siguen abiertas H-52 (tabla de código de pago por punto) y H-57 (el 10 % de Bold). El
+  porcentaje 90 no está fijo en el núcleo: llega como parámetro.
+- Cada cambio de lógica ahora se hace dos veces. Si TypeScript no se usa pronto, va a
+  costar mantenerlo al día.
+
 ## 2026-11-02 · Corrección de 0001 y lectura del conciliador
 Hecho:
 - 0001 corregida con el visto bueno de Jacobo (D-018): llaves foráneas con empresa,

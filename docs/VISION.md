@@ -65,4 +65,5 @@ También: la persona encargada de las finanzas y el contador del negocio.
 ## Estado
 
 Noviembre de 2026, fase 0: validar con 6 a 10 dueños antes de construir de más.
+Primero un programa de escritorio; el celular y la web vienen después (D-023).
 Las fases y sus puertas están en el plan maestro; las tareas, en `tareas/`.
