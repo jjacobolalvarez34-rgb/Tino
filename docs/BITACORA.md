@@ -15,6 +15,20 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Corrección de Cajas y Kits, y migración 0003
+Hecho:
+- Jacobo aclaró que Caja y Kit son productos distintos. Se había asumido lo contrario: las
+  Cajas quedaron sin código y los Kits son productos aparte. Nada se borró.
+- `0003_importacion.sql`: archivos y errores de importación, con hash único por empresa y
+  archivos que se deshacen sin borrarse. Probada en local. **Aún no está aplicada.**
+- Tarea 003 cerrada, con la salvedad de D-032.
+Falta:
+- Jacobo aplica 0003 en el editor SQL.
+- Jacobo apaga el registro abierto.
+- Definir la tarea 004 antes de escribir 0004.
+Dudas:
+- Falta el código de Siigo de las Cajas y de un acondicionador.
+
 ## 2026-11-02 · Milagros cargada en tino-pruebas
 Hecho:
 - Maestros de Milagros cargados: puntos, asesoras con código, alias por punto, productos,

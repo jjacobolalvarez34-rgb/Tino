@@ -119,8 +119,8 @@ se corrieron un número con 0002: el plan de abajo manda.
 | Tabla | Para qué | Migración |
 | --- | --- | --- |
 | `perfil_fuente` | Cómo leer los reportes de cada empresa: mapeo de columnas. | 0001 |
-| `archivo_importado` | Cada archivo que entra; `hash` único evita duplicar plata. | 0002 |
-| `error_importacion` | Filas que no se pudieron leer y nombres sin reconocer. | 0002 |
+| `archivo_importado` | Cada archivo que entra; `hash` único por empresa evita duplicar plata. Se deshace, no se borra. | 0003 |
+| `error_importacion` | Filas que no se pudieron leer y nombres sin reconocer, hasta que alguien los resuelva. | 0003 |
 
 ### Operación diaria
 

@@ -1,7 +1,7 @@
 # 003 · Cargar Milagros como empresa 1
 
 Paso del plan: F1 · 1.4
-Estado: en curso
+Estado: hecha, salvo los nombres cortos de D-032
 
 ## Objetivo
 Tener a Milagros completa en el proyecto de pruebas: puntos, asesoras,
@@ -40,8 +40,10 @@ productos, alias, tipos de venta, medios de pago, datáfonos y cuentas.
 - Cargada en `tino-pruebas` el 2 nov 2026 por orden de Jacobo. Verificado leyendo la base:
   conteos, códigos de asesora, configuración y auditoría. Una empresa de prueba no ve nada de
   Milagros. Correr la carga otra vez no crea nada.
-- Falta para darla por hecha: que Jacobo revise 10 alias al azar. Los nombres cortos sin
-  resolver quedan por fuera a propósito (D-032).
+- Jacobo revisó los 10 alias. Los nombres cortos sin resolver quedan por fuera a propósito
+  (D-032): aparecerán como pendientes al importar.
+- Caja y Kit son productos distintos: se corrigió la carga sin borrar nada. Las Cajas no
+  tienen código de Siigo todavía.
 - Supuesto que queda: códigos de pago vigentes desde el 1 de enero de 2026.
 
 ### Plan propuesto (2 nov 2026): espera la aprobación de Jacobo
