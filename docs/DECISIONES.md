@@ -182,6 +182,17 @@ se aplicó. Si una asesora rota, su nombre se registra también en el otro punto
 y mueven inventario; el regalo se factura a $1. Son datos de Milagros en `tipo_venta`,
 no reglas del código.
 
+### D-032 · Los nombres que nadie puede resolver quedan por resolver
+2 nov 2026. Decisión de Jacobo. Cuando el Excel dice solo un nombre corto y hay dos
+personas posibles, y ni Jacobo sabe cuál es, Tino no adivina: esos días quedan por
+resolver. Una asesora sin apellido conocido se carga con lo que se sabe. Pegarle ventas a
+la persona equivocada sería peor que dejarlo pendiente.
+
+### D-033 · La bodega no es un punto de venta
+2 nov 2026. Decisión de Jacobo. La bodega hace salidas de producto y se maneja aparte, así
+que no se carga como punto, aunque `punto_venta.tipo` lo permita. Se revisa cuando llegue
+inventario.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

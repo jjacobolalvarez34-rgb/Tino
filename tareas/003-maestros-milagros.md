@@ -1,7 +1,7 @@
 # 003 · Cargar Milagros como empresa 1
 
 Paso del plan: F1 · 1.4
-Estado: pendiente
+Estado: en curso
 
 ## Objetivo
 Tener a Milagros completa en el proyecto de pruebas: puntos, asesoras,
@@ -31,6 +31,15 @@ productos, alias, tipos de venta, medios de pago, datáfonos y cuentas.
 
 ## Notas
 - Pendiente: la lista oficial de tipos de venta de Milagros.
+
+### Avance del 2 nov 2026
+- Cargador genérico en `ingesta/maestros.py`, con simulacro por defecto y 7 pruebas sin red.
+- Asesoras leídas de Drive, solo lectura. Tipos de venta y bodega decididos (D-031, D-033).
+- Simulacro de Milagros limpio, sin avisos. El archivo queda en
+  `D:\Repositorios\Tino-datos	rabajo\maestros\`, fuera del repositorio.
+- Falta que Jacobo revise el simulacro y dé la orden de cargar.
+- Supuestos a confirmar: todos los puntos de tipo detal, y códigos de pago vigentes desde
+  el 1 de enero de 2026.
 
 ### Plan propuesto (2 nov 2026): espera la aprobación de Jacobo
 

@@ -15,6 +15,17 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Cargador de maestros y simulacro de Milagros
+Hecho:
+- `ingesta/maestros.py`: genérico, con simulacro por defecto y sin datos de ningún cliente.
+- Simulacro de Milagros contra `tino-pruebas`, solo leyendo: sin avisos. No se cargó nada.
+- Decisiones D-032 y D-033.
+Falta:
+- La orden de Jacobo para cargar.
+- Jacobo apaga el registro abierto en Authentication.
+Dudas:
+- Productos del Excel que no están en `mapeo_siigo`, y productos sin código de Siigo.
+
 ## 2026-11-02 · Asesoras leídas de Google Drive
 Hecho:
 - 0002 aplicada por Jacobo en Supabase y verificada por la API.
