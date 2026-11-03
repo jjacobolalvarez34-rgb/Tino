@@ -1,78 +1,92 @@
 # Reglas de descuadres
 
-Redactadas por Claude el 2 nov 2026. Los valores marcados ⚑ son supuestos
-razonables que Jacobo confirma contra el Excel diario real. El código los toma
-de configuración por empresa.
+Borrador del 2 nov 2026, reescrito con lo que hace el conciliador actual sobre el Excel
+diario de Milagros y lo que mostraron los datos reales. Reemplaza el borrador anterior,
+que tenía causas que nunca podían ocurrir. Jacobo lo revisa: lo que lleva ⚑ todavía es un
+supuesto.
 
 ## Supuestos a confirmar
 
 | ⚑ | Supuesto | Valor inicial | Dónde se configura |
 | --- | --- | --- | --- |
-| D1 | Diferencia mínima para marcar un descuadre | 1.000 pesos | `empresa_config.desc_umbral` |
-| D2 | Confianza mínima para proponer una causa | 0,60 | `empresa_config.desc_confianza_min` |
-| D3 | El efectivo esperado incluye la base de caja del día | Sí | Regla fija |
-| D4 | Los descuadres se calculan al cerrar el día y se recalculan cuando llega el extracto | Sí | Regla fija |
+| D1 | Hasta cuánto se considera que el día cuadra | 100 pesos | `empresa_config` (cambia el actual) |
+| D2 | Qué parte del descuadre debe explicar una causa para dar el día por explicado | 80 % | `empresa_config` (nuevo) |
+| D3 | El descuadre del día es el que calcula el Excel del punto | Sí | Regla fija |
+| D4 | Billetes que se revisan para un error de conteo | 2.000 a 100.000, hasta 3 | `empresa_config` (nuevo) |
+
+Los valores salen del conciliador actual.
 
 ## Qué es un descuadre
 
-La diferencia entre lo esperado y lo reportado en una jornada, para un medio de
-pago o para el total del día. Solo se marca si su valor absoluto supera D1.
+La diferencia entre lo que el punto **tiene** y lo que **debía tener** en el día:
+total de caja menos valor de lo vendido. **Negativo: falta plata. Positivo: sobra.** Se
+calcula por día y por punto (D3). Si es de D1 o menos, el día **cuadra**.
 
-| Medio | Esperado | Reportado |
+## Estados del día
+
+| Estado | Cuándo |
+| --- | --- |
+| Cuadra | El descuadre es de D1 o menos |
+| Explicado | La causa más fuerte explica al menos D2 del descuadre |
+| **Sin causa clara** | Nada lo explica lo suficiente. Se dice así, sin inventar |
+
+**Las causas no se suman.** Son explicaciones alternativas del mismo faltante: cuenta la
+que más explica. Sumarlas daría una explicación que no existe.
+
+## Causas
+
+Una causa trae siempre su prueba: la celda, el cobro o la línea del banco.
+
+| Causa | Cómo se detecta | ¿Cuenta para explicar? |
 | --- | --- | --- |
-| Efectivo | Base + ventas en efectivo − gastos − consignaciones − retiros | Efectivo contado al cierre |
-| Tarjeta | Pagos con tarjeta reportados por el punto | Bruto de las liquidaciones de Bold y Redeban del punto |
-| Transferencia | Transferencias reportadas por el punto | Movimientos del extracto o avisos confirmados |
-| Total del día | Suma de ventas netas (cobradas de verdad) | Suma de todo lo recibido por todos los medios |
+| Transferencia que no llegó | Anotada en el Excel y no está en el banco ese día ni los vecinos | Sí |
+| Cobrada sin anotar | Está en el banco o el datáfono y no en el Excel | Sí, si falta plata |
+| Venta con tarjeta que no aparece | Anotada y no está en el reporte de Bold o Redeban | Sí |
+| Monto mal digitado | Un monto anotado y uno real que parecen el mismo mal escrito | Sí |
+| Compensación entre días | Un día sobra y el siguiente falta un monto parecido | Sí |
+| Error de billete | El descuadre es de 1 a 3 billetes de la misma denominación (D4) | Sí |
+| Combinación de precios | El descuadre es la suma de 1 a 3 precios de productos del punto | **No**: casi cualquier monto redondo cuadra así; se muestra como pista |
 
-Diferencia = reportado − esperado. Negativa: falta plata. Positiva: sobra.
+## Señales (algo para revisar, aunque el día cuadre)
 
-## Causas y cómo se detectan
+- Consignación anotada que no aparece en el extracto de ese día ni del siguiente.
+- Unidades facturadas en Siigo que no están en el Excel, o al revés.
+- Formas de pago en Siigo que no coinciden con lo anotado.
+- Fórmulas del Excel cambiadas o corridas, y errores de planilla que se repiten. Esto es
+  propio del Excel de cada empresa: va en su lector, no en el motor.
+- Faltantes sin causa clara repetidos con la misma asesora, o descuentos, regalos y
+  devoluciones muy por encima del promedio. **Una señal dice "revisar", nunca acusa.**
 
-El motor evalúa todas las causas y se queda con la de mayor confianza. Si
-ninguna llega a D2, la causa es `sin_causa_clara`.
+## Quién trabajó el día
 
-| Código | Causa | Cómo se detecta | Confianza |
-| --- | --- | --- | --- |
-| `transf_no_llego` | La transferencia no llegó al banco | Hay comprobante del valor exacto sin aviso ni línea de extracto pasado el tiempo límite | 0,90 |
-| `otro_medio` | Se pagó por otro medio del registrado | Sobra en un medio exactamente lo que falta en otro, mismo día y punto | 0,85 |
-| `comision` | Comisión del datáfono no descontada | La diferencia es igual a la suma de comisiones y retenciones del día | 0,70 |
-| `duplicado` | Pago registrado dos veces | Dos pagos iguales, mismo medio, menos de 5 minutos de diferencia | 0,80 |
-| `digitacion` | Error al escribir un valor | La diferencia es 9 veces un dígito (dígitos invertidos) o un múltiplo de 10 de un pago (un cero de más o de menos) | 0,65 |
-| `sin_factura` | Venta sin factura en Siigo | Pago recibido sin venta registrada que lo cubra | 0,60 |
-| `faltante_efectivo` | Falta efectivo sin explicación | Diferencia solo en efectivo y ninguna causa anterior aplica | 0,60 |
-| `sin_causa_clara` | No hay explicación | Ninguna causa llega a D2 | — |
+Sale del Excel. Si dice solo un nombre corto que puede ser de dos personas, el día queda
+**por resolver**, sin pegárselo a nadie (D-032). Los días con "Domingo", "Festivo" o "No
+abrió" no tienen asesora.
 
 ## Reglas
 
-- Cada causa propuesta guarda su confianza y al menos una evidencia: el pago,
-  movimiento o venta concreto que la sustenta.
-- Si dos causas explican lo mismo, se muestra la de mayor confianza y la otra se
-  guarda como alternativa.
-- Un descuadre no se borra. Termina en uno de estos estados, siempre con nota y
-  con quién lo hizo:
-  - `explicado`: una persona confirmó la causa.
-  - `resuelto`: la plata apareció o se corrigió el registro.
-  - `aceptado`: se asume la pérdida o la diferencia.
-- Cuando llega el extracto del día siguiente (D4), los descuadres abiertos se
-  recalculan. Si la diferencia desaparece, el descuadre pasa a `resuelto` solo,
-  con la nota "Se resolvió con el extracto".
+- Un descuadre no se borra. Termina en uno de estos estados, siempre con nota y con quién
+  lo hizo: **explicado** (una persona confirmó la causa), **resuelto** (la plata apareció o
+  se corrigió el registro) o **aceptado** (se asume la diferencia).
+- Cuando llega información nueva, como el extracto o un reporte, los descuadres abiertos
+  se recalculan. Si la diferencia desaparece, pasa a resuelto con la nota "Se resolvió con
+  datos nuevos".
 - Un día con descuadres abiertos se puede cerrar, pero queda marcado.
 
 ## Casos de control
 
-Jacobo elige días de Milagros cuya causa real ya conoce, idealmente uno por
-causa. Cada caso va en `tests/casos/descuadres/AAAA-MM-DD_punto.json`:
+Jacobo elige días de Milagros cuya causa ya conoce, idealmente uno por causa, y al menos
+uno sin causa clara. Cada caso va en `tests/casos/descuadres/AAAA-MM-DD_punto.json`:
 
 ```json
 {
   "fecha": "2026-10-14",
   "punto": "P09",
-  "medio": "efectivo",
-  "diferencia_esperada": -40000,
-  "causa_esperada": "sin_causa_clara"
+  "descuadre": -40000,
+  "estado_esperado": "sin_causa_clara",
+  "causa_esperada": null
 }
 ```
 
-Criterio: el motor acierta la causa en los casos de control y nunca inventa una
-causa donde el caso dice `sin_causa_clara`.
+Criterio: el motor acierta el estado y la causa en los casos de control, y nunca inventa
+una causa donde el caso dice "sin causa clara".

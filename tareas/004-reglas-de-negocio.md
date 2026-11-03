@@ -24,3 +24,9 @@ conciliador actual.
 
 ## Cómo lo reviso yo (Jacobo)
 - Le pido a Claude que lea las reglas y me haga preguntas sobre los casos raros.
+
+## Notas
+- 2 nov 2026: con permiso de Jacobo, Claude reescribió los tres archivos con lo que
+  mostraron los datos reales y el conciliador actual. Cierra las contradicciones H-14 a
+  H-26 de la bitácora. Quedan supuestos ⚑ para Jacobo, y faltan los casos de control.
+- Varios valores nuevos van a `empresa_config`: se agregan con la migración que los use.

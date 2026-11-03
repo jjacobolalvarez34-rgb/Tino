@@ -15,6 +15,16 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Reglas reescritas con datos reales
+Hecho:
+- Con permiso de Jacobo, se reescribieron los tres archivos de `docs/REGLAS/` con lo que
+  mostraron los datos reales y lo que hace el conciliador. Cierra las contradicciones
+  H-14 a H-26. Es un borrador: quedan supuestos ⚑ para Jacobo.
+Falta:
+- Jacobo revisa las reglas y elige los casos de control (tarea 004).
+Dudas:
+- ¿Redeban distingue débito y crédito? Su reporte tiene una columna `TIPO TARJETA`.
+
 ## 2026-11-02 · Corrección de Cajas y Kits, y migración 0003
 Hecho:
 - Jacobo aclaró que Caja y Kit son productos distintos. Se había asumido lo contrario: las

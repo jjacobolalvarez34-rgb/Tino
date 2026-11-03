@@ -1,71 +1,71 @@
 # Reglas de verificación de transferencias
 
-Redactadas por Claude el 2 nov 2026. Los valores marcados ⚑ son supuestos que
-Jacobo confirma con correos y extractos reales. El código los toma de
-configuración por empresa.
+Borrador del 2 nov 2026, reescrito con lo que mostraron los datos reales de Milagros.
+Reemplaza el borrador anterior, que suponía comprobantes con hora y una cuenta por punto.
+Jacobo lo revisa: lo que lleva ⚑ todavía es un supuesto.
 
 ## Supuestos a confirmar
 
 | ⚑ | Supuesto | Valor inicial | Dónde se configura |
 | --- | --- | --- | --- |
-| T1 | Tiempo sin aviso del banco para marcar sospechosa | 30 minutos | `empresa_config.transf_minutos_sospecha` |
-| T2 | Ventana para que un aviso coincida con un comprobante | ±30 minutos | `empresa_config.transf_ventana_aviso` |
-| T3 | Bancolombia envía un correo de aviso por cada transferencia recibida | Sí | `perfil_fuente` tipo `correo` |
-| T4 | El extracto del día siguiente trae la referencia de la transferencia | Sí | `docs/FUENTES/bancos.md` |
-| T5 | Daviplata y Nequi | Fase posterior | — |
+| T1 | Días vecinos donde se busca una transferencia antes de decir que no llegó | 1 antes y 1 después | `empresa_config` (nuevo) |
+| T2 | Los pagos sin código (Nequi, PSE, interbancarios) se asignan a mano | Sí | Regla fija |
+| T3 | Un punto que anotó transferencias y no tiene ninguna en el banco, el mismo día que llegan pagos sin código, puede tener el QR cambiado | Sí | Regla fija |
+| T4 | Verificación en minutos con los correos del banco | Fase posterior | — |
 
-## Recorrido de una transferencia
+## Cómo funciona hoy (fase 1, D-024)
 
-1. **Comprobante:** la asesora sube la foto o el reporte del pago.
-2. **Aviso del banco:** llega el correo del banco con valor, hora y referencia.
-3. **Extracto:** al día siguiente, la línea del extracto confirma.
+Se revisa **a la mañana siguiente**, con dos fuentes:
 
-## Estados
+1. **Lo anotado:** la lista de transferencias de cada punto en el Excel del día. Trae
+   montos, sin hora ni referencia.
+2. **Lo que llegó:** el extracto de Bancolombia. Hay **una sola cuenta para todos los
+   puntos**. Cada pago con QR o llave trae una referencia, y sus **últimos 4 dígitos dicen
+   de qué punto es** (`codigo_recaudo`, D-026).
 
-| Estado | Cuándo |
-| --- | --- |
-| `pendiente` | Hay comprobante y aún no pasa T1 |
-| `vista_en_correo` | Un aviso del banco coincide con el comprobante |
-| `confirmada` | El extracto confirma el movimiento |
-| `sospechosa` | Pasó T1 sin aviso, o el comprobante está repetido, o la referencia ya se usó |
-| `rechazada` | Una persona revisó y no es válida; pasa a descuadres |
+## El cruce
 
-## Cuándo coincide un aviso
+- Por punto y por día, **monto por monto**, contando repeticiones. Es el mismo cruce de
+  las tarjetas, sin horas.
+- Lo que no cruza se busca en el día anterior y el siguiente (T1), solo entre lo que le
+  sobra a esos días: los pagos de la noche suelen caer en otra fecha.
+- Un monto anotado y uno recibido que parecen el mismo mal escrito se proponen como mal
+  digitado.
 
-Todas deben cumplirse:
-- Mismo valor exacto.
-- Misma cuenta de recaudo (por los últimos 4 dígitos o por el buzón que recibió el aviso).
-- Hora del aviso dentro de T2 respecto a la hora del comprobante.
-- El aviso no está asignado ya a otro pago.
+## Resultados por transferencia
 
-Si hay dos avisos que sirven, ninguno se asigna solo: la transferencia queda
-`pendiente` y aparece para revisión.
+| Resultado | Qué significa | Qué hace Tino |
+| --- | --- | --- |
+| Llegó | Está en el extracto del mismo día | Confirmada |
+| Llegó otro día | Está el día anterior o el siguiente | Propuesta |
+| Mal digitada | Parece la misma con un número distinto | Propuesta |
+| **No llegó** | No está en ninguno de los tres días | **Sospechosa**: pasa a descuadres |
+| Llegó sin anotar | Está en el banco y no en el Excel | Señal para revisar |
+
+## Pagos sin código
+
+- Nequi, PSE e interbancarios llegan **sin referencia de punto**. Tino no adivina de qué
+  punto son: quedan como "sin origen" hasta que alguien los asigne (T2).
+- Si ese día un punto tiene transferencias que no llegaron por el mismo monto que un pago
+  sin código, Tino lo sugiere como posible pareja, sin confirmarlo.
+- Si un punto anotó transferencias y no recibió ninguna con su código, el mismo día que
+  llegan pagos sin código, puede que le hayan cambiado el QR (T3).
 
 ## Reglas
-
-- Un comprobante cuyo hash ya existe en la empresa queda `sospechoso` siempre,
-  aunque llegue un aviso.
-- Una misma referencia bancaria no puede verificar dos pagos.
-- Nada pasa a `confirmada` sin el extracto, aunque el aviso haya llegado.
+- Una misma línea del banco no verifica dos transferencias.
+- Nada pasa a confirmada sin el extracto.
 - Confirmar a mano exige una nota y queda en auditoría.
-- Rechazar una transferencia crea el descuadre correspondiente en el punto.
-- Una transferencia `sospechosa` que luego aparece en el extracto pasa a
-  `confirmada`, con la nota "Confirmada por extracto después de sospecha".
+- Una transferencia sospechosa que aparece después en el extracto pasa a confirmada, con
+  la nota "Confirmada por extracto después de sospecha".
 
-## Lector de correos
-
-- Acceso al buzón de solo lectura, con autorización escrita de la empresa.
-- El remitente, el asunto y el formato del correo se documentan en
-  `docs/FUENTES/correos_notificacion.md` a partir de correos reales, y se
-  configuran en `perfil_fuente`. Nada de esto va fijo en el código.
-- El lector revisa el buzón cada 5 minutos.
-- Un correo que no se puede leer va a `error_importacion` y genera una alerta.
+## Fase posterior: verificación en minutos
+Con acceso de solo lectura al buzón de avisos del banco, autorizado por escrito, Tino
+podría verificar en minutos y no al día siguiente (T4). Necesita correos reales para
+definir formato y tiempos. Daviplata y Nequi directos también van ahí.
 
 ## Casos de control
+Jacobo elige transferencias reales: varias normales, una que llegó al día siguiente, una
+que no llegó y, si existe, un pago sin código que era de un punto. Van en
+`tests/casos/transferencias/` con el resultado esperado.
 
-Jacobo elige transferencias reales de octubre: varias normales, una que no llegó
-y, si existe, un comprobante repetido. Cada caso va en
-`tests/casos/transferencias/` con el comprobante anonimizado, el aviso, la línea
-del extracto y el estado esperado.
-
-Criterio: cero transferencias falsas aprobadas en los casos de control.
+Criterio: cero transferencias que no llegaron marcadas como confirmadas.
