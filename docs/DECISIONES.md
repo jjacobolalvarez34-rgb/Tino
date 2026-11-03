@@ -206,6 +206,30 @@ Ahora es HTML con los tokens de DESIGN.md, dentro del motor de Edge (WebView2) q
 Windows, en una ventana propia y no en el navegador. Así el `.exe` y la futura web usan
 las mismas pantallas.
 
+### D-036 · En la fase 1 la asesora no ve el banco, los cruces ni los descuadres
+3 nov 2026. Tomada por Claude con autorización de Jacobo para decidir solo. La asesora ve
+su jornada y su caja, no las del banco ni lo que dice "revisar". Una señal no debe llegarle
+como acusación antes de que exista su app con el contexto completo (fase posterior). Es
+más estricto que la tabla de roles de MODELO_DATOS, que decía "su punto".
+
+### D-037 · Se guarda la lista de precios completa de cada día
+3 nov 2026. Tomada por Claude. Del Excel del día entran todas las filas de producto con
+precio, aunque no se movieran. La pista de "suma de precios" necesita todos los precios del
+punto, y la base aún no tiene lista de precios (`precio_producto` está vacía).
+
+### D-038 · Si la misma plata llega en dos archivos, cuenta uno solo
+3 nov 2026. Tomada por Claude. El hash solo detecta archivos idénticos, y el mismo mes de
+Bold o el mismo extracto suelen llegar varias veces. Por eso: en el Excel cuentan los pagos
+del archivo cuyo reporte de caja está vigente; en el extracto, cada fecha sale del último
+extracto cargado que la cubre; en Bold y Redeban, por proveedor y día, el reporte con
+préstamo y más cobros (`unir_reportes`, como con archivos sueltos).
+
+### D-039 · Deshacer un archivo deshace también lo que se decidió con él
+3 nov 2026. Tomada por Claude. Si no, una línea del banco seguiría ocupada por un pago que
+ya no cuenta y el archivo corregido no podría confirmarse. Sus cruces se rechazan, sus
+transferencias se rechazan o vuelven a pendiente y sus errores se dan por resueltos, todo
+con la nota "Se deshizo el archivo …" y en el historial.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

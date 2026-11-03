@@ -71,6 +71,9 @@ class Cliente:
     def rpc(self, funcion, argumentos):
         return self._pedir("POST", f"{self.rest}/rpc/{funcion}", argumentos)
 
+    def crear(self, tabla, filas):
+        return self._pedir("POST", f"{self.rest}/{tabla}", filas, prefer="return=representation")
+
     def cambiar(self, tabla, filtros, valores):
         q = urllib.parse.urlencode([(col, f"{op}.{valor}") for col, op, valor in filtros])
         return self._pedir("PATCH", f"{self.rest}/{tabla}?{q}", valores, prefer="return=representation")

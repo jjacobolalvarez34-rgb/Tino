@@ -1,6 +1,6 @@
 # Modelo de datos
 
-39 tablas en 7 módulos, en Supabase (Postgres). Este documento dice qué guarda
+41 tablas en 7 módulos, en Supabase (Postgres). Este documento dice qué guarda
 cada tabla y por qué. El SQL exacto está en `db/migrations/`.
 
 ## Principios
@@ -85,8 +85,7 @@ erDiagram
 
 ## Tablas por módulo
 
-La columna "Migración" dice en qué archivo nace cada tabla. Las que aún no existen
-se corrieron un número con 0002: el plan de abajo manda.
+La columna "Migración" dice en qué archivo nace cada tabla.
 
 ### Empresa y seguridad
 
@@ -126,30 +125,32 @@ se corrieron un número con 0002: el plan de abajo manda.
 
 | Tabla | Para qué | Migración |
 | --- | --- | --- |
-| `jornada` | Un día de un punto. Único por punto y fecha. Estados: abierta, cerrada, conciliada, bloqueada. | 0003 |
-| `turno` | Quién trabajó realmente ese día. | 0003 |
-| `venta` | Cada venta, o el total por asesora si el reporte no trae detalle (D-013). | 0003 |
-| `venta_detalle` | Productos de cada venta, con precio de lista y precio cobrado. | 0003 |
-| `pago` | Cómo se pagó: por venta o agregado del día por medio de pago. | 0003 |
-| `movimiento_caja` | Gastos, consignaciones y retiros del punto. | 0003 |
-| `observacion` | Notas del día. | 0003 |
-| `meta` | Meta diaria por punto o por asesora. | 0003 |
+| `jornada` | Un día de un punto. Único por punto y fecha. Estados: abierta, cerrada, conciliada, bloqueada. | 0004 |
+| `reporte_caja` | Lo que el punto reportó de su caja: efectivo, venta y descuadre. Una por archivo; cuenta la del último cargado. | 0004 |
+| `turno` | Quién trabajó realmente ese día. | 0004 |
+| `venta` | Cada venta, o el total por asesora si el reporte no trae detalle (D-013). | 0004 |
+| `venta_detalle` | Productos de cada venta, con precio de lista y precio cobrado. | 0004 |
+| `pago` | Cómo se pagó: por venta o agregado del día por medio de pago. | 0004 |
+| `movimiento_caja` | Gastos, consignaciones y retiros del punto. | 0004 |
+| `observacion` | Notas del día. | 0004 |
+| `meta` | Meta diaria por punto o por asesora. | 0004 |
 
 ### Bancos y conciliación
 
 | Tabla | Para qué | Migración |
 | --- | --- | --- |
-| `movimiento_externo` | Lo que realmente llegó: extracto, Bold, Redeban o aviso, con comisión y retenciones. | 0004 |
-| `conciliacion` | Puente entre pagos y movimientos. Estados: propuesta, confirmada, rechazada. | 0004 |
-| `verificacion_transferencia` | Comprobante, aviso y extracto de cada transferencia. Hash del comprobante único. | 0004 |
+| `movimiento_externo` | Lo que realmente llegó: extracto, Bold, Redeban o aviso, con comisión, retenciones y préstamo. | 0005 |
+| `festivo` | Festivos de Colombia, para el día de consignación. Es de todos, no de una empresa. | 0005 |
+| `conciliacion` | Puente entre pagos y movimientos. Estados: propuesta, confirmada, rechazada. | 0005 |
+| `verificacion_transferencia` | Comprobante, aviso y extracto de cada transferencia. Hash del comprobante único. | 0005 |
 
 ### Descuadres
 
 | Tabla | Para qué | Migración |
 | --- | --- | --- |
-| `causa_descuadre` | Catálogo de causas, incluida "sin causa clara". | 0005 |
-| `descuadre` | Diferencia esperada contra reportada, con causa, confianza y estado. | 0005 |
-| `descuadre_evidencia` | Las pruebas de cada causa. | 0005 |
+| `causa_descuadre` | Catálogo de causas, incluida "sin causa clara". Es de todos; cuánto pesa cada una es de cada empresa. | 0006 |
+| `descuadre` | Diferencia esperada contra reportada, con causa, confianza y estado. | 0006 |
+| `descuadre_evidencia` | Las pruebas de cada causa. | 0006 |
 
 ### Inventario y personal (fases posteriores)
 

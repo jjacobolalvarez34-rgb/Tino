@@ -15,6 +15,31 @@ Dudas:
 -
 ```
 
+## 2026-11-03 · Migraciones 0004 a 0007 y el programa conectado a la base
+Hecho:
+- 0004 (operación diaria), 0005 (bancos, conciliación, verificación y festivos 2024–2030),
+  0006 (descuadres, causas y valores D1 a D6) y 0007 (vistas, importar_archivo,
+  deshacer_archivo y guardar_revision). 259 pruebas locales con dos empresas y cada rol.
+  Jacobo las aplicó en tino-pruebas; 57 + 12 pruebas pasan en Supabase con el cliente real.
+- `panel/datos/`: cliente de la API con la sesión del usuario (nunca la llave de servicio),
+  la configuración de la empresa leída de la base, la carga de archivos y la revisión
+  desde la base. `emparejar` en el contrato y los dos lenguajes.
+- Perfiles de Milagros cargados en tino-pruebas: nombres de los puntos en su Excel y el
+  datáfono que se ignora. puntos.json ya no hace falta para el programa conectado.
+- Base local `tino_local` en D: con los maestros de Milagros, y `tests/local/cliente_psql.py`
+  para probar sin PostgREST (el ejecutable descargado fue bloqueado y se borró).
+- Septiembre de Plaza Imperial, de punta a punta: los 4 archivos suben, se rechazan
+  repetidos, y desde la base sale lo mismo que desde los archivos en los 30 días. Deshacer
+  y volver a subir deja todo igual (D-039).
+- Decisiones D-036 a D-039.
+Falta:
+- Pantallas del programa contra la base: entrar, Archivos, Revisión, Transferencias,
+  Conciliación y Descuadres.
+- `SUPABASE_DB_URL` está vacía en `.env`: Jacobo aplica las migraciones a mano.
+- "Angie" en la hoja del 27 de Plaza Imperial no está en los alias de ese punto.
+Dudas:
+- Ninguna nueva.
+
 ## 2026-11-02 · Causas del descuadre: compensación, billete y precios
 Hecho:
 - `causa_compensacion`, `causa_billete` y `causa_precios` en el contrato y en los dos
