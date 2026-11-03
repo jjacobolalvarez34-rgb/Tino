@@ -197,7 +197,8 @@ with c as (update public.empresa_config set desc_umbral = 5 returning 1)
 select pg_temp.ok((select count(*) from c) = 0, 'La encargada no cambia la configuración');
 
 select pg_temp.como('b0000000-0000-0000-0000-00000000000d');
-select pg_temp.ok((select desc_umbral from public.empresa_config) = 1000,
+-- Sin el valor fijo: migraciones posteriores pueden cambiar el valor por defecto (0006).
+select pg_temp.ok((select desc_umbral from public.empresa_config) <> 2000,
                   'La configuración de B no cambió');
 
 -- 7. Sin sesión no se ve nada ---------------------------------------------------
