@@ -148,6 +148,20 @@ class Lector(unittest.TestCase):
         self.assertEqual(tarjetas.unir_reportes([sin, con])[0]["prestamo"], 9600)
         self.assertEqual(tarjetas.unir_reportes([con, sin])[0]["prestamo"], 9600)
 
+    def test_unir_reportes_no_premia_filas_de_mas_sin_prestamo(self):
+        trabajado = [{"proveedor": "bold", "fecha": "2026-07-21", "prestamo": 0} for _ in range(3)]
+        original = [{"proveedor": "bold", "fecha": "2026-07-21", "prestamo": 9600}]
+        self.assertEqual(tarjetas.unir_reportes([trabajado, original]), original)
+
+    def test_sin_columna_de_estado_no_cuenta_venta_con_deposito_cero(self):
+        encabezado = [c for c in BOLD if c != "OPERACIÓN"]
+        ruta = libro(self.carpeta / "s.xlsx", encabezado, [
+            ["Tienda Uno", dt.datetime(2026, 7, 8, 10, 0), 0, 0, 40000, 0, 0, 0, 0, 0, 0, 39000],
+            ["Tienda Uno", dt.datetime(2026, 7, 8, 11, 0), 0, 0, 90000, 0, 0, 0, 0, 0, 0, 0],
+        ])
+        cobros, _ = tarjetas.leer(ruta, PUNTOS)
+        self.assertEqual([c["bruto"] for c in cobros], [40000])
+
     def test_valor_que_no_se_entiende_no_se_cuenta_y_avisa(self):
         ruta = libro(self.carpeta / "b.xlsx", BOLD, [
             ["Tienda Uno", dt.datetime(2026, 10, 30, 14, 32), "COBRO EXITOSO", 0, 0, "#REF!",

@@ -168,6 +168,10 @@ def leer_bold(ruta, puntos):
         partes = [_pesos(celda(c)) for c in ("retefuente", "reteiva", "reteica")]
         comisiones = [_pesos(celda(c)) for c in ("comision_pct", "comision_fija")]
         franquicia = celda("franquicia") if col["franquicia"] else None
+        # Sin columna de estado, una venta con depósito 0 es un cobro que no se realizó.
+        if not col["operacion"] and _pesos(celda("deposito")) == 0 and _pesos(celda("total")):
+            omitidas += 1
+            continue
         cobro = _cobro(f, avisos, fecha=dia, hora=hora, punto=punto, proveedor="bold",
                        franquicia=str(franquicia).strip().upper() if franquicia else None,
                        bruto=_pesos(celda("total")),
@@ -252,11 +256,12 @@ def unir_reportes(lotes):
     """Une reportes que se traslapan sin contar dos veces.
 
     El mismo mes suele estar descargado varias veces, a veces incompleto. Para cada día
-    de cada proveedor se queda con el reporte que más cobros trae de ese día. Si empatan,
-    gana el que trae el préstamo: una versión vieja del archivo puede no tener esa columna.
+    de cada proveedor se queda con el reporte que trae el préstamo y, entre esos, el que
+    más cobros trae. El préstamo va primero: un archivo ya trabajado puede perder esa
+    columna y la de estado, y traer más filas solo porque incluye cobros fallidos.
     """
     def valor(cobros_del_dia):
-        return len(cobros_del_dia), sum(c.get("prestamo", 0) for c in cobros_del_dia)
+        return sum(c.get("prestamo", 0) for c in cobros_del_dia) > 0, len(cobros_del_dia)
 
     mejor = {}
     for cobros in lotes:

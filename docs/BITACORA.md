@@ -15,6 +15,22 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Extracto de julio y corrección de la unión de reportes
+Hecho:
+- Con el extracto de julio se encontró un error del tablero: los archivos procesados con la
+  macro pierden las columnas de estado y de préstamo, y ganaban la unión por traer más
+  filas. Ahora gana el reporte con préstamo, y sin columna de estado una venta con depósito
+  0 no se cuenta. Salieron del histórico unos 200 cobros fallidos.
+- Julio contra el banco: sin bloques con 10 % de menos. El préstamo del reporte da exacto.
+  Un bloque llegó un día hábil más tarde: el cruce debe mirar el día siguiente.
+- Jacobo aclaró que el conciliador se equivocaba mucho en Bold. Por eso `core.py` no sirve
+  de árbitro para Bold: el árbitro es el extracto del banco.
+Falta:
+- Respuesta de Jacobo sobre tipos de venta y alias por punto, para la tarea 003.
+Dudas:
+- Dos primeros bloques de julio sin línea en el banco: el extracto puede no cubrirlos.
+- Las diferencias pequeñas de agosto y septiembre siguen sin explicación; julio no las tiene.
+
 ## 2026-11-02 · 0001 aplicada en tino-pruebas
 Hecho:
 - Jacobo creó `tino-pruebas` y corrió 0001. Quedó la versión final y la base está vacía.
