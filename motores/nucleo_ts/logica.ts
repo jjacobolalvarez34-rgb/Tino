@@ -531,6 +531,43 @@ export function estadisticas_ventas(cobros: Cobro[]): Estadisticas {
   };
 }
 
+export type CausaCruce = {
+  regla: string;
+  que: "mal_digitado" | "sin_anotar" | "no_llego";
+  tipo: "causa" | "senal";
+  monto: number;
+  total: number;
+};
+
+function mismo_signo(a: number, b: number): boolean {
+  return (a > 0 && b > 0) || (a < 0 && b < 0);
+}
+
+// Una transferencia anotada que no llegó ya está sumada en la caja: no explica un
+// faltante, pero sí un sobrante si se anotó dos veces.
+export function causas_de_cruce(regla: string, cruce: Cruce, descuadre: number): CausaCruce[] {
+  const salida: CausaCruce[] = [];
+  const agregar = (que: CausaCruce["que"], explica: number, total: number) => {
+    const es_causa = mismo_signo(explica, descuadre);
+    salida.push({ regla, que, tipo: es_causa ? "causa" : "senal", monto: es_causa ? explica : 0, total });
+  };
+  const suma = (items: Item[]) => items.reduce((acumulado, item) => acumulado + item.monto, 0);
+
+  if (cruce.mal_digitadas.length > 0) {
+    const efecto = cruce.mal_digitadas.reduce((a, p) => a + (p.anotado.monto - p.externo.monto), 0);
+    agregar("mal_digitado", efecto, efecto);
+  }
+  if (cruce.no_anotadas.length > 0) {
+    const total = suma(cruce.no_anotadas);
+    agregar("sin_anotar", descuadre < 0 ? 0 - total : 0, total);
+  }
+  if (cruce.no_llegaron.length > 0) {
+    const total = suma(cruce.no_llegaron);
+    agregar("no_llego", descuadre > 0 ? total : 0, total);
+  }
+  return salida;
+}
+
 type Entrada = Record<string, unknown>;
 type Registro = { parametros: string[]; llamar: (e: Entrada) => unknown };
 
@@ -628,6 +665,13 @@ const FUNCIONES = new Map<string, Registro>([
   [
     "estadisticas_ventas",
     { parametros: ["cobros"], llamar: (e) => estadisticas_ventas(e.cobros as Cobro[]) },
+  ],
+  [
+    "causas_de_cruce",
+    {
+      parametros: ["regla", "cruce", "descuadre"],
+      llamar: (e) => causas_de_cruce(e.regla as string, e.cruce as Cruce, e.descuadre as number),
+    },
   ],
 ]);
 

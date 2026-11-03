@@ -301,10 +301,39 @@ def estadisticas_ventas(cobros):
     }
 
 
+def _mismo_signo(a, b):
+    return (a > 0 and b > 0) or (a < 0 and b < 0)
+
+
+def causas_de_cruce(regla, cruce, descuadre):
+    """Lo que no cuadró en un cruce, como causa o señal del descuadre del día.
+
+    Una transferencia anotada que no llegó ya está sumada en la caja: no explica un
+    faltante, pero sí un sobrante si se anotó dos veces.
+    """
+    salida = []
+
+    def agregar(que, explica, total):
+        es_causa = _mismo_signo(explica, descuadre)
+        salida.append({"regla": regla, "que": que, "tipo": "causa" if es_causa else "senal",
+                       "monto": explica if es_causa else 0, "total": total})
+
+    if cruce["mal_digitadas"]:
+        efecto = sum(p["anotado"]["monto"] - p["externo"]["monto"] for p in cruce["mal_digitadas"])
+        agregar("mal_digitado", efecto, efecto)
+    if cruce["no_anotadas"]:
+        total = sum(i["monto"] for i in cruce["no_anotadas"])
+        agregar("sin_anotar", -total if descuadre < 0 else 0, total)
+    if cruce["no_llegaron"]:
+        total = sum(i["monto"] for i in cruce["no_llegaron"])
+        agregar("no_llego", total if descuadre > 0 else 0, total)
+    return salida
+
+
 _FUNCIONES = {f.__name__: f for f in (
     a_pesos, restar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
     bloques_deposito, coincide_deposito, cruces_redeban, estado_dia,
-    leer_linea_transferencia, punto_por_referencia, estadisticas_ventas)}
+    leer_linea_transferencia, punto_por_referencia, estadisticas_ventas, causas_de_cruce)}
 
 
 def ejecutar(funcion, entrada):

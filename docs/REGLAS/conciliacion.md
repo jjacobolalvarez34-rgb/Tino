@@ -37,10 +37,10 @@ errores del punto, y el segundo, errores o descuentos del proveedor.
 - Un monto anotado y uno cobrado que parecen el mismo mal escrito se proponen como
   **mal digitado**: dígitos cambiados de lugar (35.900 y 39.500), un dígito distinto
   (35.900 y 36.900) o un cero de más o de menos (3.590 y 35.900).
-- Los reportes de Bold traen débito o crédito, y los de Redeban tienen una columna
-  `TIPO TARJETA` que parece decirlo ⚑. Hasta confirmarlo, débito y crédito se suman antes
-  de cruzar, como hacía el conciliador. Separarlos encontraría ventas anotadas en la
-  columna equivocada.
+- Bold y Redeban dicen si cada cobro fue débito o crédito. En Redeban va en `TIPO TARJETA`
+  (débito o crédito, nacional o internacional): revisado en 4 reportes reales. La primera
+  versión suma débito y crédito antes de cruzar, como el conciliador. Separarlos es el
+  paso siguiente, para encontrar ventas anotadas en la columna equivocada.
 - Las **reversiones** de Redeban son ventas devueltas: restan.
 - Un cobro de Bold `NO REALIZADO` no es una venta. El conciliador viejo los contaba en
   los reportes antiguos; Tino no.

@@ -112,6 +112,9 @@ def generar(r):
                                   "puntos": [{"punto": f"P{i}", "codigo": str(r.randint(10000000, 99999999))}
                                              for i in range(r.randint(0, 5))]}),
         ("estadisticas_ventas", {"cobros": [cobro(r) for _ in range(r.randint(0, 30))]}),
+        ("causas_de_cruce", {"regla": r.choice(["R30", "R33"]), "descuadre": r.choice([0, monto(r), -monto(r)]),
+                             "cruce": ejecutar("cruzar", {"anotado": items(r, "a"), "externo": items(r, "e"),
+                                                          "ext_vecinos": items(r, "v", 3), "excel_vecinos": items(r, "x", 3)})}),
     ])
 
 

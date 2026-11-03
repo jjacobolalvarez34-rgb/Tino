@@ -177,6 +177,26 @@ Devuelve:
 - `dia_pico` y `hora_pico`: la `clave` de mayor `bruto` en `por_dia` y en `por_hora`. Si
   empatan, la primera de la lista. Sin datos, `null`.
 
+### `causas_de_cruce` · `{regla, cruce, descuadre}` → lista
+Convierte lo que no cuadró en un cruce en causas o señales del descuadre del día. `cruce`
+es la salida de `cruzar`. Dos montos son del **mismo signo** si los dos son mayores que 0
+o los dos menores que 0. Devuelve, en este orden y solo si la lista tiene ítems:
+
+1. `mal_digitadas`: `total` = suma de `anotado.monto − externo.monto`.
+2. `no_anotadas` (llegó sin anotar): `total` = suma de montos;
+   `explica` = `−total` si `descuadre < 0`, si no 0.
+3. `no_llegaron` (anotado que no llegó): `total` = suma de montos;
+   `explica` = `total` si `descuadre > 0`, si no 0.
+
+En el caso 1, `explica` es el mismo `total`. Cada elemento es
+`{regla, que, tipo, monto, total}`: `que` es `mal_digitado`, `sin_anotar` o `no_llego`.
+Si `explica` es del mismo signo que `descuadre`, `tipo` es `causa` y `monto` es `explica`.
+Si no, `tipo` es `senal` y `monto` es 0.
+
+Por qué: una transferencia anotada que no llegó ya está sumada en la caja, así que no
+explica un faltante; sí explica un sobrante, si se anotó dos veces. Igual que en el
+conciliador actual.
+
 ## Cómo se prueba
 
 - `tests/casos/motor/casos.json`: casos escritos a mano, con datos inventados. Cada
