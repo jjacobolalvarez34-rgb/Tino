@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --color-marca:#74305F; --color-marca-hover:#5A2449; --color-marca-suave:#F3E4EE; --color-foco:#C99BBB;
+  --color-fondo:#F7F5F7; --color-superficie:#FFFFFF; --color-texto:#22161F; --color-texto-suave:#5E5862;
+  --color-borde:#E2DDE3; --color-divisor:#F0ECF0;
+  --color-deshabilitado-fondo:#E3E8E6; --color-deshabilitado-texto:#7C8A92;
+  --ok:#1C7638; --ok-fondo:#E1F2E5; --revisar:#7A5A00; --revisar-fondo:#FBF1CC; --mal:#9A2A0A; --mal-fondo:#FDE5DA;
+  --esp-1:4px; --esp-2:8px; --esp-3:12px; --esp-4:16px; --esp-5:20px; --esp-6:24px; --esp-8:32px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--color-fondo);color:var(--color-texto);font-family:Figtree,system-ui,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--color-foco);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+h1{font-size:28px;font-weight:800;line-height:1.2} h2{font-size:18px;font-weight:700} h3{font-size:17px;font-weight:600}
+svg.icono{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pagina{max-width:760px;margin:0 auto;padding:var(--esp-6);display:flex;flex-direction:column;gap:var(--esp-6)}
+.cabeza{display:flex;align-items:center;gap:var(--esp-3)}
+.cabeza .logo{width:40px;height:40px;flex:none}
+.pequeno{font-size:13px;font-weight:500;color:var(--color-texto-suave)}
+.empresa{display:flex;align-items:center;gap:var(--esp-2);flex-wrap:wrap;color:var(--color-texto-suave)}
+.empresa .ruta{font-size:13px;font-weight:500;overflow-wrap:anywhere}
+
+/* Pestañas: dos pantallas, una a la vez */
+.pestanas{display:flex;gap:var(--esp-2);border-bottom:1px solid var(--color-borde)}
+.pestana{border:0;background:none;padding:var(--esp-3) var(--esp-4);font-size:15px;font-weight:600;color:var(--color-texto-suave);border-bottom:3px solid transparent;margin-bottom:-1px;display:inline-flex;align-items:center;gap:var(--esp-2);min-height:44px}
+.pestana[aria-selected="true"]{color:var(--color-marca);border-bottom-color:var(--color-marca)}
+.pestana:hover{color:var(--color-marca)}
+
+.tarjeta{background:var(--color-superficie);border:1px solid var(--color-borde);border-radius:12px;padding:var(--esp-5);display:flex;flex-direction:column;gap:var(--esp-5)}
+.intro{display:flex;flex-direction:column;gap:var(--esp-1)}
+.campo{display:flex;flex-direction:column;gap:var(--esp-2)}
+.campo label{font-weight:600}
+input[type=date]{height:44px;padding:0 var(--esp-3);border:1px solid var(--color-borde);border-radius:10px;background:var(--color-superficie);width:220px;font-variant-numeric:tabular-nums}
+
+/* Una fila por cada tipo de archivo */
+.archivos{display:flex;flex-direction:column;gap:var(--esp-3)}
+.fila{border:1px solid var(--color-divisor);border-radius:10px;padding:var(--esp-4);display:grid;grid-template-columns:auto 1fr auto;gap:var(--esp-2) var(--esp-3);align-items:center}
+.fila .ico{width:40px;height:40px;border-radius:10px;background:var(--color-marca-suave);color:var(--color-marca);display:grid;place-items:center}
+.fila .texto{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fila .nombre{font-weight:600}
+.fila.lista{border-color:var(--color-borde)}
+.fila.con-error{border-color:#F6CBB8;background:#FFFBF9}
+.elegidos{grid-column:2 / 4;margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:var(--esp-2)}
+.elegidos li{font-size:13px;font-weight:500;background:var(--color-divisor);color:var(--color-texto);border-radius:8px;padding:3px 10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.error-campo{grid-column:2 / 4;font-size:13px;font-weight:600;color:var(--mal);display:flex;gap:var(--esp-1);align-items:center}
+.error-campo:empty{display:none}
+.campo .error-campo{grid-column:auto}
+
+.boton{height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--color-marca);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:var(--esp-2);transition:background .15s}
+.boton:hover{background:var(--color-marca-hover)}
+.boton.secundario{background:var(--color-superficie);color:var(--color-marca);border:1px solid var(--color-marca)}
+.boton.secundario:hover{background:var(--color-marca-suave)}
+.boton.compacto{height:36px;padding:0 14px;font-size:14px;border-radius:8px}
+.boton.texto{background:none;color:var(--color-marca);padding:0 var(--esp-2);height:36px}
+.boton.texto:hover{background:var(--color-marca-suave)}
+.boton[aria-disabled="true"]{background:var(--color-deshabilitado-fondo);color:var(--color-deshabilitado-texto);border-color:transparent;cursor:not-allowed}
+.acciones{display:flex;align-items:center;gap:var(--esp-4);flex-wrap:wrap}
+.girando{animation:girar 1s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+
+.nota{border-radius:10px;padding:var(--esp-3) var(--esp-4);font-size:14px;display:flex;gap:var(--esp-3);align-items:flex-start}
+.nota[hidden]{display:none}
+.nota .cuerpo{display:flex;flex-direction:column;gap:var(--esp-1);min-width:0;overflow-wrap:anywhere}
+.nota.ok{background:var(--ok-fondo);color:var(--ok)} .nota.mal{background:var(--mal-fondo);color:var(--mal)}
+.nota.aviso{background:var(--revisar-fondo);color:var(--revisar)}
+.nota ul{margin:0;padding-left:var(--esp-5)}
+.pie{text-align:center}
+@media (max-width:560px){.pagina{padding:var(--esp-5)}.fila{grid-template-columns:auto 1fr}.fila .boton{grid-column:1 / 3}.elegidos,.error-campo{grid-column:1 / 3}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Íconos de Lucide (ISC) -->
+  <symbol id="i-excel" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></symbol>
+  <symbol id="i-banco" viewBox="0 0 24 24"><path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2 8 5H4Z"/></symbol>
+  <symbol id="i-tarjeta" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></symbol>
+  <symbol id="i-dia" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></symbol>
+  <symbol id="i-ventas" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+  <symbol id="i-tienda" viewBox="0 0 24 24"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-cargando" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+  <symbol id="i-abrir" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+</svg>
+
+<div class="pagina">
+  <header class="cabeza">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#74305F"/><path d="M50 48 V78" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/><path d="M37 27 L46 36 L64 15" fill="none" stroke="#E9C6DC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <h1>Tino</h1>
+      <div class="empresa">
+        <svg class="icono" aria-hidden="true"><use href="#i-tienda"/></svg>
+        <span class="ruta" id="ruta-puntos">Buscando la configuración de la empresa…</span>
+        <button class="boton texto compacto" id="cambiar-puntos">Cambiar</button>
+      </div>
+      <p class="error-campo" id="error-puntos" role="alert"></p>
+    </div>
+  </header>
+
+  <nav class="pestanas" role="tablist" aria-label="Pantallas">
+    <button class="pestana" role="tab" id="tab-revision" aria-controls="panel-revision" aria-selected="true">
+      <svg class="icono" aria-hidden="true"><use href="#i-dia"/></svg>Revisión del día</button>
+    <button class="pestana" role="tab" id="tab-ventas" aria-controls="panel-ventas" aria-selected="false" tabindex="-1">
+      <svg class="icono" aria-hidden="true"><use href="#i-ventas"/></svg>Ventas con tarjeta</button>
+  </nav>
+
+  <section class="tarjeta" role="tabpanel" id="panel-revision" aria-labelledby="tab-revision">
+    <div class="intro">
+      <h2>Revisar un día</h2>
+      <p class="pequeno">Cruza lo anotado en el Excel de cada punto con el banco y con los datáfonos, y explica cada descuadre.</p>
+    </div>
+    <div class="campo">
+      <label for="fecha">Día que se revisa</label>
+      <input type="date" id="fecha" aria-describedby="error-fecha">
+      <p class="error-campo" id="error-fecha"></p>
+    </div>
+    <div class="archivos">
+      <div class="fila" data-tipo="excel" data-obligatorio="si"></div>
+      <div class="fila" data-tipo="banco"></div>
+      <div class="fila" data-tipo="tarjetas"></div>
+    </div>
+    <div class="acciones">
+      <button class="boton" id="revisar"><span>Revisar el día</span></button>
+      <span class="pequeno" id="progreso-revision" role="status" aria-live="polite"></span>
+    </div>
+    <div class="nota" id="resultado-revision" hidden></div>
+  </section>
+
+  <section class="tarjeta" role="tabpanel" id="panel-ventas" aria-labelledby="tab-ventas" hidden>
+    <div class="intro">
+      <h2>Ventas con tarjeta</h2>
+      <p class="pequeno">Vendido por punto y por mes, desde los reportes de Bold y Redeban. No incluye efectivo ni transferencias.</p>
+    </div>
+    <div class="archivos">
+      <div class="fila" data-tipo="reportes" data-obligatorio="si"></div>
+    </div>
+    <div class="acciones">
+      <button class="boton" id="armar-tablero"><span>Armar el tablero</span></button>
+      <span class="pequeno" id="progreso-ventas" role="status" aria-live="polite"></span>
+    </div>
+    <div class="nota" id="resultado-ventas" hidden></div>
+  </section>
+
+  <p class="pequeno pie">Todo se lee en este computador. Nada se sube a internet.</p>
+</div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const escapar = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const icono = (id, clase = '') => `<svg class="icono ${clase}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const api = () => window.pywebview.api;
+
+  const TIPOS = {
+    excel: { icono: 'excel', nombre: 'Excel del día de cada punto', ayuda: 'Uno o varios .xlsx, uno por punto.', falta: 'Elija al menos un Excel del día.' },
+    banco: { icono: 'banco', nombre: 'Extracto de Bancolombia', ayuda: 'Opcional. Sin él, las transferencias no se cruzan con el banco.' },
+    tarjetas: { icono: 'tarjeta', nombre: 'Reportes de Bold y Redeban', ayuda: 'Opcional. Sin ellos, las tarjetas no se cruzan con los datáfonos.' },
+    reportes: { icono: 'tarjeta', nombre: 'Reportes de Bold y Redeban', ayuda: 'Uno o varios .xlsx. Si un mes viene repetido, no se cuenta dos veces.', falta: 'Elija al menos un reporte de Bold o Redeban.' },
+  };
+  const elegidos = { excel: [], banco: [], tarjetas: [], reportes: [] };
+  const nombreArchivo = (r) => r.split(/[\\/]/).pop();
+
+  function pintarFila(fila) {
+    const tipo = fila.dataset.tipo, t = TIPOS[tipo], lista = elegidos[tipo];
+    const muestra = lista.slice(0, 4).map((r) => `<li title="${escapar(r)}">${escapar(nombreArchivo(r))}</li>`).join('')
+      + (lista.length > 4 ? `<li>y ${lista.length - 4} más</li>` : '');
+    fila.classList.toggle('lista', lista.length > 0);
+    fila.innerHTML = `<span class="ico">${icono(t.icono)}</span>
+      <div class="texto"><span class="nombre" id="nombre-${tipo}">${t.nombre}</span>
+        <span class="pequeno">${lista.length ? `${lista.length} archivo${lista.length === 1 ? '' : 's'} elegido${lista.length === 1 ? '' : 's'}` : t.ayuda}</span></div>
+      <button class="boton secundario compacto" aria-describedby="nombre-${tipo} error-${tipo}">${lista.length ? 'Cambiar' : 'Elegir archivos'}</button>
+      ${lista.length ? `<ul class="elegidos" aria-label="Archivos elegidos">${muestra}</ul>` : ''}
+      <p class="error-campo" id="error-${tipo}"></p>`;
+    fila.querySelector('button').addEventListener('click', async () => {
+      const rutas = await api().elegir(tipo);
+      if (rutas && rutas.length) { elegidos[tipo] = rutas; pintarFila(fila); fila.classList.remove('con-error'); }
+    });
+  }
+  document.querySelectorAll('.fila').forEach(pintarFila);
+
+  function errorEn(tipo, texto) {
+    const fila = document.querySelector(`.fila[data-tipo="${tipo}"]`);
+    fila.classList.toggle('con-error', !!texto);
+    $('error-' + tipo).innerHTML = texto ? icono('alerta') + escapar(texto) : '';
+  }
+
+  // Pestañas, también con las flechas del teclado
+  const pestanas = [$('tab-revision'), $('tab-ventas')];
+  function mostrar(tab) {
+    pestanas.forEach((p) => {
+      const activa = p === tab;
+      p.setAttribute('aria-selected', activa); p.tabIndex = activa ? 0 : -1;
+      $(p.getAttribute('aria-controls')).hidden = !activa;
+    });
+  }
+  pestanas.forEach((p, i) => {
+    p.addEventListener('click', () => mostrar(p));
+    p.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const otra = pestanas[(i + (e.key === 'ArrowRight' ? 1 : pestanas.length - 1)) % pestanas.length];
+      mostrar(otra); otra.focus();
+    });
+  });
+
+  function pintarPuntos(ruta) {
+    $('ruta-puntos').textContent = ruta ? ruta : 'Falta elegir el archivo puntos.json de la empresa.';
+    $('error-puntos').innerHTML = '';
+  }
+  $('cambiar-puntos').addEventListener('click', async () => {
+    const ruta = await api().cambiar_puntos();
+    if (ruta) pintarPuntos(ruta);
+  });
+
+  // Ocupado: el botón no se puede tocar dos veces y dice qué está pasando.
+  function ocupado(boton, progreso, texto) {
+    boton.setAttribute('aria-disabled', texto ? 'true' : 'false');
+    boton.querySelector('span').previousElementSibling?.remove();
+    if (texto) boton.insertAdjacentHTML('afterbegin', icono('cargando', 'girando'));
+    progreso.textContent = texto || '';
+  }
+
+  function resultado(caja, r, que) {
+    caja.hidden = false;
+    if (r.error) {
+      caja.className = 'nota mal';
+      caja.innerHTML = `${icono('alerta')}<div class="cuerpo"><b>No se pudo armar ${que}.</b><span>${escapar(r.error)}</span><span>Revise que los archivos sean los correctos y vuelva a intentarlo.</span></div>`;
+      return;
+    }
+    const avisos = r.avisos && r.avisos.length
+      ? `<details><summary>${r.avisos.length} aviso${r.avisos.length === 1 ? '' : 's'} sobre los archivos</summary><ul>${r.avisos.map((a) => `<li>${escapar(a)}</li>`).join('')}</ul></details>` : '';
+    caja.className = 'nota ok';
+    caja.innerHTML = `${icono('ok')}<div class="cuerpo"><b>Listo: se abrió en otra ventana.</b><span class="ruta">Guardado en ${escapar(r.salida)}</span>${avisos}
+      <span><button class="boton texto compacto" data-abrir>${icono('abrir')}Abrir otra vez</button></span></div>`;
+    caja.querySelector('[data-abrir]').addEventListener('click', () => api().abrir(r.salida));
+  }
+
+  async function correr({ boton, progreso, caja, que, validar, llamar }) {
+    if (boton.getAttribute('aria-disabled') === 'true') return;
+    caja.hidden = true;
+    if (!validar()) return;
+    ocupado(boton, progreso, 'Leyendo archivos. Cada Excel tarda cerca de un minuto…');
+    try {
+      const r = await llamar();
+      if (r.falta_puntos) $('error-puntos').innerHTML = icono('alerta') + escapar(r.error);
+      resultado(caja, r, que);
+    } catch (e) {
+      resultado(caja, { error: String(e) }, que);
+    } finally {
+      ocupado(boton, progreso, '');
+    }
+  }
+
+  $('revisar').addEventListener('click', () => correr({
+    boton: $('revisar'), progreso: $('progreso-revision'), caja: $('resultado-revision'), que: 'la revisión',
+    validar: () => {
+      let bien = true;
+      $('error-fecha').innerHTML = $('fecha').value ? '' : icono('alerta') + 'Elija el día que quiere revisar.';
+      if (!$('fecha').value) { bien = false; $('fecha').focus(); }
+      errorEn('excel', elegidos.excel.length ? '' : TIPOS.excel.falta);
+      if (!elegidos.excel.length) bien = false;
+      return bien;
+    },
+    llamar: () => api().revisar($('fecha').value, elegidos.excel, elegidos.banco, elegidos.tarjetas),
+  }));
+
+  $('armar-tablero').addEventListener('click', () => correr({
+    boton: $('armar-tablero'), progreso: $('progreso-ventas'), caja: $('resultado-ventas'), que: 'el tablero',
+    validar: () => { errorEn('reportes', elegidos.reportes.length ? '' : TIPOS.reportes.falta); return elegidos.reportes.length > 0; },
+    llamar: () => api().tablero(elegidos.reportes),
+  }));
+
+  window.addEventListener('pywebviewready', async () => {
+    const e = await api().estado();
+    $('fecha').value = e.ayer;
+    pintarPuntos(e.puntos);
+  });
+})();
+</script>
+</body>
+</html>

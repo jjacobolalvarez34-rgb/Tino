@@ -1,32 +1,35 @@
 # -*- coding: utf-8 -*-
-"""Tino en una ventana: la revisión del día y el tablero de ventas, sin usar la consola.
+"""Tino en una ventana: la revisión del día y las ventas con tarjeta, sin usar la consola.
 
-Cada pantalla se guarda como HTML junto a puntos.json y se abre en el navegador. Lo propio
-de la empresa sale de puntos.json, que vive fuera del programa. Nada se sube a internet.
+La ventana es HTML (panel/inicio.html), con los tokens de docs/DESIGN.md, dentro del motor de
+Edge (WebView2) que trae Windows. Cada resultado se guarda como HTML junto a puntos.json y
+se abre en otra ventana. Lo propio de la empresa sale de puntos.json, fuera del programa.
 
 Para probar sin ventana, con los mismos argumentos de cada armar.py:
     app.py --revision --fecha ... --puntos ... --salida ... --excel ...
     app.py --tablero --puntos ... --salida ... reporte.xlsx ...
 """
 import datetime as dt
-import queue
+import os
 import sys
-import threading
-import webbrowser
 from pathlib import Path
 
+CONGELADO = getattr(sys, "frozen", False)
 RAIZ = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(RAIZ), str(RAIZ / "motores"), str(RAIZ / "motores" / "conciliador")]
 
 from panel.revision import armar as revision  # noqa: E402
 from panel.tablero import armar as tablero  # noqa: E402
 
-FONDO, TINTA, SUAVE = "#F7F5F7", "#22161F", "#5E5862"
+# Lo que el programa guarda para sí (temporales y datos de la ventana) va junto a él, no
+# en el disco del sistema: en el computador de pruebas, C: está lleno (D-034).
+PROPIO = Path(sys.executable).parent if CONGELADO else RAIZ / ".ventana"
+INICIO = (Path(sys._MEIPASS) if CONGELADO else Path(__file__).parent) / "inicio.html"
 
 
 def buscar_puntos():
     """puntos.json junto al programa o en una carpeta Tino-datos de más arriba."""
-    inicio = Path(sys.executable).parent if getattr(sys, "frozen", False) else RAIZ
+    inicio = Path(sys.executable).parent if CONGELADO else RAIZ
     for carpeta in [inicio, *inicio.parents]:
         for candidato in (carpeta / "puntos.json", carpeta / "Tino-datos" / "puntos.json"):
             if candidato.exists():
@@ -34,158 +37,79 @@ def buscar_puntos():
     return None
 
 
-def ventana():
-    import tkinter as tk
-    from tkinter import filedialog, messagebox, ttk
+class Api:
+    """Lo que la pantalla puede pedirle a Python. Solo lee archivos y escribe HTML."""
 
-    raiz = tk.Tk()
-    raiz.title("Tino")
-    raiz.geometry("680x560")
-    raiz.configure(bg=FONDO)
-    estilo = ttk.Style()
-    estilo.configure(".", background=FONDO, foreground=TINTA, font=("Segoe UI", 11))
-    estilo.configure("Titulo.TLabel", font=("Segoe UI", 18, "bold"))
-    estilo.configure("Suave.TLabel", foreground=SUAVE, font=("Segoe UI", 10))
-    estilo.configure("TButton", padding=8)
-    estilo.configure("TNotebook.Tab", padding=(16, 8))
+    def __init__(self):
+        self._puntos = buscar_puntos()
+        self._ventana = None
 
-    encontrado = buscar_puntos()
-    puntos = tk.StringVar(value=str(encontrado) if encontrado else "")
-    resultados = queue.Queue()
+    def estado(self):
+        ayer = dt.date.today() - dt.timedelta(days=1)
+        return {"ayer": ayer.isoformat(), "puntos": str(self._puntos) if self._puntos else None}
 
-    def en_segundo_plano(boton, estado, trabajo):
-        """Lee los archivos sin congelar la ventana; al terminar abre el HTML."""
-        boton.state(["disabled"])
-        estado.set("Leyendo archivos… puede tardar un minuto por cada Excel.")
+    def _dialogo(self, tipos, varios=True):
+        import webview
+        return self._ventana.create_file_dialog(webview.FileDialog.OPEN, allow_multiple=varios, file_types=tipos)
 
-        def correr():
-            try:
-                resultados.put((boton, estado, trabajo(), None))
-            except Exception as e:  # noqa: BLE001 - se muestra a quien usa la ventana
-                resultados.put((boton, estado, None, e))
+    def elegir(self, tipo):
+        tipos = ("Extracto en PDF (*.pdf)",) if tipo == "banco" else ("Excel (*.xlsx)",)
+        return list(self._dialogo(tipos) or [])
 
-        threading.Thread(target=correr, daemon=True).start()
+    def cambiar_puntos(self):
+        rutas = self._dialogo(("Configuración (*.json)",), varios=False)
+        if rutas:
+            self._puntos = Path(rutas[0] if isinstance(rutas, (list, tuple)) else rutas)
+            return str(self._puntos)
+        return None
 
-    def revisar_cola():
-        while not resultados.empty():
-            boton, estado, salida, error = resultados.get()
-            boton.state(["!disabled"])
-            if error:
-                estado.set("")
-                messagebox.showerror("No se pudo armar", str(error))
-            else:
-                estado.set(f"Listo: {salida}")
-                webbrowser.open(Path(salida).as_uri())
-        raiz.after(200, revisar_cola)
-
-    def carpeta_salida(nombre):
-        carpeta = Path(puntos.get()).parent / nombre
+    def _carpeta(self, nombre):
+        carpeta = self._puntos.parent / nombre
         carpeta.mkdir(parents=True, exist_ok=True)
         return carpeta
 
-    def puntos_listo():
-        if not puntos.get() or not Path(puntos.get()).exists():
-            messagebox.showwarning("Configuración", "Elija el archivo puntos.json de la empresa.")
-            return False
-        return True
-
-    def selector(marco, fila, texto, tipos, destino):
-        resumen = tk.StringVar(value="Ninguno")
-
-        def elegir():
-            rutas = filedialog.askopenfilenames(title=texto, filetypes=tipos)
-            if rutas:
-                destino[:] = list(rutas)
-                resumen.set(f"{len(rutas)} archivo(s)")
-
-        ttk.Label(marco, text=texto).grid(row=fila, column=0, sticky="w")
-        ttk.Button(marco, text="Elegir…", command=elegir).grid(row=fila, column=1, sticky="w", pady=6)
-        ttk.Label(marco, textvariable=resumen, style="Suave.TLabel").grid(row=fila, column=2, sticky="w", padx=8)
-
-    cabeza = ttk.Frame(raiz, padding=(24, 20, 24, 8))
-    cabeza.pack(fill="x")
-    ttk.Label(cabeza, text="Tino", style="Titulo.TLabel").grid(row=0, column=0, sticky="w")
-    ttk.Label(cabeza, text="Configuración de la empresa:", style="Suave.TLabel").grid(row=1, column=0, sticky="w")
-    ttk.Label(cabeza, textvariable=puntos, style="Suave.TLabel", wraplength=380).grid(row=1, column=1, sticky="w", padx=6)
-
-    def cambiar_puntos():
-        ruta = filedialog.askopenfilename(title="puntos.json de la empresa", filetypes=[("JSON", "*.json")])
-        if ruta:
-            puntos.set(ruta)
-
-    ttk.Button(cabeza, text="Cambiar…", command=cambiar_puntos).grid(row=1, column=2, sticky="w")
-
-    pestanas = ttk.Notebook(raiz)
-    pestanas.pack(fill="both", expand=True, padx=16, pady=(0, 16))
-
-    # Revisión del día
-    rev = ttk.Frame(pestanas, padding=20)
-    pestanas.add(rev, text="Revisión del día")
-    ayer = (dt.date.today() - dt.timedelta(days=1)).isoformat()
-    fecha = tk.StringVar(value=ayer)
-    excel, banco, tarj = [], [], []
-    ttk.Label(rev, text="Fecha (AAAA-MM-DD)").grid(row=0, column=0, sticky="w")
-    ttk.Entry(rev, textvariable=fecha, width=14).grid(row=0, column=1, sticky="w", pady=6)
-    selector(rev, 1, "Excel del día de cada punto", [("Excel", "*.xlsx")], excel)
-    selector(rev, 2, "Extracto de Bancolombia (PDF)", [("PDF", "*.pdf")], banco)
-    selector(rev, 3, "Reportes de Bold y Redeban", [("Excel", "*.xlsx")], tarj)
-    estado_rev = tk.StringVar()
-    ttk.Label(rev, textvariable=estado_rev, style="Suave.TLabel", wraplength=560).grid(
-        row=5, column=0, columnspan=3, sticky="w", pady=(16, 0))
-
-    def revisar():
-        dia = fecha.get().strip()
+    def _armar(self, hacer):
+        if not self._puntos or not self._puntos.exists():
+            return {"error": "Falta el archivo puntos.json de la empresa. Elíjalo con «Cambiar».", "falta_puntos": True}
         try:
-            dt.date.fromisoformat(dia)
-        except ValueError:
-            messagebox.showwarning("Fecha", "Escriba la fecha así: 2026-09-26.")
-            return
-        if not puntos_listo():
-            return
-        if not excel:
-            messagebox.showwarning("Archivos", "Elija al menos un Excel del día.")
-            return
+            salida, avisos = hacer()
+        except Exception as e:  # noqa: BLE001 - se muestra en la pantalla
+            return {"error": str(e) or e.__class__.__name__}
+        self.abrir(str(salida))
+        return {"salida": str(salida), "avisos": avisos}
 
-        def trabajo():
-            salida = carpeta_salida("revisiones") / f"revision_{dia}.html"
-            revision.generar(dia, puntos.get(), salida, excel, banco, tarj)
-            return salida
+    def revisar(self, fecha, excel, banco, tarjetas):
+        def hacer():
+            dt.date.fromisoformat(fecha)
+            salida = self._carpeta("revisiones") / f"revision_{fecha}.html"
+            _, avisos = revision.generar(fecha, self._puntos, salida, excel, banco, tarjetas)
+            return salida, avisos
+        return self._armar(hacer)
 
-        en_segundo_plano(boton_rev, estado_rev, trabajo)
+    def tablero(self, reportes):
+        def hacer():
+            salida = self._carpeta("tableros") / f"tablero_{dt.date.today().isoformat()}.html"
+            _, avisos = tablero.generar(self._puntos, salida, reportes)
+            return salida, avisos
+        return self._armar(hacer)
 
-    boton_rev = ttk.Button(rev, text="Revisar", command=revisar)
-    boton_rev.grid(row=4, column=0, sticky="w", pady=(20, 0))
+    def abrir(self, ruta):
+        import webview
+        webview.create_window(f"Tino · {Path(ruta).stem.replace('_', ' ')}", url=Path(ruta).as_uri(),
+                              width=1280, height=720, min_size=(400, 500), background_color="#F7F5F7")
 
-    # Tablero de ventas
-    tab = ttk.Frame(pestanas, padding=20)
-    pestanas.add(tab, text="Tablero de ventas")
-    reportes = []
-    ttk.Label(tab, text="Ventas con tarjeta por punto y por mes, desde los reportes de Bold y Redeban.",
-              style="Suave.TLabel", wraplength=560).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 12))
-    selector(tab, 1, "Reportes de Bold y Redeban", [("Excel", "*.xlsx")], reportes)
-    estado_tab = tk.StringVar()
-    ttk.Label(tab, textvariable=estado_tab, style="Suave.TLabel", wraplength=560).grid(
-        row=3, column=0, columnspan=3, sticky="w", pady=(16, 0))
 
-    def armar_tablero():
-        if not puntos_listo():
-            return
-        if not reportes:
-            messagebox.showwarning("Archivos", "Elija al menos un reporte de Bold o Redeban.")
-            return
+def ventana():
+    PROPIO.mkdir(parents=True, exist_ok=True)
+    (PROPIO / "tmp").mkdir(exist_ok=True)
+    os.environ["TEMP"] = os.environ["TMP"] = str(PROPIO / "tmp")
+    os.environ["WEBVIEW2_USER_DATA_FOLDER"] = str(PROPIO / "ventana")
+    import webview
 
-        def trabajo():
-            salida = carpeta_salida("tableros") / f"tablero_{dt.date.today().isoformat()}.html"
-            tablero.generar(puntos.get(), salida, reportes)
-            return salida
-
-        en_segundo_plano(boton_tab, estado_tab, trabajo)
-
-    boton_tab = ttk.Button(tab, text="Armar tablero", command=armar_tablero)
-    boton_tab.grid(row=2, column=0, sticky="w", pady=(20, 0))
-
-    revisar_cola()
-    raiz.mainloop()
+    api = Api()
+    api._ventana = webview.create_window("Tino", html=INICIO.read_text(encoding="utf-8"), js_api=api,
+                                         width=820, height=700, min_size=(420, 560), background_color="#F7F5F7")
+    webview.start(private_mode=False, storage_path=str(PROPIO / "ventana"))
 
 
 if __name__ == "__main__":

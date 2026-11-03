@@ -197,7 +197,14 @@ inventario.
 2 nov 2026. Un `.exe` de un solo archivo se descomprime en el TEMP del sistema cada vez
 que se abre, y en este computador nada se escribe en C:. Empacado como carpeta, abre más
 rápido y no escribe en ningún disco al arrancar. Se entrega la carpeta entera
-(`Tino.exe` y `_internal`). Se revisa cuando haya instalador.
+(`Tino.exe` y `_internal`). Se revisa cuando haya instalador. Lo que el programa guarda
+para sí (temporales y datos de la ventana) va en `tmp/` y `ventana/` junto al `.exe`.
+
+### D-035 · La ventana del .exe es HTML, en una ventana propia
+2 nov 2026. Decisión de Jacobo. La primera ventana, en Tk, no tenía la estética de Tino.
+Ahora es HTML con los tokens de DESIGN.md, dentro del motor de Edge (WebView2) que ya trae
+Windows, en una ventana propia y no en el navegador. Así el `.exe` y la futura web usan
+las mismas pantallas.
 
 ## Pendientes
 

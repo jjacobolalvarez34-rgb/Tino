@@ -17,13 +17,19 @@ Dudas:
 
 ## 2026-11-02 · Primer Tino.exe
 Hecho:
-- `panel/app.py`: una ventana con dos pestañas, revisión del día y tablero de ventas. Busca
-  `puntos.json` junto al programa o en una carpeta `Tino-datos` de más arriba, y guarda los
-  HTML junto a él, en `revisiones/` y `tableros/`.
-- `panel/construir_exe.py` empaca todo con PyInstaller como carpeta (D-034). Construido en
-  `D:\Repositorios\Tino-datos\app\Tino\Tino.exe`, 68 MB; C: no cambió.
+- `panel/app.py` y `panel/inicio.html`: una ventana con dos pestañas, revisión del día y
+  ventas con tarjeta, en HTML con los tokens de DESIGN.md (D-035). La primera versión, en
+  Tk, no tenía la estética de Tino y se reemplazó. Busca `puntos.json` junto al programa o
+  en una carpeta `Tino-datos` de más arriba, y guarda los HTML junto a él, en `revisiones/`
+  y `tableros/`. Cada resultado abre en otra ventana.
+- `panel/construir_exe.py` empaca todo con PyInstaller como carpeta (D-034), con el ícono
+  de Tino. Construido en `D:\Repositorios\Tino-datos\app\Tino\Tino.exe`, 63 MB; C: no cambió.
 - Con los archivos de septiembre, el `.exe` saca los mismos HTML, byte por byte, que la
-  versión en Python. La ventana abre.
+  versión en Python. La ventana se probó tocando los botones: error junto al campo sin
+  Excel, archivos elegidos, revisión abierta en otra ventana, error claro con un archivo
+  que no es reporte.
+- La primera vez que abre, la ventana queda en negro unos 10 segundos mientras el motor de
+  Edge prepara su carpeta. Después abre rápido.
 Falta:
 - Jacobo dijo que al motor de transferencias le falta arreglar algo, pero no dijo qué.
   Preguntarle.

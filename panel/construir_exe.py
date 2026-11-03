@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Empaca panel/app.py como Tino.exe (una carpeta con el programa adentro).
 
-Uso, con el Python que tenga PyInstaller, openpyxl y pdfplumber:
+Uso, con el Python que tenga PyInstaller, pywebview, openpyxl y pdfplumber:
     python panel/construir_exe.py --construir D:/Repositorios/Tino-datos/construir --destino D:/Repositorios/Tino-datos/app
 
 Se empaca como carpeta y no como un solo archivo: el de un solo archivo se descomprime en
@@ -24,10 +24,17 @@ def main():
     p.add_argument("--destino", required=True, help="Carpeta donde queda Tino/Tino.exe")
     a = p.parse_args()
     construir = Path(a.construir)
+    construir.mkdir(parents=True, exist_ok=True)
+    # El ícono de Tino para el .exe y la barra de la ventana, desde el PNG de la marca.
+    from PIL import Image
+    icono = construir / "tino.ico"
+    Image.open(RAIZ / "docs" / "marca" / "png" / "tino-icono-512.png").save(
+        icono, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
     entorno = dict(os.environ, PYINSTALLER_CONFIG_DIR=str(construir / "pyi-config"))
     if os.name == "nt":
         ctypes.windll.kernel32.SetThreadExecutionState(0x80000001)  # que Windows no se suspenda
     orden = [sys.executable, "-m", "PyInstaller", "--noconfirm", "--onedir", "--windowed", "--name", "Tino",
+             "--icon", str(icono), "--add-data", f"{RAIZ / 'panel' / 'inicio.html'}{os.pathsep}.",
              "--workpath", str(construir / "work"), "--distpath", a.destino, "--specpath", str(construir),
              "--paths", str(RAIZ), "--paths", str(RAIZ / "motores"), "--paths", str(RAIZ / "motores" / "conciliador"),
              # excel_diario lo importa dentro de una función: PyInstaller no lo ve solo.

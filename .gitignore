@@ -28,3 +28,6 @@ dist/
 
 # Gráfica de graphify: guarda fragmentos de lo que lee
 graphify-out/
+
+# Temporales y datos de la ventana de Tino al correrla desde el código
+.ventana/
