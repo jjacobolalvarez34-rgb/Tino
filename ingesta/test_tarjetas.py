@@ -54,6 +54,12 @@ class Lector(unittest.TestCase):
                                    "retenciones": 1827, "prestamo": 0, "neto": 95183}])
         self.assertEqual(len(avisos), 2)
 
+    def test_datafono_ignorado_no_cuenta_ni_avisa(self):
+        ruta = libro(self.carpeta / "i.xlsx", BOLD, [
+            ["Tienda Vieja", dt.datetime(2025, 5, 2, 9, 30), "COBRO EXITOSO", 0, 0, 7000, 0, 0, 0, 0, 0, 0, 7000]])
+        cobros, avisos = tarjetas.leer(ruta, {**PUNTOS, "ignorar": ["tienda vieja"]})
+        self.assertEqual((cobros, avisos), ([], []))
+
     def test_bold_formato_clasico_sin_operacion(self):
         encabezado = [c for c in BOLD if c != "OPERACIÓN"]
         encabezado[-1] = "DEPOSITO EN SALDO DE VENTAS"

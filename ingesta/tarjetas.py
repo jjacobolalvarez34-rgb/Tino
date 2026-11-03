@@ -3,7 +3,8 @@
 
 Los encabezados son de Bold y Redeban, no de un cliente. Lo propio de cada empresa,
 qué datáfono es de qué punto, llega en `puntos`:
-    {"bold": {"NOMBRE DEL DATAFONO": "Punto 1"}, "redeban": {"85": "Punto 2"}}
+    {"bold": {"NOMBRE DEL DATAFONO": "Punto 1"}, "redeban": {"85": "Punto 2"},
+     "ignorar": ["DATAFONO QUE NO CUENTA"]}
 Por ahora sale de un archivo local. Con la base, saldrá de terminal_datafono.
 
 Solo lee: no escribe Excel. Las hojas que arma el conciliador con su plantilla no
@@ -138,6 +139,7 @@ def leer_bold(ruta, puntos):
     hoja, inicio, mapa = _hoja_del_reporte(ruta, {"NOMBRE DEL DATÁFONO"})
     col = _columnas(mapa, COLUMNAS_BOLD, "Bold", OPCIONALES_BOLD)
     por_nombre = {str(k).strip().upper(): v for k, v in puntos.get("bold", {}).items()}
+    ignorados = {str(n).strip().upper() for n in puntos.get("ignorar", [])}
 
     cobros, avisos, omitidas, desconocidos, raras = [], [], 0, set(), 0
     for f in range(inicio + 1, hoja.max_row + 1):
@@ -157,6 +159,8 @@ def leer_bold(ruta, puntos):
             raras += 1
             continue
         nombre = str(datafono).strip().upper().rstrip(".").strip()
+        if nombre in ignorados:
+            continue
         punto = por_nombre.get(nombre)
         if punto is None:
             desconocidos.add(str(datafono).strip())
