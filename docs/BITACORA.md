@@ -26,7 +26,7 @@ Hecho:
   repositorio: 16 meses y 11 puntos. El código de la pantalla corrió en Node en sus 204
   combinaciones de mes y punto, sin errores. No se revisó en un navegador, porque Edge
   podría escribir en C:.
-- 37 extractos contra los depósitos de Bold. De los 50 bloques con línea en el banco, 36
+- 37 extractos contra los depósitos de Bold. De los 44 bloques con línea en el banco, 36
   coinciden exacto.
 - El préstamo es anterior a lo que se creía: en mayo de 2026 el banco recibió 10 % menos y
   el reporte no traía la columna. De ahí salía el 90 % del conciliador (D-029).
