@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tino · Revisión del día</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --color-marca:#74305F; --color-marca-hover:#5A2449; --color-marca-suave:#F3E4EE; --color-foco:#C99BBB;
+  --color-fondo:#F7F5F7; --color-superficie:#FFFFFF; --color-texto:#22161F; --color-texto-suave:#5E5862;
+  --color-borde:#E2DDE3; --color-divisor:#F0ECF0;
+  --ok:#1C7638; --ok-fondo:#E1F2E5; --revisar:#7A5A00; --revisar-fondo:#FBF1CC;
+  --mal:#9A2A0A; --mal-fondo:#FDE5DA; --neutro:#4F4853;
+  --esp-1:4px; --esp-2:8px; --esp-3:12px; --esp-4:16px; --esp-5:20px; --esp-6:24px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--color-fondo);color:var(--color-texto);font-family:Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--color-foco);outline-offset:2px}
+.num,table{font-variant-numeric:tabular-nums}
+.pagina{max-width:1232px;margin:0 auto;padding:var(--esp-6);display:flex;flex-direction:column;gap:var(--esp-6)}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-size:28px;font-weight:800} h2{font-size:18px;font-weight:700} h3{font-size:15px;font-weight:700}
+.cabeza{display:flex;align-items:center;gap:var(--esp-3)}
+.cabeza svg{width:40px;height:40px;flex:none}
+.pequeno{font-size:13px;font-weight:500;color:var(--color-texto-suave)}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--esp-4)}
+.tarjeta{background:var(--color-superficie);border:1px solid var(--color-borde);border-radius:12px;padding:var(--esp-5);min-width:0}
+.tarjeta.alerta{background:var(--mal-fondo);border-color:#F6CBB8} .tarjeta.alerta *{color:var(--mal)}
+.cifra{display:flex;flex-direction:column;gap:var(--esp-1)}
+.cifra .etiqueta{font-size:13px;font-weight:600;color:var(--color-texto-suave)}
+.cifra .valor{font-size:30px;font-weight:800}
+.encabezado{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--esp-3);margin-bottom:var(--esp-3)}
+.caja{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-texto-suave);font-weight:600;padding:var(--esp-2) 10px;border-bottom:1px solid var(--color-borde);text-align:left;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:top}
+.d{text-align:right;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.c-ok{color:var(--ok);background:var(--ok-fondo)} .c-rev{color:var(--revisar);background:var(--revisar-fondo)}
+.c-mal{color:var(--mal);background:var(--mal-fondo)} .c-neu{color:var(--neutro);background:var(--color-divisor)}
+.boton{height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--color-marca);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:var(--esp-2)}
+.boton:hover{background:var(--color-marca-hover)}
+.punto{display:flex;flex-direction:column;gap:var(--esp-4)}
+.grupos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:var(--esp-4)}
+.grupo{border:1px solid var(--color-divisor);border-radius:10px;padding:var(--esp-3) var(--esp-4);display:flex;flex-direction:column;gap:var(--esp-2)}
+.grupo ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:var(--esp-1)}
+.grupo li{display:flex;justify-content:space-between;gap:var(--esp-3);font-size:14px}
+.nota{border-radius:10px;padding:var(--esp-3) var(--esp-4);font-size:14px}
+.aviso{background:var(--revisar-fondo);color:var(--revisar)} .aviso ul{margin:var(--esp-1) 0 0;padding-left:var(--esp-5)}
+#anuncio{position:fixed;left:50%;bottom:var(--esp-6);transform:translateX(-50%);background:var(--color-texto);color:#fff;padding:var(--esp-3) 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+#anuncio.ver{opacity:1}
+@media (max-width:560px){.pagina{padding:var(--esp-5)}.cifra .valor{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="cabeza">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#74305F"/><path d="M50 48 V78" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/><path d="M37 27 L46 36 L64 15" fill="none" stroke="#E9C6DC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><h1>Revisión del día</h1><div class="pequeno" id="fecha"></div></div>
+  </header>
+  <section class="cifras" id="cifras" aria-label="Lo que necesita atención"></section>
+  <section class="tarjeta">
+    <div class="encabezado">
+      <h2>Puntos</h2>
+      <button class="boton" id="copiar">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        Copiar como números
+      </button>
+    </div>
+    <div class="caja" id="tabla"></div>
+  </section>
+  <div id="detalle" style="display:flex;flex-direction:column;gap:var(--esp-4)"></div>
+  <section class="tarjeta" id="sin-origen"></section>
+  <div class="nota aviso" id="avisos" hidden></div>
+</div>
+<div id="anuncio" role="status" aria-live="polite"></div>
+<script id="datos" type="application/json">/*DATOS*/null</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById('datos').textContent);
+  const $ = (id) => document.getElementById(id);
+  const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const miles = (n) => Math.abs(n).toLocaleString('es-CO');
+  const pesos = (n) => (n < 0 ? '−' : '') + '$ ' + miles(n);
+  const escapar = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const suma = (lista) => lista.reduce((a, x) => a + x.monto, 0);
+  const fila = (id) => { const m = /fila (\d+)/.exec(id); return m ? 'fila ' + m[1] : ''; };
+  const [a, m, d] = D.fecha.split('-').map(Number);
+  $('fecha').textContent = `${DIAS[new Date(Date.UTC(a, m - 1, d)).getUTCDay()]} ${d} de ${MESES[m - 1]} de ${a}`;
+
+  const ESTADOS = {
+    cuadra: '<span class="chip c-ok">● Cuadra</span>',
+    explicado: '<span class="chip c-rev">▲ Explicado</span>',
+    sin_explicar: '<span class="chip c-mal">■ Sin causa clara</span>',
+    sin_dato: '<span class="chip c-neu">Sin descuadre en el Excel</span>',
+  };
+  const QUE = { no_llego: 'Anotada que no llegó', sin_anotar: 'Llegó sin anotar', mal_digitado: 'Monto mal digitado' };
+  const REGLA = { R30: 'transferencias', R33: 'tarjetas' };
+  const conDia = D.puntos.filter((p) => !p.sin_excel);
+  const pendientes = (p, rol, campo) => (p.cruces[rol] ? p.cruces[rol][campo] : []);
+  const causaPrincipal = (p) => {
+    const c = p.causas.filter((x) => x.tipo === 'causa').sort((x, y) => Math.abs(y.monto) - Math.abs(x.monto))[0];
+    return c ? `${QUE[c.que]} en ${REGLA[c.regla]}` : (p.estado.estado === 'sin_explicar' ? 'Sin causa clara' : '');
+  };
+
+  // Lo que necesita atención va arriba (DESIGN.md, principio 1).
+  const noLlegaron = conDia.flatMap((p) => pendientes(p, 'transferencias', 'no_llegaron'));
+  const sinCausa = conDia.filter((p) => p.estado.estado === 'sin_explicar');
+  const cifra = (etiqueta, valor, ayuda, alerta) => `<div class="tarjeta cifra ${alerta ? 'alerta' : ''}"><span class="etiqueta">${etiqueta}</span><span class="valor num">${valor}</span><span class="pequeno">${ayuda}</span></div>`;
+  $('cifras').innerHTML =
+    cifra('Puntos sin causa clara', sinCausa.length, `de ${conDia.length} revisados`, sinCausa.length > 0)
+    + cifra('Transferencias que no llegaron', noLlegaron.length, noLlegaron.length ? pesos(suma(noLlegaron)) + ' en total' : 'Ninguna', noLlegaron.length > 0)
+    + cifra('Pagos sin punto', D.sin_origen.length, D.sin_origen.length ? pesos(D.sin_origen.reduce((x, s) => x + s.valor, 0)) + ' por asignar' : 'Ninguno', false);
+
+  const orden = { sin_explicar: 0, explicado: 1, sin_dato: 2, cuadra: 3 };
+  const lista = [...conDia].sort((x, y) => orden[x.estado.estado] - orden[y.estado.estado] || x.punto.localeCompare(y.punto));
+  $('tabla').innerHTML = `<table style="min-width:640px"><thead><tr><th>Punto</th><th>Asesora</th><th class="d">Venta</th><th class="d">Descuadre</th><th>Estado</th><th>Causa principal</th></tr></thead><tbody>`
+    + lista.map((p) => `<tr><td><b>${escapar(p.punto)}</b></td><td>${escapar(p.asesoras)}</td><td class="d">${p.venta == null ? '' : miles(p.venta)}</td><td class="d"><b>${p.descuadre == null ? '' : pesos(p.descuadre)}</b></td><td>${ESTADOS[p.estado.estado]}</td><td>${escapar(causaPrincipal(p))}</td></tr>`).join('')
+    + `</tbody></table>` + (D.puntos.some((p) => p.sin_excel) ? `<p class="pequeno">Sin Excel ese día: ${D.puntos.filter((p) => p.sin_excel).map((p) => escapar(p.punto)).join(', ')}.</p>` : '');
+
+  const grupo = (titulo, items, ayuda) => items.length ? `<div class="grupo"><h3>${titulo}</h3><span class="pequeno">${ayuda}</span><ul>${items.map((i) => `<li><span>${escapar(i.texto)}</span><b class="num">${pesos(i.monto)}</b></li>`).join('')}</ul></div>` : '';
+  $('detalle').innerHTML = lista.filter((p) => Object.values(p.cruces).some((c) => c.no_llegaron.length || c.no_anotadas.length || c.mal_digitadas.length || c.otro_dia.length) || p.sin_datos.length).map((p) => {
+    const bloques = [];
+    for (const [rol, nombre, externo] of [['transferencias', 'Transferencias', 'el banco'], ['tarjetas', 'Tarjetas', 'Bold o Redeban']]) {
+      const c = p.cruces[rol];
+      if (!c) continue;
+      bloques.push(grupo(`${nombre}: anotadas que no aparecen`, c.no_llegaron.map((i) => ({ texto: fila(i.id) || 'anotada', monto: i.monto })), `No están en ${externo} ese día ni el anterior o el siguiente.`));
+      bloques.push(grupo(`${nombre}: llegaron sin anotar`, c.no_anotadas.map((i) => ({ texto: 'sin anotar', monto: i.monto })), `Están en ${externo} y no en el Excel.`));
+      bloques.push(grupo(`${nombre}: posible monto mal digitado`, c.mal_digitadas.map((x) => ({ texto: `anotado ${miles(x.anotado.monto)}, real`, monto: x.externo.monto })), 'Se parecen: un dígito distinto, cambiados de lugar o un cero de más.'));
+      bloques.push(grupo(`${nombre}: aparecen otro día`, c.otro_dia.map((x) => ({ texto: x.donde === 'externo_otro_dia' ? 'llegó otro día' : 'se anotó otro día', monto: x.monto })), 'Normal en pagos de la noche: no es un faltante.'));
+    }
+    const faltan = p.sin_datos.length ? `<p class="pequeno">No se revisó contra: ${p.sin_datos.join(' ni ')}.</p>` : '';
+    return `<section class="tarjeta punto"><div class="encabezado" style="margin:0"><h2>${escapar(p.punto)}</h2>${ESTADOS[p.estado.estado]}</div><div class="grupos">${bloques.join('')}</div>${faltan}</section>`;
+  }).join('');
+
+  $('sin-origen').innerHTML = `<h2>Pagos sin punto</h2><p class="pequeno" style="margin:var(--esp-1) 0 var(--esp-3)">Llegaron al banco sin un código de punto reconocible. Tino no adivina de qué punto son: asígnelos a mano.</p>`
+    + (D.sin_origen.length ? `<div class="caja"><table><thead><tr><th>Referencia</th><th class="d">Valor</th></tr></thead><tbody>${D.sin_origen.map((s) => `<tr><td>${escapar(s.referencia || 'sin referencia')}</td><td class="d">${pesos(s.valor)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="pequeno">Ninguno.</p>');
+
+  if (D.avisos.length) {
+    $('avisos').hidden = false;
+    $('avisos').innerHTML = '<b>▲ Revisar los archivos</b><ul>' + D.avisos.map((x) => `<li>${escapar(x)}</li>`).join('') + '</ul>';
+  }
+
+  $('copiar').addEventListener('click', () => {
+    const filas = [['Punto', 'Venta', 'Descuadre', 'Transferencias que no llegaron', 'Tarjetas que no aparecen']]
+      .concat(lista.map((p) => [p.punto, p.venta ?? '', p.descuadre ?? '', suma(pendientes(p, 'transferencias', 'no_llegaron')), suma(pendientes(p, 'tarjetas', 'no_llegaron'))]));
+    const texto = filas.map((f) => f.join('\t')).join('\n');
+    const avisa = (msg) => { const x = $('anuncio'); x.textContent = msg; x.classList.add('ver'); setTimeout(() => x.classList.remove('ver'), 2400); };
+    const respaldo = () => { const t = document.createElement('textarea'); t.value = texto; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); avisa(ok ? 'Copiado. Péguelo en Excel: quedan números que se pueden sumar.' : 'No se pudo copiar.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(() => avisa('Copiado. Péguelo en Excel: quedan números que se pueden sumar.'), respaldo);
+    else respaldo();
+  });
+})();
+</script>
+</body>
+</html>

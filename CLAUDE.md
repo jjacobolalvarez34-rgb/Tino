@@ -104,6 +104,9 @@ quiere entender cada decisión, no solo recibir código.
 - Probar el lector de Bold y Redeban: `python -m unittest ingesta.test_tarjetas`
 - Cargar maestros de una empresa (simula, y con `--aplicar` escribe):
   `python ingesta/maestros.py <datos.json fuera del repositorio>`
+- Armar la revisión de un día (Excel, extracto y reportes de tarjetas):
+  `python panel/revision/armar.py --fecha AAAA-MM-DD --puntos puntos.json --salida revision.html --excel ... --banco ... --tarjetas ...`
+- Probar la revisión, desde `motores/`: `python -m unittest test_revision`
 - Armar el tablero de ventas:
   `python panel/tablero/armar.py --puntos puntos.json --salida tablero.html reporte.xlsx`
 - [POR COMPLETAR en la tarea 001: aplicar migraciones en Supabase y levantar el

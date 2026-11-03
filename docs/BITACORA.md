@@ -15,6 +15,21 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Primera versión de la revisión de la mañana
+Hecho:
+- `causas_de_cruce` en el contrato y en los dos lenguajes: 0 diferencias.
+- Lectores del Excel diario (adaptador sobre el lector del conciliador) y del extracto.
+- `motores/revision.py` y `panel/revision/`: la revisión de un día, por punto. Probada con
+  todo septiembre de un punto real, y su pantalla corre sin errores en Node.
+- Redeban sí distingue débito y crédito (`TIPO TARJETA`).
+Falta:
+- Causas que aún no revisa: error de billete, compensación entre días y combinación de
+  precios. Por eso muchos días salen "sin causa clara".
+- Excels de los otros 10 puntos en D: para probarla completa.
+- Cruce de los depósitos de Bold y Redeban contra el banco dentro de la revisión.
+Dudas:
+- Ninguna nueva.
+
 ## 2026-11-02 · Reglas reescritas con datos reales
 Hecho:
 - Con permiso de Jacobo, se reescribieron los tres archivos de `docs/REGLAS/` con lo que
