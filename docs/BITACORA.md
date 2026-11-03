@@ -22,11 +22,16 @@ Hecho:
 - `0002_asesoras.sql`: código automático y alias por punto (D-030). 101 pruebas en verde en
   Postgres local, con los datos del servidor en D:. **Aún no está aplicada en Supabase.**
 - Tipos de venta de Milagros definidos (D-031).
+- Simulacro de maestros, sin escribir en Supabase: el lector viejo funciona con el Excel
+  real si se usa `LibroXlsx` directo. `leer_libro` no se usa porque guarda caché en C:.
 Falta:
 - Jacobo aplica 0002 en el editor SQL.
 - Jacobo apaga el registro abierto en Authentication: sigue encendido.
+- Faltan los Excels diarios de 10 puntos: en Descargas solo está uno. Sin ellos no hay
+  asesoras completas para la tarea 003.
 Dudas:
-- Ninguna.
+- Algunos productos del Excel no están en `mapeo_siigo` y otros no tienen código de Siigo.
+  Jacobo debe revisarlos antes de cargarlos.
 
 ## 2026-11-02 · Extracto de julio y corrección de la unión de reportes
 Hecho:
