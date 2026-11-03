@@ -27,6 +27,30 @@ nombre claro y el Excel de transferencias para pegar en el Google Sheet.
 - El orden de los puntos y su código salen de la base (`punto_venta`,
   `codigo_recaudo`), no de una lista en el código.
 
+### Pagos sin origen (lo que le falta al apartado de transferencias, dijo Jacobo)
+
+Hoy Tino solo cuenta como sin origen los PAGO QR y PAGO LLAVE cuyo código no reconoce.
+El conciliador (`cierre/banco.py`, `SIN_CODIGO_RE`) también cuenta las líneas que
+empiezan por `TRANSFERENCIA DESDE` (Nequi y otros) y `TRANSFERENCIA CTA`: Tino no las
+lee, y esos pagos no aparecen en ningún lado. Hay que:
+
+- Leer esas líneas del extracto como movimientos sin punto (en el contrato y en los
+  dos lenguajes, como `leer_linea_transferencia`).
+- Pantalla "Sin origen": cada pago sin punto, con fecha, descripción y valor, y
+  "Asignar a un punto" con nota (`movimiento_externo.punto_id` ya se puede cambiar).
+  Nunca se asigna solo (T2).
+- Sugerir la pareja sin confirmarla: si ese día un punto tiene una transferencia que
+  no llegó por el mismo monto, se muestra como posible.
+- Señal de QR cambiado (T3): un punto anotó transferencias y no recibió ninguna con su
+  código el mismo día que llegan pagos sin código.
+- Al asignar, revisar otra vez ese día y el vecino, para que la transferencia pase de
+  "no llegó" a "llegó" con la nota de quién la asignó.
+- En el Excel exportado, la sección "DATOS SIN ORIGEN" con el punto ya asignado, si lo
+  tiene.
+
+Pregunta para Jacobo antes de empezar: ¿las consignaciones (`palabras_consignacion` del
+conciliador) también van aquí, o se ven aparte?
+
 ## Fuera de alcance
 
 - Cambiar cómo se reconoce el punto (últimos 4 dígitos, D-026): ya es igual en los dos.
@@ -39,6 +63,9 @@ nombre claro y el Excel de transferencias para pegar en el Google Sheet.
 - El Excel que exporta Tino para el 30 de agosto de 2026 tiene, punto por punto, los
   mismos totales que `TRANSFERENCIAS {2026-08-30}.xlsx` del conciliador (7).
 - La copia del PDF queda con el nombre esperado y nada se escribe en C:.
+- Con el extracto de septiembre, la lista de pagos sin origen de Tino tiene los mismos
+  pagos que "DATOS SIN ORIGEN" del conciliador, incluidos los de Nequi. Al asignar uno a
+  un punto, esa transferencia deja de salir como "no llegó".
 
 ## Cómo lo reviso yo (Jacobo)
 
