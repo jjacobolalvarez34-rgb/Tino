@@ -15,6 +15,17 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · 0001 aplicada en tino-pruebas
+Hecho:
+- Jacobo creó `tino-pruebas` y corrió 0001. Quedó la versión final y la base está vacía.
+- Las llaves están en `.env`, que git ignora. Jacobo las va a cambiar después, porque
+  pasaron por el chat.
+Falta:
+- Apagar el registro abierto en Authentication: sigue encendido.
+- `SUPABASE_DB_URL`, y la prueba con dos empresas (tarea 002).
+Dudas:
+- Ninguna.
+
 ## 2026-11-02 · Tablero histórico y depósitos de Bold contra el banco
 Hecho:
 - Dos crasheos más mientras corrían procesos míos. Windows registra que el equipo estaba

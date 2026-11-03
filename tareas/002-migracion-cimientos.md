@@ -35,6 +35,15 @@ y perfiles de fuente, con la separación entre empresas probada.
 - Ya probada en un Postgres 16 local el 2 nov 2026: migra sin errores y las 20
   pruebas pasan (incluye `empresa_config`).
 
+### Aplicada en `tino-pruebas` el 2 nov 2026
+- Jacobo la corrió en el editor SQL. Revisado por la API, solo leyendo: 16 tablas, versión
+  final (con `codigo_recaudo` y sin `bold_porcentajes_deposito`), sin filas, y la llave
+  pública sin sesión no ve datos.
+- **Desde ahora 0001 no se edita.** Cualquier corrección va en una migración nueva (D-012).
+- Falta para dar la tarea por hecha: contar políticas y triggers, revisar TRUNCATE y hacer
+  la prueba con dos empresas de prueba. Necesita `SUPABASE_DB_URL` y el visto bueno de
+  Jacobo, porque crea filas en la base.
+
 ### Avance del 2 nov 2026
 - Jacobo aprobó corregir 0001 antes de aplicarla (D-018). Pasos 1 a 3 hechos: 0001
   corregida y 88 pruebas en verde en Postgres 16.3. Quedan 16 tablas con RLS, 45
