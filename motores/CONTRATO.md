@@ -197,6 +197,51 @@ Por qué: una transferencia anotada que no llegó ya está sumada en la caja, as
 explica un faltante; sí explica un sobrante, si se anotó dos veces. Igual que en el
 conciliador actual.
 
+### Causas que salen del descuadre mismo
+
+Las tres funciones siguientes devuelven elementos con la misma forma de `causas_de_cruce`
+(`{regla, que, tipo, monto, total}`) y algunos campos más. Usan las reglas y los valores
+del conciliador actual (`R03`, `R04` y `R05` en `cierre_config.json`). De **signo
+contrario** quiere decir que uno es mayor que 0 y el otro menor que 0.
+
+### `causa_compensacion` · `{descuadre, vecinos, monto_minimo, tolerancia, porcentaje}` → lista
+Un día sobra y el día vecino falta un monto parecido, o al revés: suele ser un error de
+conteo o de base que se arrastra. Cada vecino es `{cual, descuadre}`: `cual` es texto
+(`anterior` o `siguiente`) y `descuadre` es entero o `null`. Se recorren en el orden
+recibido. `porcentaje` es entero (25 significa 25 %).
+1. Si `abs(descuadre) < monto_minimo`, devuelve `[]`.
+2. Se salta el vecino si su `descuadre` es `null`, si `abs(y) < monto_minimo` o si no es
+   de signo contrario al del día.
+3. `dif` = `abs(descuadre + y)`. Se compensa si `dif ≤ tolerancia` o si
+   `100 × dif ≤ porcentaje × max(abs(descuadre), abs(y))`.
+4. Si se compensa, agrega `{regla: "R03", que: "compensacion", tipo: "causa", monto, total: y, cual}`,
+   con `monto` = `signo × min(abs(descuadre), abs(y))` y `signo` = 1 si `descuadre > 0`,
+   si no -1.
+
+### `causa_billete` · `{descuadre, denominaciones, max_billetes}` → lista
+El descuadre es justo de 1 a `max_billetes` billetes de una misma denominación. Las
+denominaciones son enteros mayores que 0 y se prueban de mayor a menor, sin repetir.
+La primera `d` con `abs(descuadre)` divisible por `d` y `1 ≤ abs(descuadre) / d ≤ max_billetes`
+da `[{regla: "R04", que: "billete", tipo: "causa", monto: descuadre, total: descuadre, denominacion: d, cantidad}]`.
+Si ninguna sirve, `[]`.
+
+### `causa_precios` · `{descuadre, productos, monto_minimo, max_productos, max_mostradas}` → lista
+El descuadre es justo la suma de unos pocos precios de productos del punto. Casi
+cualquier monto redondo se arma así: por eso es una **pista** y su regla va en
+`reglas_sin_peso`. Cada producto es `{precio, movimiento}`, los dos enteros; los de
+precio 0 o menos no cuentan. `movimiento` dice cuánto se movió ese producto en el día.
+1. `objetivo` = `abs(descuadre)`. Si es 0 o menor que `monto_minimo`, devuelve `[]`.
+2. `precios`: los precios distintos, de menor a mayor. El movimiento de un precio es la
+   suma del `movimiento` de sus productos.
+3. Para `n` de 1 a `max_productos`: las combinaciones son las listas de `n` precios, de
+   menor a mayor y con repetición, que suman `objetivo`, en orden lexicográfico. Se para
+   en el primer `n` que tenga alguna: la explicación con menos productos.
+4. Sin combinaciones, `[]`. Si hay, se ordenan por movimiento total (suma del movimiento
+   de cada precio de la lista, contando repetidos), de mayor a menor; si empatan, queda
+   el orden lexicográfico.
+5. Devuelve `[{regla: "R05", que: "precios", tipo: "causa", monto: descuadre, total: descuadre, cuantas, combinaciones}]`,
+   con `cuantas` = número de combinaciones y `combinaciones` = las primeras `max_mostradas`.
+
 ## Cómo se prueba
 
 - `tests/casos/motor/casos.json`: casos escritos a mano, con datos inventados. Cada

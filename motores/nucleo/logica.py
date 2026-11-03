@@ -330,10 +330,77 @@ def causas_de_cruce(regla, cruce, descuadre):
     return salida
 
 
+def _contrarios(a, b):
+    return (a > 0 and b < 0) or (a < 0 and b > 0)
+
+
+def causa_compensacion(descuadre, vecinos, monto_minimo, tolerancia, porcentaje):
+    """Un día sobra y el vecino falta un monto parecido: un error que se arrastra."""
+    if abs(descuadre) < monto_minimo:
+        return []
+    salida = []
+    for vecino in vecinos:
+        y = vecino["descuadre"]
+        if y is None or abs(y) < monto_minimo or not _contrarios(descuadre, y):
+            continue
+        dif = abs(descuadre + y)
+        if dif <= tolerancia or 100 * dif <= porcentaje * max(abs(descuadre), abs(y)):
+            signo = 1 if descuadre > 0 else -1
+            salida.append({"regla": "R03", "que": "compensacion", "tipo": "causa",
+                           "monto": signo * min(abs(descuadre), abs(y)), "total": y, "cual": vecino["cual"]})
+    return salida
+
+
+def causa_billete(descuadre, denominaciones, max_billetes):
+    """El descuadre es justo de uno a pocos billetes iguales: un error al contar."""
+    for d in sorted(set(denominaciones), reverse=True):
+        cantidad, resto = divmod(abs(descuadre), d)
+        if resto == 0 and 1 <= cantidad <= max_billetes:
+            return [{"regla": "R04", "que": "billete", "tipo": "causa", "monto": descuadre,
+                     "total": descuadre, "denominacion": d, "cantidad": cantidad}]
+    return []
+
+
+def causa_precios(descuadre, productos, monto_minimo, max_productos, max_mostradas):
+    """El descuadre es la suma de pocos precios del punto. Es pista, no causa con peso."""
+    objetivo = abs(descuadre)
+    if objetivo == 0 or objetivo < monto_minimo:
+        return []
+    movimiento = {}
+    for p in productos:
+        if p["precio"] > 0:
+            movimiento[p["precio"]] = movimiento.get(p["precio"], 0) + p["movimiento"]
+    precios = sorted(movimiento)
+
+    def armar(n, desde, suma):
+        # Listas de n precios, de menor a mayor, que suman objetivo, en orden lexicográfico.
+        if n == 1:
+            resto = objetivo - suma
+            return [[resto]] if resto in movimiento and resto >= precios[desde] else []
+        salida = []
+        for i in range(desde, len(precios)):
+            if suma + n * precios[i] > objetivo:
+                break
+            salida += [[precios[i]] + cola for cola in armar(n - 1, i, suma + precios[i])]
+        return salida
+
+    combinaciones = []
+    for n in range(1, max_productos + 1):
+        combinaciones = armar(n, 0, 0) if precios else []
+        if combinaciones:
+            break
+    if not combinaciones:
+        return []
+    combinaciones.sort(key=lambda c: -sum(movimiento[q] for q in c))
+    return [{"regla": "R05", "que": "precios", "tipo": "causa", "monto": descuadre, "total": descuadre,
+             "cuantas": len(combinaciones), "combinaciones": combinaciones[:max_mostradas]}]
+
+
 _FUNCIONES = {f.__name__: f for f in (
     a_pesos, restar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
     bloques_deposito, coincide_deposito, cruces_redeban, estado_dia,
-    leer_linea_transferencia, punto_por_referencia, estadisticas_ventas, causas_de_cruce)}
+    leer_linea_transferencia, punto_por_referencia, estadisticas_ventas, causas_de_cruce,
+    causa_compensacion, causa_billete, causa_precios)}
 
 
 def ejecutar(funcion, entrada):

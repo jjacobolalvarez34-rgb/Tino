@@ -102,11 +102,16 @@ td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:top}
   };
   const QUE = { no_llego: 'Anotada que no llegó', sin_anotar: 'Llegó sin anotar', mal_digitado: 'Monto mal digitado' };
   const REGLA = { R30: 'transferencias', R33: 'tarjetas' };
+  const fechaCorta = (f) => { const [, mm, dd] = f.split('-').map(Number); return `${dd} de ${MESES[mm - 1]}`; };
+  const nombreCausa = (c) => ({
+    compensacion: `Se compensa con el ${fechaCorta(c.fecha)}`,
+    billete: `${c.cantidad === 1 ? 'Un billete' : c.cantidad + ' billetes'} de ${pesos(c.denominacion)}`,
+  }[c.que] || `${QUE[c.que]} en ${REGLA[c.regla]}`);
   const conDia = D.puntos.filter((p) => !p.sin_excel);
   const pendientes = (p, rol, campo) => (p.cruces[rol] ? p.cruces[rol][campo] : []);
   const causaPrincipal = (p) => {
     const c = p.causas.filter((x) => x.tipo === 'causa').sort((x, y) => Math.abs(y.monto) - Math.abs(x.monto))[0];
-    return c ? `${QUE[c.que]} en ${REGLA[c.regla]}` : (p.estado.estado === 'sin_explicar' ? 'Sin causa clara' : '');
+    return c ? nombreCausa(c) : (p.estado.estado === 'sin_explicar' ? 'Sin causa clara' : '');
   };
 
   // Lo que necesita atención va arriba (DESIGN.md, principio 1).
@@ -125,8 +130,19 @@ td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:top}
     + `</tbody></table>` + (D.puntos.some((p) => p.sin_excel) ? `<p class="pequeno">Sin Excel ese día: ${D.puntos.filter((p) => p.sin_excel).map((p) => escapar(p.punto)).join(', ')}.</p>` : '');
 
   const grupo = (titulo, items, ayuda) => items.length ? `<div class="grupo"><h3>${titulo}</h3><span class="pequeno">${ayuda}</span><ul>${items.map((i) => `<li><span>${escapar(i.texto)}</span><b class="num">${pesos(i.monto)}</b></li>`).join('')}</ul></div>` : '';
-  $('detalle').innerHTML = lista.filter((p) => Object.values(p.cruces).some((c) => c.no_llegaron.length || c.no_anotadas.length || c.mal_digitadas.length || c.otro_dia.length) || p.sin_datos.length).map((p) => {
+  const DEL_DESCUADRE = ['compensacion', 'billete', 'precios'];
+  const delDescuadre = (p) => p.causas.filter((c) => DEL_DESCUADRE.includes(c.que));
+  const combo = (c) => c.map((x) => (x.nombres.length ? x.nombres.join(' o ') : 'un producto') + ` (${pesos(x.precio)})`).join(' + ');
+  $('detalle').innerHTML = lista.filter((p) => Object.values(p.cruces).some((c) => c.no_llegaron.length || c.no_anotadas.length || c.mal_digitadas.length || c.otro_dia.length) || p.sin_datos.length || delDescuadre(p).length).map((p) => {
     const bloques = [];
+    const otras = delDescuadre(p).filter((c) => c.que !== 'precios');
+    bloques.push(grupo('Otras explicaciones del descuadre', otras.map((c) => ({
+      texto: c.que === 'compensacion' ? `El ${fechaCorta(c.fecha)} quedó ${pesos(c.total)}` : nombreCausa(c), monto: c.monto,
+    })), 'Un error de conteo o de base que se arrastra, o billetes contados de más o de menos.'));
+    const pista = delDescuadre(p).find((c) => c.que === 'precios');
+    if (pista) {
+      bloques.push(`<div class="grupo"><h3>Pista: el descuadre es lo que valen estos productos</h3><span class="pequeno">Casi cualquier monto redondo se arma así: es una pista, no explica el descuadre.${pista.cuantas > pista.productos.length ? ` Hay ${pista.cuantas} combinaciones posibles.` : ''}</span><ul>${pista.productos.map((c) => `<li><span>${escapar(combo(c))}</span></li>`).join('')}</ul></div>`);
+    }
     for (const [rol, nombre, externo] of [['transferencias', 'Transferencias', 'el banco'], ['tarjetas', 'Tarjetas', 'Bold o Redeban']]) {
       const c = p.cruces[rol];
       if (!c) continue;

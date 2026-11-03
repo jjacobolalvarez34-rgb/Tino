@@ -568,6 +568,109 @@ export function causas_de_cruce(regla: string, cruce: Cruce, descuadre: number):
   return salida;
 }
 
+export type VecinoDescuadre = { cual: string; descuadre: number | null };
+export type Producto = { precio: number; movimiento: number };
+
+function contrarios(a: number, b: number): boolean {
+  return (a > 0 && b < 0) || (a < 0 && b > 0);
+}
+
+// Un día sobra y el vecino falta un monto parecido: un error que se arrastra.
+export function causa_compensacion(
+  descuadre: number,
+  vecinos: VecinoDescuadre[],
+  monto_minimo: number,
+  tolerancia: number,
+  porcentaje: number,
+): object[] {
+  if (Math.abs(descuadre) < monto_minimo) return [];
+  const salida: object[] = [];
+  for (const vecino of vecinos) {
+    const y = vecino.descuadre;
+    if (y === null || Math.abs(y) < monto_minimo || !contrarios(descuadre, y)) continue;
+    const dif = Math.abs(descuadre + y);
+    if (dif <= tolerancia || 100 * dif <= porcentaje * Math.max(Math.abs(descuadre), Math.abs(y))) {
+      const signo = descuadre > 0 ? 1 : -1;
+      salida.push({
+        regla: "R03",
+        que: "compensacion",
+        tipo: "causa",
+        monto: signo * Math.min(Math.abs(descuadre), Math.abs(y)),
+        total: y,
+        cual: vecino.cual,
+      });
+    }
+  }
+  return salida;
+}
+
+// El descuadre es justo de uno a pocos billetes iguales: un error al contar.
+export function causa_billete(descuadre: number, denominaciones: number[], max_billetes: number): object[] {
+  const distintas = [...new Set(denominaciones)].sort((a, b) => b - a);
+  const objetivo = Math.abs(descuadre);
+  for (const d of distintas) {
+    const cantidad = Math.floor(objetivo / d);
+    if (objetivo % d === 0 && cantidad >= 1 && cantidad <= max_billetes) {
+      return [
+        { regla: "R04", que: "billete", tipo: "causa", monto: descuadre, total: descuadre, denominacion: d, cantidad },
+      ];
+    }
+  }
+  return [];
+}
+
+// El descuadre es la suma de pocos precios del punto. Es pista, no causa con peso.
+export function causa_precios(
+  descuadre: number,
+  productos: Producto[],
+  monto_minimo: number,
+  max_productos: number,
+  max_mostradas: number,
+): object[] {
+  const objetivo = Math.abs(descuadre);
+  if (objetivo === 0 || objetivo < monto_minimo) return [];
+  const movimiento = new Map<number, number>();
+  for (const p of productos) {
+    if (p.precio > 0) movimiento.set(p.precio, (movimiento.get(p.precio) ?? 0) + p.movimiento);
+  }
+  const precios = [...movimiento.keys()].sort((a, b) => a - b);
+
+  // Listas de n precios, de menor a mayor, que suman objetivo, en orden lexicográfico.
+  const armar = (n: number, desde: number, suma: number): number[][] => {
+    if (n === 1) {
+      const resto = objetivo - suma;
+      return movimiento.has(resto) && resto >= precios[desde] ? [[resto]] : [];
+    }
+    const salida: number[][] = [];
+    for (let i = desde; i < precios.length; i++) {
+      if (suma + n * precios[i] > objetivo) break;
+      for (const cola of armar(n - 1, i, suma + precios[i])) salida.push([precios[i], ...cola]);
+    }
+    return salida;
+  };
+
+  let combinaciones: number[][] = [];
+  for (let n = 1; n <= max_productos; n++) {
+    combinaciones = precios.length > 0 ? armar(n, 0, 0) : [];
+    if (combinaciones.length > 0) break;
+  }
+  if (combinaciones.length === 0) return [];
+  const peso = (c: number[]) => c.reduce((a, q) => a + (movimiento.get(q) ?? 0), 0);
+  // sort de JavaScript es estable: los empates quedan en orden lexicográfico.
+  combinaciones.sort((x, y) => peso(y) - peso(x));
+  return [
+    {
+      regla: "R05",
+      que: "precios",
+      tipo: "causa",
+      monto: descuadre,
+      total: descuadre,
+      cuantas: combinaciones.length,
+      combinaciones: combinaciones.slice(0, max_mostradas),
+    },
+  ];
+}
+
 type Entrada = Record<string, unknown>;
 type Registro = { parametros: string[]; llamar: (e: Entrada) => unknown };
 
@@ -671,6 +774,41 @@ const FUNCIONES = new Map<string, Registro>([
     {
       parametros: ["regla", "cruce", "descuadre"],
       llamar: (e) => causas_de_cruce(e.regla as string, e.cruce as Cruce, e.descuadre as number),
+    },
+  ],
+  [
+    "causa_compensacion",
+    {
+      parametros: ["descuadre", "vecinos", "monto_minimo", "tolerancia", "porcentaje"],
+      llamar: (e) =>
+        causa_compensacion(
+          e.descuadre as number,
+          e.vecinos as VecinoDescuadre[],
+          e.monto_minimo as number,
+          e.tolerancia as number,
+          e.porcentaje as number,
+        ),
+    },
+  ],
+  [
+    "causa_billete",
+    {
+      parametros: ["descuadre", "denominaciones", "max_billetes"],
+      llamar: (e) => causa_billete(e.descuadre as number, e.denominaciones as number[], e.max_billetes as number),
+    },
+  ],
+  [
+    "causa_precios",
+    {
+      parametros: ["descuadre", "productos", "monto_minimo", "max_productos", "max_mostradas"],
+      llamar: (e) =>
+        causa_precios(
+          e.descuadre as number,
+          e.productos as Producto[],
+          e.monto_minimo as number,
+          e.max_productos as number,
+          e.max_mostradas as number,
+        ),
     },
   ],
 ]);

@@ -15,6 +15,22 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Causas del descuadre: compensación, billete y precios
+Hecho:
+- `causa_compensacion`, `causa_billete` y `causa_precios` en el contrato y en los dos
+  lenguajes: 96 casos pasan en los dos y 0 diferencias en 30.000 comparaciones al azar.
+- La revisión las usa. La suma de precios es pista: se muestra y no explica (regla R05 en
+  `reglas_sin_peso`). Sin configuración, la causa no se revisa y se avisa.
+- Valores tomados del conciliador (`cierre_config.json`), como dicen las reglas. Quedan
+  como supuestos D5 y D6 en `docs/REGLAS/descuadres.md`.
+- Septiembre de Plaza Imperial: 18 días sin causa clara (antes 19). El 29 ahora se
+  explica por compensación con el 28. Ningún descuadre del mes es un número justo de
+  billetes. Los demás siguen sin causa clara: es lo correcto, no hay una que los explique.
+Falta:
+- Jacobo confirma D5 y D6.
+Dudas:
+- Ninguna nueva.
+
 ## 2026-11-02 · Primer Tino.exe
 Hecho:
 - `panel/app.py` y `panel/inicio.html`: una ventana con dos pestañas, revisión del día y

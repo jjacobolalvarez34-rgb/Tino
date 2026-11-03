@@ -58,5 +58,8 @@ def leer(ruta, puntos):
             "descuadre": _pesos(dia.caja.descuadre),
             "venta": _pesos(dia.caja.valor_teorico),
             "asesoras": dia.asesoras_texto,
+            # Para la pista de "suma de precios": se movió si salió por Siigo o en efectivo.
+            "productos": [{"precio": _pesos(p.precio) or 0, "nombre": p.nombre,
+                           "movimiento": 1 if (p.salidas_tot or p.efectivo_cant) else 0} for p in dia.productos],
         }
     return punto, dias, avisos

@@ -70,6 +70,7 @@ def generar(fecha, ruta_puntos, salida, excel=(), banco=(), tarjetas=()):
     puntos = json.loads(Path(ruta_puntos).read_text(encoding="utf-8"))
     excel_dias, banco_dias, tarj, avisos = leer_todo(a, puntos)
     resultado = revisar(fecha, excel_dias, banco_dias, tarj, puntos["config"])
+    avisos += [f"Falta configurar «{c}» en puntos.json: esa causa no se revisó." for c in resultado["sin_configurar"]]
     resultado["avisos"] = avisos
     resultado["fuentes"] = {"excel": len(a.excel), "banco": len(a.banco), "tarjetas": len(a.tarjetas)}
     datos = json.dumps(resultado, ensure_ascii=False).replace("</", "<\\/")

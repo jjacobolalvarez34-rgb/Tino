@@ -115,7 +115,23 @@ def generar(r):
         ("causas_de_cruce", {"regla": r.choice(["R30", "R33"]), "descuadre": r.choice([0, monto(r), -monto(r)]),
                              "cruce": ejecutar("cruzar", {"anotado": items(r, "a"), "externo": items(r, "e"),
                                                           "ext_vecinos": items(r, "v", 3), "excel_vecinos": items(r, "x", 3)})}),
+        ("causa_compensacion", {"descuadre": descuadre(r),
+                                "vecinos": [{"cual": c, "descuadre": r.choice([None, 0, descuadre(r), descuadre(r)])}
+                                            for c in r.sample(["anterior", "siguiente"], r.randint(0, 2))],
+                                "monto_minimo": r.choice([0, 1000]), "tolerancia": r.choice([0, 500]),
+                                "porcentaje": r.choice([0, 25, 100])}),
+        ("causa_billete", {"descuadre": descuadre(r), "max_billetes": r.choice([1, 3]),
+                           "denominaciones": r.sample([2000, 5000, 10000, 20000, 50000, 100000], r.randint(0, 6))}),
+        ("causa_precios", {"descuadre": descuadre(r), "monto_minimo": r.choice([0, 1000]),
+                           "max_productos": r.choice([1, 2, 3]), "max_mostradas": r.choice([1, 3]),
+                           "productos": [{"precio": r.choice([0, -100, 2500, 5000, 7500, 10000, 12000, 35900, r.randint(1, 90000)]),
+                                         "movimiento": r.randint(0, 3)} for _ in range(r.randint(0, 25))]}),
     ])
+
+
+def descuadre(r):
+    # Montos redondos a propósito: son los que arman billetes, precios y compensaciones.
+    return r.choice([0, 1, -1]) * r.choice([r.randint(0, 200) * 500, r.randint(0, 9_000_000), 100000, 35900])
 
 
 def correr_python(funcion, entrada):

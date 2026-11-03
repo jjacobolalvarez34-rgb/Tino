@@ -13,6 +13,8 @@ supuesto.
 | D2 | Qué parte del descuadre debe explicar una causa para dar el día por explicado | 80 % | `empresa_config` (nuevo) |
 | D3 | El descuadre del día es el que calcula el Excel del punto | Sí | Regla fija |
 | D4 | Billetes que se revisan para un error de conteo | 2.000 a 100.000, hasta 3 | `empresa_config` (nuevo) |
+| D5 | Cuándo dos días seguidos se compensan | Desde 1.000 pesos; la suma de los dos queda en 500 pesos o en el 25 % del mayor | `empresa_config` (nuevo) |
+| D6 | Suma de precios que se muestra como pista | Desde 1.000 pesos, de 1 a 3 productos, hasta 3 combinaciones | `empresa_config` (nuevo) |
 
 Los valores salen del conciliador actual.
 
@@ -43,7 +45,7 @@ Una causa trae siempre su prueba: la celda, el cobro o la línea del banco.
 | Cobrada sin anotar | Está en el banco o el datáfono y no en el Excel | Sí, si falta plata |
 | Venta con tarjeta que no aparece | Anotada y no está en el reporte de Bold o Redeban | Sí |
 | Monto mal digitado | Un monto anotado y uno real que parecen el mismo mal escrito | Sí |
-| Compensación entre días | Un día sobra y el siguiente falta un monto parecido | Sí |
+| Compensación entre días | Un día sobra y el anterior o el siguiente falta un monto parecido (D5). Vecino es la hoja anterior o siguiente del libro | Sí |
 | Error de billete | El descuadre es de 1 a 3 billetes de la misma denominación (D4) | Sí |
 | Combinación de precios | El descuadre es la suma de 1 a 3 precios de productos del punto | **No**: casi cualquier monto redondo cuadra así; se muestra como pista |
 
