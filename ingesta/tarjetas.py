@@ -248,14 +248,18 @@ def unir_reportes(lotes):
     """Une reportes que se traslapan sin contar dos veces.
 
     El mismo mes suele estar descargado varias veces, a veces incompleto. Para cada día
-    de cada proveedor se queda con el reporte que más cobros trae de ese día.
+    de cada proveedor se queda con el reporte que más cobros trae de ese día. Si empatan,
+    gana el que trae el préstamo: una versión vieja del archivo puede no tener esa columna.
     """
+    def valor(cobros_del_dia):
+        return len(cobros_del_dia), sum(c.get("prestamo", 0) for c in cobros_del_dia)
+
     mejor = {}
     for cobros in lotes:
         por_dia = {}
         for c in cobros:
             por_dia.setdefault((c["proveedor"], c["fecha"]), []).append(c)
-        for clave, delDia in por_dia.items():
-            if clave not in mejor or len(delDia) > len(mejor[clave]):
-                mejor[clave] = delDia
+        for clave, del_dia in por_dia.items():
+            if clave not in mejor or valor(del_dia) > valor(mejor[clave]):
+                mejor[clave] = del_dia
     return [c for clave in sorted(mejor) for c in mejor[clave]]

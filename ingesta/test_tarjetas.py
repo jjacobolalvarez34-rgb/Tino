@@ -136,6 +136,12 @@ class Lector(unittest.TestCase):
         unidos = tarjetas.unir_reportes([mes_parcial, mes_completo, mes_parcial])
         self.assertEqual([c["id"] for c in unidos], [1, 2, 3, 4])
 
+    def test_unir_reportes_prefiere_el_que_trae_el_prestamo(self):
+        sin = [{"proveedor": "bold", "fecha": "2026-07-15", "prestamo": 0}]
+        con = [{"proveedor": "bold", "fecha": "2026-07-15", "prestamo": 9600}]
+        self.assertEqual(tarjetas.unir_reportes([sin, con])[0]["prestamo"], 9600)
+        self.assertEqual(tarjetas.unir_reportes([con, sin])[0]["prestamo"], 9600)
+
     def test_valor_que_no_se_entiende_no_se_cuenta_y_avisa(self):
         ruta = libro(self.carpeta / "b.xlsx", BOLD, [
             ["Tienda Uno", dt.datetime(2026, 10, 30, 14, 32), "COBRO EXITOSO", 0, 0, "#REF!",

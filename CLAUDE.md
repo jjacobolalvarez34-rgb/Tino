@@ -13,10 +13,13 @@ quiere entender cada decisión, no solo recibir código.
 
 ## Este computador
 
-- Solo se trabaja en el disco D:. No se escribe nada en C:, que está casi lleno: un
-  crasheo el 2 nov 2026 ocurrió con C: al 99 %. Temporales y copias de trabajo van
+- Regla obligatoria: nada se escribe en C:, que está al 99 %. Los programas instalados
+  ahí se pueden ejecutar, sin escribir en ese disco. Temporales y copias de trabajo van
   en `D:\Repositorios\Tino-datos\trabajo\`, y `TEMP` y `TMP` deben apuntar ahí.
-- Un solo proceso pesado a la vez.
+- Sin tareas en segundo plano: dejan su registro en C:.
+- Lo pesado va en tandas cortas, de una en una, con avance guardado en D: y pidiéndole a
+  Windows no suspenderse mientras corre. El 2 nov 2026 el computador se apagó dos veces
+  al entrar en suspensión.
 
 ## Antes de escribir código
 
