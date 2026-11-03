@@ -167,6 +167,9 @@ tabla, y lo que no se entienda de un vistazo no entra.
 depósito ya viene descontado. Contra el extracto de septiembre, ningún bloque necesitó
 el 90 %. Por eso `empresa_config.bold_porcentajes_deposito` salió de 0001 antes de
 aplicarla: era un parche para un dato que el reporte ya trae exacto.
+Aclaración: el 90 % del conciliador sí tenía razón de ser. En mayo de 2026 el banco
+recibió 10 % menos y el reporte de entonces no traía la columna del préstamo. Aplica
+solo a reportes viejos: Tino no carga ese historial como dato de plata confirmado.
 
 ## Pendientes
 

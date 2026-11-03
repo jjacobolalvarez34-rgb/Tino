@@ -15,6 +15,32 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Tablero histórico y depósitos de Bold contra el banco
+Hecho:
+- Dos crasheos más mientras corrían procesos míos. Windows registra que el equipo estaba
+  entrando en suspensión (`SleepInProgress=1`, sin pantalla azul) y con memoria de sobra:
+  no fue por memoria. Hipótesis sin comprobar: C: al 99 % al suspender.
+- Regla reforzada en `CLAUDE.md`: nada se escribe en C:. Lo pesado va por tandas, con
+  avance en `D:\Repositorios\Tino-datos\trabajo\`, y pidiéndole a Windows no suspenderse.
+- Tablero histórico en `D:\Repositorios\Tino-datos\tablero_historico.html`, fuera del
+  repositorio: 16 meses y 11 puntos. El código de la pantalla corrió en Node en sus 204
+  combinaciones de mes y punto, sin errores. No se revisó en un navegador, porque Edge
+  podría escribir en C:.
+- 37 extractos contra los depósitos de Bold. De los 50 bloques con línea en el banco, 36
+  coinciden exacto.
+- El préstamo es anterior a lo que se creía: en mayo de 2026 el banco recibió 10 % menos y
+  el reporte no traía la columna. De ahí salía el 90 % del conciliador (D-029).
+Falta:
+- Lector del Excel diario y extracto como fuente de transferencias.
+- Revisar la pantalla en un navegador cuando C: tenga espacio.
+Dudas:
+- Agosto y septiembre, ya con la columna del préstamo, tienen bloques que llegaron con un
+  poco menos que el reporte. Son pocos y pequeños, y no tienen explicación. ¿Bold cobra algo
+  que el reporte no muestra? Conviene preguntarle a Bold.
+- Faltan extractos de buena parte de junio a agosto en Descargas.
+- `Metro AutoSur` y `D209058`: datáfonos de 2025 sin punto asignado. Lo decide Jacobo.
+- Septiembre de 2025 no aparece en los reportes.
+
 ## 2026-11-02 · Lector probado contra todo el historial de reportes
 Hecho:
 - Con permiso de Jacobo, el lector pasó por 142 reportes de Bold y Redeban, de mayo de
