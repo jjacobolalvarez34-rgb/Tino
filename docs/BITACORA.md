@@ -15,6 +15,20 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Milagros cargada en tino-pruebas
+Hecho:
+- Maestros de Milagros cargados: puntos, asesoras con código, alias por punto, productos,
+  datáfonos y códigos de pago. Verificado leyendo la base.
+- Un punto queda de tipo mayorista y ADDI sin conciliar, por decisión de Jacobo.
+- Copia actualizada de `mapeo_siigo` en `D:\Repositorios\Tino-datos\`, con los productos que
+  faltaban. Códigos sacados de reportes de Siigo; uno no apareció y queda sin código.
+Falta:
+- Jacobo revisa 10 alias al azar.
+- Jacobo apaga el registro abierto en Authentication, y cambia las llaves.
+- Siguiente migración: importación y operación diaria.
+Dudas:
+- Se asumió que "Caja" en el Excel es "Kit" en Siigo, por el nombre. Jacobo debe confirmarlo.
+
 ## 2026-11-02 · Cargador de maestros y simulacro de Milagros
 Hecho:
 - `ingesta/maestros.py`: genérico, con simulacro por defecto y sin datos de ningún cliente.

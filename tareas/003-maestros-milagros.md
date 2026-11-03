@@ -37,9 +37,12 @@ productos, alias, tipos de venta, medios de pago, datáfonos y cuentas.
 - Asesoras leídas de Drive, solo lectura. Tipos de venta y bodega decididos (D-031, D-033).
 - Simulacro de Milagros limpio, sin avisos. El archivo queda en
   `D:\Repositorios\Tino-datos	rabajo\maestros\`, fuera del repositorio.
-- Falta que Jacobo revise el simulacro y dé la orden de cargar.
-- Supuestos a confirmar: todos los puntos de tipo detal, y códigos de pago vigentes desde
-  el 1 de enero de 2026.
+- Cargada en `tino-pruebas` el 2 nov 2026 por orden de Jacobo. Verificado leyendo la base:
+  conteos, códigos de asesora, configuración y auditoría. Una empresa de prueba no ve nada de
+  Milagros. Correr la carga otra vez no crea nada.
+- Falta para darla por hecha: que Jacobo revise 10 alias al azar. Los nombres cortos sin
+  resolver quedan por fuera a propósito (D-032).
+- Supuesto que queda: códigos de pago vigentes desde el 1 de enero de 2026.
 
 ### Plan propuesto (2 nov 2026): espera la aprobación de Jacobo
 
