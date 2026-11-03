@@ -49,7 +49,8 @@ class Lector(unittest.TestCase):
             ["Tienda Sin Punto", dt.datetime(2026, 10, 30, 16, 0), "COBRO EXITOSO", 0, 0, 7000, 0, 0, 0, 0, 0, 0, 0],
         ], titulo="Reporte de transacciones")
         cobros, avisos = tarjetas.leer(ruta, PUNTOS)
-        self.assertEqual(cobros, [{"fecha": "2026-10-30", "hora": 14, "punto": "Punto 1", "proveedor": "bold",
+        self.assertEqual(cobros, [{"fila_origen": 3, "terminal": "TIENDA UNO",
+                                   "fecha": "2026-10-30", "hora": 14, "punto": "Punto 1", "proveedor": "bold",
                                    "franquicia": None, "bruto": 100000, "comision": 2990,
                                    "retenciones": 1827, "prestamo": 0, "neto": 95183}])
         self.assertEqual(len(avisos), 2)
@@ -92,7 +93,8 @@ class Lector(unittest.TestCase):
             ["0000099", "AMEX", "20261030", "20261102", 0, 0, 5000, 0, 0, 0, 0, 5000],
         ])
         cobros, avisos = tarjetas.leer(ruta, PUNTOS)
-        self.assertEqual(cobros, [{"fecha": "2026-10-30", "hora": None, "punto": "Punto 3", "proveedor": "redeban",
+        self.assertEqual(cobros, [{"fila_origen": 2, "terminal": "11",
+                                   "fecha": "2026-10-30", "hora": None, "punto": "Punto 3", "proveedor": "redeban",
                                    "franquicia": "VISA", "bruto": 100000, "comision": 2500,
                                    "retenciones": 1826, "prestamo": 0, "neto": 95674}])
         self.assertIn("99", avisos[0])

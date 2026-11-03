@@ -57,6 +57,12 @@ Empareja dos listas de ítems monto por monto, contando repeticiones.
    ese grupo. Si no, el ítem de `a` va a `sobran_a`.
 3. `sobran_b` son los grupos restantes, uno tras otro, en ese mismo orden.
 
+### `emparejar` · `{a, b}` → `{parejas, sobran_a, sobran_b}`
+Lo mismo que `restar`, paso por paso, y además dice con quién quedó cada ítem: cada vez
+que un ítem de `a` quita el último de su grupo en `b`, se agrega `{"a": ítem de a, "b":
+ítem quitado}` a `parejas`, en el orden de `a`. `sobran_a` y `sobran_b` son iguales a
+los de `restar`. Sirve para guardar qué línea del banco cubre cada pago anotado.
+
 ### `parecidos` · `{a, b}` → booleano
 ¿Pudo ser un error al digitar? Ambos son enteros mayores o iguales a cero.
 - Si son iguales: falso.

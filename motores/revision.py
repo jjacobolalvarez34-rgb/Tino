@@ -24,7 +24,9 @@ def _cruce(fecha, dias_punto, rol, externo_de, cubre):
     vecinos = [{"cubre": cubre(f), "tiene_excel": f in dias_punto,
                 "anotado": dias_punto.get(f, {}).get(rol, []), "externo": externo_de(f)} for f in _vecinas(fecha)]
     sobra = sobrantes_vecinos(vecinos)
-    return cruzar(dias_punto[fecha][rol], externo_de(fecha), sobra["ext_sobra"], sobra["excel_sobra"])
+    c = cruzar(dias_punto[fecha][rol], externo_de(fecha), sobra["ext_sobra"], sobra["excel_sobra"])
+    # Para guardar cada cruce hay que saber con qué quedó cada cosa: lo del día y lo vecino.
+    return {**c, "externo_dia": externo_de(fecha), "ext_vecinos": sobra["ext_sobra"]}
 
 
 def _causas_del_descuadre(fecha, dias_punto, config):

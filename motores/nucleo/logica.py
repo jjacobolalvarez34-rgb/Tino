@@ -44,18 +44,24 @@ def a_pesos(texto):
 
 def restar(a, b):
     """Empareja dos listas monto por monto, contando repeticiones."""
+    e = emparejar(a, b)
+    return {"sobran_a": e["sobran_a"], "sobran_b": e["sobran_b"]}
+
+
+def emparejar(a, b):
+    """Lo mismo que restar, y además dice qué ítem de b quedó con cada ítem de a."""
     pendientes = {}
     for item in b:
         pendientes.setdefault(item["monto"], []).append(item)
-    sobran_a = []
+    parejas, sobran_a = [], []
     for item in a:
         grupo = pendientes.get(item["monto"])
         if grupo:
-            grupo.pop()
+            parejas.append({"a": item, "b": grupo.pop()})
         else:
             sobran_a.append(item)
     sobran_b = [item for grupo in pendientes.values() for item in grupo]
-    return {"sobran_a": sobran_a, "sobran_b": sobran_b}
+    return {"parejas": parejas, "sobran_a": sobran_a, "sobran_b": sobran_b}
 
 
 def parecidos(a, b):
@@ -397,7 +403,7 @@ def causa_precios(descuadre, productos, monto_minimo, max_productos, max_mostrad
 
 
 _FUNCIONES = {f.__name__: f for f in (
-    a_pesos, restar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
+    a_pesos, restar, emparejar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
     bloques_deposito, coincide_deposito, cruces_redeban, estado_dia,
     leer_linea_transferencia, punto_por_referencia, estadisticas_ventas, causas_de_cruce,
     causa_compensacion, causa_billete, causa_precios)}

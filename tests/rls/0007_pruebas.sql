@@ -158,9 +158,38 @@ select pg_temp.ok((select count(*) from public.pago where archivo_id = (select e
                   'Pero no se borra');
 select pg_temp.falla($$select public.deshacer_archivo((select excel from ids))$$, 'P0002',
                      'Un archivo deshecho no se deshace otra vez');
-select public.importar_archivo((select p from carga where nombre = 'excel'));
+select pg_temp.ok((select count(*) from public.conciliacion where estado = 'rechazada'
+                   and pago_id in ((select pago85 from rev), (select pago40 from rev))) = 2,
+                  'Los cruces de un archivo deshecho se rechazan con nota');
+select pg_temp.ok((select count(*) from public.verificacion_transferencia where estado = 'rechazada'
+                   and nota like 'Se deshizo el archivo%') = 2,
+                  'Y las transferencias de sus pagos también');
+select pg_temp.ok((select count(*) from public.error_importacion where archivo_id = (select excel from ids)
+                   and not resuelto) = 0, 'Sus errores pendientes dejan de estar pendientes');
+
+update ids set excel = public.importar_archivo((select p from carga where nombre = 'excel'));
 select pg_temp.ok((select count(*) from public.v_pago_vigente where fecha = '2026-09-18') = 2,
                   'El archivo corregido se vuelve a subir y cuenta de nuevo');
+update rev set pago85 = (select id from public.pago where fila_origen = 30 and archivo_id = (select excel from ids));
+select public.guardar_revision(jsonb_build_object(
+  'cruces', jsonb_build_array(
+    jsonb_build_object('pago_id', (select pago85 from rev), 'movimiento_id', (select mov85 from rev), 'tipo', 'mismo_dia')),
+  'verificaciones', jsonb_build_array(
+    jsonb_build_object('pago_id', (select pago85 from rev), 'estado', 'confirmada', 'extracto_id', (select mov85 from rev)))));
+select pg_temp.ok((select estado from public.v_transferencia where pago_id = (select pago85 from rev)) = 'confirmada',
+                  'La línea del banco quedó libre: el pago nuevo se confirma con ella');
+
+select public.deshacer_archivo((select banco from ids));
+select pg_temp.ok((select estado = 'pendiente' and extracto_id is null from public.verificacion_transferencia
+                   where pago_id = (select pago85 from rev)),
+                  'Si se deshace el extracto, la transferencia vuelve a pendiente');
+update ids set banco = public.importar_archivo((select p from carga where nombre = 'banco'));
+update rev set mov85 = (select id from public.movimiento_externo where fila_origen = 5 and archivo_id = (select banco from ids));
+select public.guardar_revision(jsonb_build_object(
+  'verificaciones', jsonb_build_array(
+    jsonb_build_object('pago_id', (select pago85 from rev), 'estado', 'confirmada', 'extracto_id', (select mov85 from rev)))));
+select pg_temp.ok((select estado from public.v_transferencia where pago_id = (select pago85 from rev)) = 'confirmada',
+                  'Con el extracto de nuevo, se vuelve a confirmar');
 
 -- 4. Roles y otra empresa -------------------------------------------------------
 select pg_temp.como('a0000000-0000-0000-0000-00000000000a');

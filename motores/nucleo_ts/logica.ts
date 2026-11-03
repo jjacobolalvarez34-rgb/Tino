@@ -83,6 +83,14 @@ export function a_pesos(texto: string): number | null {
 }
 
 export function restar(a: Item[], b: Item[]): Restados {
+  const { sobran_a, sobran_b } = emparejar(a, b);
+  return { sobran_a, sobran_b };
+}
+
+export type Emparejados = Restados & { parejas: { a: Item; b: Item }[] };
+
+// Lo mismo que restar, y además dice qué ítem de b quedó con cada ítem de a.
+export function emparejar(a: Item[], b: Item[]): Emparejados {
   // Map y no objeto: un objeto reordena las llaves numéricas de menor a mayor.
   const grupos = new Map<number, Item[]>();
   for (const item of b) {
@@ -91,14 +99,16 @@ export function restar(a: Item[], b: Item[]): Restados {
     else grupo.push(item);
   }
 
+  const parejas: { a: Item; b: Item }[] = [];
   const sobran_a: Item[] = [];
   for (const item of a) {
     const grupo = grupos.get(item.monto);
-    if (grupo !== undefined && grupo.length > 0) grupo.pop();
+    const pareja = grupo !== undefined && grupo.length > 0 ? grupo.pop() : undefined;
+    if (pareja !== undefined) parejas.push({ a: item, b: pareja });
     else sobran_a.push(item);
   }
 
-  return { sobran_a, sobran_b: [...grupos.values()].flat() };
+  return { parejas, sobran_a, sobran_b: [...grupos.values()].flat() };
 }
 
 function digitos_ordenados(numero: string): string {
@@ -678,6 +688,7 @@ type Registro = { parametros: string[]; llamar: (e: Entrada) => unknown };
 const FUNCIONES = new Map<string, Registro>([
   ["a_pesos", { parametros: ["texto"], llamar: (e) => a_pesos(e.texto as string) }],
   ["restar", { parametros: ["a", "b"], llamar: (e) => restar(e.a as Item[], e.b as Item[]) }],
+  ["emparejar", { parametros: ["a", "b"], llamar: (e) => emparejar(e.a as Item[], e.b as Item[]) }],
   [
     "parecidos",
     { parametros: ["a", "b"], llamar: (e) => parecidos(e.a as number, e.b as number) },

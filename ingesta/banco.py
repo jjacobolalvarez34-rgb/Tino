@@ -22,9 +22,11 @@ def leer(ruta, puntos):
 
     codigos = [{"punto": p, "codigo": c} for p, c in puntos.get("codigos", {}).items()]
     transferencias, sin_origen, fechas, avisos = [], [], set(), []
+    fila = 0  # línea del PDF contada de corrido, para guardar de dónde salió cada pago
     with pdfplumber.open(str(ruta)) as pdf:
         for pagina, hoja in enumerate(pdf.pages, start=1):
             for numero, linea in enumerate((hoja.extract_text() or "").split("\n"), start=1):
+                fila += 1
                 m = FECHA.match(linea)
                 if m:
                     fechas.add(f"{m.group(1)}-{m.group(2)}-{m.group(3)}")
@@ -32,6 +34,7 @@ def leer(ruta, puntos):
                 if pago is None or pago["valor"] <= 0:
                     continue
                 pago["id"] = f"{Path(ruta).name}|p{pagina}|l{numero}"
+                pago["fila_origen"] = fila
                 punto = punto_por_referencia(pago["referencia"], codigos) if pago["referencia"] else None
                 (transferencias if punto else sin_origen).append({**pago, "punto": punto})
     if not fechas:

@@ -47,10 +47,11 @@ join public.archivo_importado a on a.id = m.archivo_id and a.estado = 'cargado';
 
 -- Productos vendidos que cuentan, con la jornada, para la pista de precios.
 create view public.v_detalle_vigente with (security_invoker = true) as
-select d.id, d.empresa_id, v.jornada_id, d.producto_id, d.texto_producto, d.cantidad, d.precio_lista, d.valor,
-       d.descuento, d.regalos, d.archivo_id, d.fila_origen
+select d.id, d.empresa_id, v.jornada_id, j.punto_id, j.fecha, d.producto_id, d.texto_producto, d.cantidad,
+       d.precio_lista, d.valor, d.descuento, d.regalos, d.archivo_id, d.fila_origen
 from public.venta_detalle d
 join public.venta v on v.id = d.venta_id and not v.anulada
+join public.jornada j on j.id = v.jornada_id
 left join public.archivo_importado a on a.id = d.archivo_id
 where d.archivo_id is null or a.estado = 'cargado';
 
@@ -182,17 +183,40 @@ end;
 $$;
 
 -- Deshacer un archivo: deja de contar, no se borra. La base pone quién y cuándo.
+-- Lo que se decidió con sus filas también deja de contar, con nota y en el historial:
+-- sus cruces se rechazan, las transferencias que confirmaba una línea suya vuelven a
+-- pendiente, las de sus pagos se rechazan y sus errores pendientes se dan por resueltos.
+-- Si no, una línea del banco seguiría "ocupada" por un pago que ya no cuenta.
 create or replace function public.deshacer_archivo(p_archivo uuid)
 returns void
 language plpgsql security invoker set search_path = ''
 as $$
+declare
+  v_nota text;
 begin
   update public.archivo_importado
   set estado = 'deshecho', deshecho_en = pg_catalog.now(), deshecho_por = auth.uid()
-  where id = p_archivo and estado = 'cargado';
+  where id = p_archivo and estado = 'cargado'
+  returning 'Se deshizo el archivo ' || nombre into v_nota;
   if not found then
     raise exception 'El archivo no existe o ya estaba deshecho' using errcode = 'P0002';
   end if;
+
+  update public.conciliacion c set estado = 'rechazada', nota = v_nota
+  where c.estado <> 'rechazada'
+    and (c.pago_id in (select id from public.pago where archivo_id = p_archivo)
+         or c.movimiento_id in (select id from public.movimiento_externo where archivo_id = p_archivo));
+
+  update public.verificacion_transferencia v set estado = 'rechazada', nota = v_nota
+  where v.estado <> 'rechazada' and v.pago_id in (select id from public.pago where archivo_id = p_archivo);
+
+  update public.verificacion_transferencia v set estado = 'pendiente', extracto_id = null, nota = v_nota
+  where v.estado <> 'rechazada'
+    and v.extracto_id in (select id from public.movimiento_externo where archivo_id = p_archivo);
+
+  update public.error_importacion set resuelto = true, resuelto_en = pg_catalog.now(), resuelto_por = auth.uid(),
+                                      nota = v_nota
+  where archivo_id = p_archivo and not resuelto;
 end;
 $$;
 
@@ -206,8 +230,8 @@ $$;
 --   "Se resolvió con datos nuevos".
 -- cruces: lo anotado y lo que llegó. Una pareja viva no se repite; lo que ya está
 --   confirmado no se toca.
--- verificaciones: una por transferencia. Lo que decidió una persona no se toca;
---   una sospechosa que ahora aparece en el extracto pasa a confirmada con nota.
+-- verificaciones: una por transferencia. Lo que confirmó o rechazó una persona no se
+--   toca; una abierta que ahora aparece en el extracto pasa a confirmada con nota.
 -- -----------------------------------------------------------------------------
 
 create or replace function public.guardar_revision(p jsonb)
@@ -269,14 +293,15 @@ begin
   from jsonb_to_recordset(coalesce(p -> 'verificaciones', '[]'::jsonb)) as x(pago_id uuid, estado text, extracto_id uuid)
   on conflict do nothing;
 
-  -- Las que ya existían y nadie decidió: avanzan solo hacia confirmada con el extracto.
+  -- Las que ya existían y siguen abiertas avanzan solo hacia confirmada, con el extracto.
+  -- Lo que una persona confirmó o rechazó no se toca.
   update public.verificacion_transferencia v
   set estado = 'confirmada', extracto_id = x.extracto_id,
       nota = case when v.estado = 'sospechosa' then 'Confirmada por extracto después de sospecha'
                   else 'Confirmada por extracto' end
   from jsonb_to_recordset(coalesce(p -> 'verificaciones', '[]'::jsonb)) as x(pago_id uuid, estado text, extracto_id uuid)
-  where v.empresa_id = v_empresa and v.pago_id = x.pago_id and v.decidido_por is null
-    and x.estado = 'confirmada' and v.estado <> 'confirmada'
+  where v.empresa_id = v_empresa and v.pago_id = x.pago_id
+    and x.estado = 'confirmada' and v.estado in ('pendiente', 'sospechosa', 'propuesta')
     and not exists (select 1 from public.verificacion_transferencia o
                     where o.empresa_id = v_empresa and o.extracto_id = x.extracto_id and o.estado = 'confirmada');
 end;

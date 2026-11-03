@@ -91,6 +91,7 @@ def generar(r):
     return r.choice([
         ("a_pesos", {"texto": texto_valor(r)}),
         ("restar", {"a": items(r, "a"), "b": items(r, "b")}),
+        ("emparejar", {"a": items(r, "a"), "b": items(r, "b")}),
         ("parecidos", {"a": monto(r), "b": monto(r)}),
         ("sobrantes_vecinos", {"vecinos": [vecino(f"v{i}") for i in range(r.randint(0, 3))]}),
         ("cruzar", {"anotado": items(r, "a"), "externo": items(r, "e"),

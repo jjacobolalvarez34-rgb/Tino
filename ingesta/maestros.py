@@ -86,6 +86,12 @@ def plan(datos, existentes):
               "activo_desde": c["activo_desde"]} for c in datos["codigos_recaudo"]],
             lambda f: f["codigo"])
 
+    # Lo propio de cada fuente: cómo se llama cada punto en el Excel, qué datáfonos se ignoran.
+    agregar("perfil_fuente",
+            [{"empresa_id": empresa, "fuente": p["fuente"], "nombre": p["nombre"], "mapeo_columnas": p["mapeo"]}
+             for p in datos.get("perfiles", [])],
+            lambda f: f["nombre"])
+
     finales = {}
     for c in datos["codigos_recaudo"]:
         if finales.setdefault(c["codigo"][-4:], c["punto"]) != c["punto"]:
@@ -95,7 +101,8 @@ def plan(datos, existentes):
 
 CLAVES = {"empresa": ("id",), "punto_venta": ("codigo",), "medio_pago": ("codigo",), "tipo_venta": ("codigo",),
           "asesora": ("nombre_completo",), "asesora_alias": ("punto_id", "texto_normalizado"), "producto": ("codigo",),
-          "producto_alias": ("texto_normalizado",), "terminal_datafono": ("codigo_terminal",), "codigo_recaudo": ("codigo",)}
+          "producto_alias": ("texto_normalizado",), "terminal_datafono": ("codigo_terminal",), "codigo_recaudo": ("codigo",),
+          "perfil_fuente": ("nombre",)}
 
 
 class Supabase:

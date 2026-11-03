@@ -172,7 +172,7 @@ def leer_bold(ruta, puntos):
         if not col["operacion"] and _pesos(celda("deposito")) == 0 and _pesos(celda("total")):
             omitidas += 1
             continue
-        cobro = _cobro(f, avisos, fecha=dia, hora=hora, punto=punto, proveedor="bold",
+        cobro = _cobro(f, avisos, fila_origen=f, terminal=nombre, fecha=dia, hora=hora, punto=punto, proveedor="bold",
                        franquicia=str(franquicia).strip().upper() if franquicia else None,
                        bruto=_pesos(celda("total")),
                        comision=None if None in comisiones else sum(comisiones),
@@ -218,7 +218,7 @@ def leer_redeban(ruta, puntos):
         signo = -1 if bruto is not None and bruto < 0 else 1
         comision = _pesos(celda("comision"))
         partes = [_pesos(celda(c)) for c in ("retefuente", "reteiva", "reteica")]
-        cobro = _cobro(f, avisos, fecha=fecha, hora=None, punto=punto,
+        cobro = _cobro(f, avisos, fila_origen=f, terminal=codigo, fecha=fecha, hora=None, punto=punto,
                        proveedor="redeban", franquicia=str(franquicia).strip().upper(),
                        bruto=bruto,
                        comision=None if comision is None else signo * abs(comision),
