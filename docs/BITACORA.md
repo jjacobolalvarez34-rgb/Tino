@@ -15,6 +15,21 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Asesoras leídas de Google Drive
+Hecho:
+- 0002 aplicada por Jacobo en Supabase y verificada por la API.
+- Con permiso de Jacobo se leyó en Drive, solo lectura, la columna de asesoras de
+  septiembre y octubre de los 11 puntos. El borrador queda en D:, sin cargar nada.
+- Hallazgos: las asesoras rotan mucho entre puntos; hay filas que no son personas (domingo,
+  festivo, no abrió); los nombres vienen con errores; y la hoja se llama distinto entre
+  meses, así que el lector debe buscarla por nombre normalizado.
+Falta:
+- Jacobo resuelve los nombres dudosos y un apellido.
+- Cargador genérico con simulacro, y carga de Milagros en `tino-pruebas` (tarea 003).
+- Jacobo apaga el registro abierto en Authentication: sigue encendido.
+Dudas:
+- Existe una hoja de Bodega además de los 11 puntos. ¿Se carga como punto de tipo bodega?
+
 ## 2026-11-02 · Migración 0002 y decisiones de asesoras
 Hecho:
 - Consulta final de 0001 en Supabase: 45 políticas, 17 triggers, ninguna tabla sin RLS y
