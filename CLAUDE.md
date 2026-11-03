@@ -93,6 +93,8 @@ quiere entender cada decisión, no solo recibir código.
 
 - Probar migraciones y permisos en un Postgres local (nunca en Supabase):
   `./tests/rls/correr.sh "postgresql://postgres@localhost:5432/postgres"`
+- Probar la separación entre empresas en Supabase, con usuarios reales de prueba:
+  `python tests/rls/probar_supabase.py <archivo de contraseñas fuera del repositorio>`
 - Probar el núcleo en Python, desde `motores/`:
   `python -m unittest nucleo.test_casos`
 - Probar el núcleo en TypeScript:

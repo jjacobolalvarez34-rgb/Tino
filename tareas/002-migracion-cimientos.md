@@ -1,7 +1,7 @@
 # 002 · Aplicar la migración 0001 (cimientos)
 
 Paso del plan: F1 · 1.2 y 1.3
-Estado: pendiente
+Estado: hecha
 
 ## Objetivo
 Crear en Supabase las tablas de empresas, configuración, usuarios, permisos, auditoría, maestros
@@ -40,9 +40,10 @@ y perfiles de fuente, con la separación entre empresas probada.
   final (con `codigo_recaudo` y sin `bold_porcentajes_deposito`), sin filas, y la llave
   pública sin sesión no ve datos.
 - **Desde ahora 0001 no se edita.** Cualquier corrección va en una migración nueva (D-012).
-- Falta para dar la tarea por hecha: contar políticas y triggers, revisar TRUNCATE y hacer
-  la prueba con dos empresas de prueba. Necesita `SUPABASE_DB_URL` y el visto bueno de
-  Jacobo, porque crea filas en la base.
+- Prueba con dos empresas (`tests/rls/probar_supabase.py`): 57 de 57, entrando con usuarios
+  reales de los cinco roles y la llave pública. "Prueba A" y "Prueba B" se quedan en la base.
+- Queda una consulta para el editor SQL: 45 políticas, 17 triggers, ninguna tabla sin RLS y
+  sin permiso de TRUNCATE. La API no permite comprobarlo.
 
 ### Avance del 2 nov 2026
 - Jacobo aprobó corregir 0001 antes de aplicarla (D-018). Pasos 1 a 3 hechos: 0001

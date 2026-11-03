@@ -20,9 +20,12 @@ Hecho:
 - Jacobo creó `tino-pruebas` y corrió 0001. Quedó la versión final y la base está vacía.
 - Las llaves están en `.env`, que git ignora. Jacobo las va a cambiar después, porque
   pasaron por el chat.
+- Prueba de separación en la base real: 57 de 57, con los cinco roles en dos empresas
+  inventadas (`tests/rls/probar_supabase.py`). Tarea 002 hecha.
 Falta:
 - Apagar el registro abierto en Authentication: sigue encendido.
-- `SUPABASE_DB_URL`, y la prueba con dos empresas (tarea 002).
+- Consulta final en el editor SQL: políticas, triggers y TRUNCATE.
+- Cambiar las llaves cuando termine la configuración.
 Dudas:
 - Ninguna.
 
