@@ -15,6 +15,22 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Primer Tino.exe
+Hecho:
+- `panel/app.py`: una ventana con dos pestañas, revisión del día y tablero de ventas. Busca
+  `puntos.json` junto al programa o en una carpeta `Tino-datos` de más arriba, y guarda los
+  HTML junto a él, en `revisiones/` y `tableros/`.
+- `panel/construir_exe.py` empaca todo con PyInstaller como carpeta (D-034). Construido en
+  `D:\Repositorios\Tino-datos\app\Tino\Tino.exe`, 68 MB; C: no cambió.
+- Con los archivos de septiembre, el `.exe` saca los mismos HTML, byte por byte, que la
+  versión en Python. La ventana abre.
+Falta:
+- Jacobo dijo que al motor de transferencias le falta arreglar algo, pero no dijo qué.
+  Preguntarle.
+- Lo mismo que en la entrada anterior: causas de billete, compensación y precios.
+Dudas:
+- Ninguna nueva.
+
 ## 2026-11-02 · Primera versión de la revisión de la mañana
 Hecho:
 - `causas_de_cruce` en el contrato y en los dos lenguajes: 0 diferencias.

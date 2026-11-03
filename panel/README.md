@@ -7,7 +7,8 @@ TypeScript en Vercel.
 Estado: `revision/` arma la revisión de la mañana de un día: transferencias y tarjetas
 anotadas contra el banco y los datáfonos, y el descuadre con su causa. `tablero/` arma el tablero de ventas con tarjeta en un solo HTML, desde los
 reportes de Bold y Redeban. El HTML lleva datos del cliente: se guarda fuera del
-repositorio. Las demás pantallas se construyen cuando exista `tino-pruebas`.
+repositorio. `app.py` junta las dos en una ventana, y `construir_exe.py` la empaca como
+`Tino.exe`. Las demás pantallas se construyen cuando exista `tino-pruebas`.
 
 ## Reglas
 

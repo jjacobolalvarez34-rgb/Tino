@@ -193,6 +193,12 @@ la persona equivocada sería peor que dejarlo pendiente.
 que no se carga como punto, aunque `punto_venta.tipo` lo permita. Se revisa cuando llegue
 inventario.
 
+### D-034 · El .exe es una carpeta, no un solo archivo
+2 nov 2026. Un `.exe` de un solo archivo se descomprime en el TEMP del sistema cada vez
+que se abre, y en este computador nada se escribe en C:. Empacado como carpeta, abre más
+rápido y no escribe en ningún disco al arrancar. Se entrega la carpeta entera
+(`Tino.exe` y `_internal`). Se revisa cuando haya instalador.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

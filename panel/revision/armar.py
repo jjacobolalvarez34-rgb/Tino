@@ -22,7 +22,8 @@ from ingesta import banco as lector_banco  # noqa: E402
 from ingesta import excel_diario, tarjetas  # noqa: E402
 from revision import revisar  # noqa: E402
 
-PLANTILLA = Path(__file__).with_name("plantilla.html")
+# Empacado como .exe, la plantilla viaja dentro del programa.
+PLANTILLA = (Path(sys._MEIPASS) / "revision" if getattr(sys, "frozen", False) else Path(__file__).parent) / "plantilla.html"
 
 
 def leer_todo(a, puntos):
@@ -63,6 +64,19 @@ def leer_todo(a, puntos):
     return excel, banco, tarj, avisos
 
 
+def generar(fecha, ruta_puntos, salida, excel=(), banco=(), tarjetas=()):
+    """Arma la revisión y la guarda en `salida`. Devuelve (resultado, avisos)."""
+    a = argparse.Namespace(excel=list(excel), banco=list(banco), tarjetas=list(tarjetas))
+    puntos = json.loads(Path(ruta_puntos).read_text(encoding="utf-8"))
+    excel_dias, banco_dias, tarj, avisos = leer_todo(a, puntos)
+    resultado = revisar(fecha, excel_dias, banco_dias, tarj, puntos["config"])
+    resultado["avisos"] = avisos
+    resultado["fuentes"] = {"excel": len(a.excel), "banco": len(a.banco), "tarjetas": len(a.tarjetas)}
+    datos = json.dumps(resultado, ensure_ascii=False).replace("</", "<\\/")
+    Path(salida).write_text(PLANTILLA.read_text(encoding="utf-8").replace("/*DATOS*/null", datos), encoding="utf-8")
+    return resultado, avisos
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--fecha", required=True)
@@ -72,14 +86,7 @@ def main():
     p.add_argument("--banco", nargs="*", default=[])
     p.add_argument("--tarjetas", nargs="*", default=[])
     a = p.parse_args()
-
-    puntos = json.loads(Path(a.puntos).read_text(encoding="utf-8"))
-    excel, banco, tarj, avisos = leer_todo(a, puntos)
-    resultado = revisar(a.fecha, excel, banco, tarj, puntos["config"])
-    resultado["avisos"] = avisos
-    resultado["fuentes"] = {"excel": len(a.excel), "banco": len(a.banco), "tarjetas": len(a.tarjetas)}
-    datos = json.dumps(resultado, ensure_ascii=False).replace("</", "<\\/")
-    Path(a.salida).write_text(PLANTILLA.read_text(encoding="utf-8").replace("/*DATOS*/null", datos), encoding="utf-8")
+    resultado, avisos = generar(a.fecha, a.puntos, a.salida, a.excel, a.banco, a.tarjetas)
     print(f"Revisión del {a.fecha}: {len(resultado['puntos'])} punto(s). Archivo: {a.salida}")
     for aviso in avisos:
         print("  Aviso:", aviso)

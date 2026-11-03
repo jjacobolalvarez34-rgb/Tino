@@ -19,7 +19,8 @@ sys.path[:0] = [str(RAIZ), str(RAIZ / "motores")]
 from ingesta import tarjetas  # noqa: E402
 from nucleo.logica import estadisticas_ventas  # noqa: E402
 
-PLANTILLA = Path(__file__).with_name("plantilla.html")
+# Empacado como .exe, la plantilla viaja dentro del programa.
+PLANTILLA = (Path(sys._MEIPASS) / "tablero" if getattr(sys, "frozen", False) else Path(__file__).parent) / "plantilla.html"
 TODOS = "Todos los puntos"
 TODO_EL_PERIODO = "todo"
 
@@ -49,6 +50,20 @@ def escribir(datos, salida):
     Path(salida).write_text(html, encoding="utf-8")
 
 
+def generar(ruta_puntos, salida, archivos):
+    """Arma el tablero y lo guarda en `salida`. Devuelve (cobros, avisos)."""
+    puntos = json.loads(Path(ruta_puntos).read_text(encoding="utf-8"))
+    lotes, avisos = [], []
+    for archivo in archivos:
+        leidos, sus_avisos = tarjetas.leer(archivo, puntos)
+        lotes.append(leidos)
+        avisos += [f"{Path(archivo).name}: {x}" for x in sus_avisos]
+    # El mismo mes puede venir en varios archivos: no se cuenta dos veces.
+    cobros = tarjetas.unir_reportes(lotes)
+    escribir(armar_datos(cobros, avisos), salida)
+    return cobros, avisos
+
+
 def main():
     args = argparse.ArgumentParser(description=__doc__)
     args.add_argument("--puntos", required=True, help="JSON con el punto de cada datáfono")
@@ -56,16 +71,7 @@ def main():
     args.add_argument("archivos", nargs="+", help="Reportes de Bold o Redeban (.xlsx)")
     a = args.parse_args()
 
-    puntos = json.loads(Path(a.puntos).read_text(encoding="utf-8"))
-    lotes, avisos = [], []
-    for archivo in a.archivos:
-        leidos, sus_avisos = tarjetas.leer(archivo, puntos)
-        lotes.append(leidos)
-        avisos += [f"{Path(archivo).name}: {x}" for x in sus_avisos]
-    # El mismo mes puede venir en varios archivos: no se cuenta dos veces.
-    cobros = tarjetas.unir_reportes(lotes)
-
-    escribir(armar_datos(cobros, avisos), a.salida)
+    cobros, avisos = generar(a.puntos, a.salida, a.archivos)
     print(f"{len(cobros)} cobros de {len(a.archivos)} archivo(s). Tablero en {a.salida}")
     for aviso in avisos:
         print(f"  Aviso: {aviso}")

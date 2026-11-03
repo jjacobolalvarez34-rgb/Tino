@@ -109,5 +109,8 @@ quiere entender cada decisión, no solo recibir código.
 - Probar la revisión, desde `motores/`: `python -m unittest test_revision`
 - Armar el tablero de ventas:
   `python panel/tablero/armar.py --puntos puntos.json --salida tablero.html reporte.xlsx`
+- Abrir la ventana de Tino (revisión y tablero): `python panel/app.py`
+- Empacar Tino.exe, todo en D: (con TEMP y TMP en D:):
+  `python panel/construir_exe.py --construir D:/Repositorios/Tino-datos/construir --destino D:/Repositorios/Tino-datos/app`
 - [POR COMPLETAR en la tarea 001: aplicar migraciones en Supabase y levantar el
   programa.]
