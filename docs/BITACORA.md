@@ -15,6 +15,19 @@ Dudas:
 -
 ```
 
+## 2026-11-02 · Migración 0002 y decisiones de asesoras
+Hecho:
+- Consulta final de 0001 en Supabase: 45 políticas, 17 triggers, ninguna tabla sin RLS y
+  sin permiso de TRUNCATE, como se esperaba.
+- `0002_asesoras.sql`: código automático y alias por punto (D-030). 101 pruebas en verde en
+  Postgres local, con los datos del servidor en D:. **Aún no está aplicada en Supabase.**
+- Tipos de venta de Milagros definidos (D-031).
+Falta:
+- Jacobo aplica 0002 en el editor SQL.
+- Jacobo apaga el registro abierto en Authentication: sigue encendido.
+Dudas:
+- Ninguna.
+
 ## 2026-11-02 · Extracto de julio y corrección de la unión de reportes
 Hecho:
 - Con el extracto de julio se encontró un error del tablero: los archivos procesados con la

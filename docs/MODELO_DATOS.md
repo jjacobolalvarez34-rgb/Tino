@@ -85,7 +85,8 @@ erDiagram
 
 ## Tablas por módulo
 
-La columna "Migración" dice en qué archivo nace cada tabla.
+La columna "Migración" dice en qué archivo nace cada tabla. Las que aún no existen
+se corrieron un número con 0002: el plan de abajo manda.
 
 ### Empresa y seguridad
 
@@ -101,8 +102,8 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 | Tabla | Para qué | Migración |
 | --- | --- | --- |
 | `punto_venta` | Los puntos y la bodega. Tipo: detal, mayorista o bodega. | 0001 |
-| `asesora` | Todas las asesoras, activas o no. Nunca se borran. | 0001 |
-| `asesora_alias` | Cada forma en que aparece escrito un nombre: el texto tal cual y el normalizado, que calcula la base. | 0001 |
+| `asesora` | Todas las asesoras, activas o no. Nunca se borran. Si no llega código, la base asigna el siguiente (A001). | 0001 y 0002 |
+| `asesora_alias` | Cada forma en que aparece escrito un nombre en un punto: el texto tal cual y el normalizado, que calcula la base. | 0001 y 0002 |
 | `producto` | Catálogo con código propio y código de Siigo. | 0001 |
 | `producto_alias` | Nombres de producto tal como vienen en los reportes, con su forma normalizada. | 0001 |
 | `tipo_venta` | Tipos de venta configurables por empresa (detal, mayor, etc.). | 0001 |
@@ -187,11 +188,12 @@ Las reglas se implementan con dos funciones de la base:
 | Archivo | Contenido | Paso del plan |
 | --- | --- | --- |
 | `0001_cimientos.sql` | Empresas, configuración, usuarios, permisos, auditoría, maestros y perfiles de fuente | 1.2 y 1.3 |
-| `0002_importacion.sql` | Archivos importados y errores | 2.1 |
-| `0003_operacion_diaria.sql` | Jornadas, ventas, pagos, caja, observaciones y metas | 2.2 |
-| `0004_bancos_conciliacion.sql` | Movimientos externos, conciliación y verificación de transferencias | 3.1 y 3.2 |
-| `0005_descuadres.sql` | Causas, descuadres y evidencia | 3.3 |
-| `0006_vistas_panel.sql` | Vistas `v_*` para el panel y para copiar a Excel | 4.1 |
+| `0002_asesoras.sql` | Código automático de asesora y alias por punto | 1.4 |
+| `0003_importacion.sql` | Archivos importados y errores | 2.1 |
+| `0004_operacion_diaria.sql` | Jornadas, ventas, pagos, caja, observaciones y metas | 2.2 |
+| `0005_bancos_conciliacion.sql` | Movimientos externos, conciliación y verificación de transferencias | 3.1 y 3.2 |
+| `0006_descuadres.sql` | Causas, descuadres y evidencia | 3.3 |
+| `0007_vistas_panel.sql` | Vistas `v_*` para el panel y para copiar a Excel | 4.1 |
 | Siguientes | Costos, inventario y personal, cuando los clientes los pidan | Fases posteriores |
 
 ## Cómo se prueba la separación entre empresas

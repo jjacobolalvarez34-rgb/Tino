@@ -171,6 +171,17 @@ Aclaración: el 90 % del conciliador sí tenía razón de ser. En mayo de 2026 e
 recibió 10 % menos y el reporte de entonces no traía la columna del préstamo. Aplica
 solo a reportes viejos: Tino no carga ese historial como dato de plata confirmado.
 
+### D-030 · Tino asigna el código de cada asesora y sus nombres van por punto
+2 nov 2026. Decisión de Jacobo. Si no llega código, la base asigna el siguiente de la
+empresa. Pero los reportes solo traen el nombre, y dos asesoras de puntos distintos
+pueden llamarse igual: por eso el alias vale para un punto. Va en 0002, porque 0001 ya
+se aplicó. Si una asesora rota, su nombre se registra también en el otro punto.
+
+### D-031 · Tipos de venta de Milagros
+2 nov 2026. Decisión de Jacobo: detal, mayorista y regalo. Los tres se facturan en Siigo
+y mueven inventario; el regalo se factura a $1. Son datos de Milagros en `tipo_venta`,
+no reglas del código.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

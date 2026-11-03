@@ -293,9 +293,10 @@ select pg_temp.ok((select count(*) from public.auditoria) > 0, 'Soporte ve la au
 -- El dueño de A intenta enlazar filas suyas a filas de B. El error es el mismo
 -- de un id que no existe, así que tampoco sirve para averiguar qué hay en B.
 select pg_temp.como('a0000000-0000-0000-0000-00000000000d');
-select pg_temp.falla($$insert into public.asesora_alias (empresa_id, asesora_id, texto_original)
+select pg_temp.falla($$insert into public.asesora_alias (empresa_id, asesora_id, punto_id, texto_original)
                        values ('aaaaaaaa-0000-0000-0000-000000000000',
-                               'bbbbbbbb-0000-0000-0000-000000000021', 'x')$$,
+                               'bbbbbbbb-0000-0000-0000-000000000021',
+                               'aaaaaaaa-0000-0000-0000-000000000011', 'x')$$,
                      '23503', 'Un alias de A no apunta a una asesora de B');
 select pg_temp.falla($$insert into public.producto_alias (empresa_id, producto_id, texto_original)
                        values ('aaaaaaaa-0000-0000-0000-000000000000',
@@ -400,15 +401,17 @@ select pg_temp.falla($$insert into public.precio_producto
                      '23P01', 'Dos precios del mismo tipo de venta no pueden coincidir');
 
 -- 16. Alias: lo original se guarda y lo normalizado se compara -------------------
-insert into public.asesora_alias (empresa_id, asesora_id, texto_original)
-values ('aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000021', 'Ánge-la  MUÑOZ.');
+insert into public.asesora_alias (empresa_id, asesora_id, punto_id, texto_original)
+values ('aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000021',
+        'aaaaaaaa-0000-0000-0000-000000000011', 'Ánge-la  MUÑOZ.');
 select pg_temp.ok((select texto_original from public.asesora_alias) = 'Ánge-la  MUÑOZ.'
                   and (select texto_normalizado from public.asesora_alias) = 'ange la munoz',
                   'El alias guarda el texto tal cual y calcula el normalizado');
-select pg_temp.falla($$insert into public.asesora_alias (empresa_id, asesora_id, texto_original)
+select pg_temp.falla($$insert into public.asesora_alias (empresa_id, asesora_id, punto_id, texto_original)
                        values ('aaaaaaaa-0000-0000-0000-000000000000',
-                               'aaaaaaaa-0000-0000-0000-000000000021', 'ange la munoz')$$,
-                     '23505', 'Dos formas del mismo nombre no se repiten en la empresa');
+                               'aaaaaaaa-0000-0000-0000-000000000021',
+                               'aaaaaaaa-0000-0000-0000-000000000011', 'ange la munoz')$$,
+                     '23505', 'Dos formas del mismo nombre no se repiten en el punto');
 
 -- 17. Códigos de pago por punto ---------------------------------------------------
 insert into public.codigo_recaudo (empresa_id, punto_id, codigo, activo_desde)
