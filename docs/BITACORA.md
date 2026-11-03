@@ -32,9 +32,16 @@ Hecho:
   repetidos, y desde la base sale lo mismo que desde los archivos en los 30 días. Deshacer
   y volver a subir deja todo igual (D-039).
 - Decisiones D-036 a D-039.
+- Pantallas del programa conectado (`panel/tino.html` y `panel/servicio.py`): entrar con
+  correo y clave, Archivos (leer antes de subir, historial, Deshacer, nombres por
+  resolver), Revisión del día desde la base, Transferencias, Por confirmar, Descuadres
+  (con pruebas y cierre con nota) y Ventas con tarjeta. Probadas con la base local y el
+  servicio también contra Supabase. Tino.exe abre conectado si encuentra `tino.json`
+  (dirección y llave pública), y sin conexión si no.
+- Las fotos de pantalla completa capturaron la pantalla de Jacobo mientras usaba el PC:
+  se borraron. Las pruebas de la ventana ahora leen su contenido, sin fotos.
 Falta:
-- Pantallas del programa contra la base: entrar, Archivos, Revisión, Transferencias,
-  Conciliación y Descuadres.
+- Un usuario de Milagros en tino-pruebas para entrar al programa (pendiente: qué correo).
 - `SUPABASE_DB_URL` está vacía en `.env`: Jacobo aplica las migraciones a mano.
 - "Angie" en la hoja del 27 de Plaza Imperial no está en los alias de ese punto.
 Dudas:

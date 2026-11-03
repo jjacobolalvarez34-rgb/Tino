@@ -9,6 +9,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -16,10 +17,9 @@ PSQL = Path(r"C:\Program Files\PostgreSQL\16\bin\psql.exe")
 OPERADORES = {"eq": "=", "gte": ">=", "lte": "<=", "gt": ">", "lt": "<", "neq": "<>"}
 
 
-class ErrorBase(Exception):
-    def __init__(self, mensaje, codigo=None, detalle=""):
-        super().__init__(mensaje)
-        self.codigo, self.detalle = codigo, detalle
+# El mismo error que el cliente real, para que el programa no note la diferencia.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from panel.datos.cliente import ErrorBase  # noqa: E402
 
 
 def _literal(valor):
@@ -61,6 +61,7 @@ class ClientePsql:
             else:
                 donde.append(f"{col} {OPERADORES[op]} {_literal(valor)}")
         w = (" where " + " and ".join(donde)) if donde else ""
+        orden = re.sub(r"\.(asc|desc)\b", r" \1", orden)  # creado_en.desc, como en PostgREST
         return self._sql(f"select coalesce(json_agg(t), '[]') from (select {columnas} from public.{tabla}{w} "
                          f"order by {orden}) t")
 

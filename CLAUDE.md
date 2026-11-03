@@ -109,7 +109,10 @@ quiere entender cada decisión, no solo recibir código.
 - Probar la revisión, desde `motores/`: `python -m unittest test_revision`
 - Armar el tablero de ventas:
   `python panel/tablero/armar.py --puntos puntos.json --salida tablero.html reporte.xlsx`
-- Abrir la ventana de Tino (revisión y tablero; necesita pywebview): `python panel/app.py`
+- Abrir la ventana de Tino (necesita pywebview): `python panel/app.py`. Con `tino.json`
+  (url y llave_publica de Supabase, fuera del repositorio) abre conectado; sin él, sin conexión.
+- Probar la operación diaria en Supabase con el cliente del programa:
+  `python tests/rls/probar_operacion_supabase.py <archivo de contraseñas fuera del repositorio>`
 - Empacar Tino.exe, todo en D: (con TEMP y TMP en D:, y el Python de
   `D:/Repositorios/Tino-datos/construir/venv`, que tiene PyInstaller y pywebview):
   `python panel/construir_exe.py --construir D:/Repositorios/Tino-datos/construir --destino D:/Repositorios/Tino-datos/app`

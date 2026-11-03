@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --color-marca:#74305F; --color-marca-hover:#5A2449; --color-marca-suave:#F3E4EE; --color-foco:#C99BBB;
+  --color-fondo:#F7F5F7; --color-superficie:#FFFFFF; --color-texto:#22161F; --color-texto-suave:#5E5862;
+  --color-borde:#E2DDE3; --color-divisor:#F0ECF0;
+  --color-deshabilitado-fondo:#E3E8E6; --color-deshabilitado-texto:#7C8A92;
+  --ok:#1C7638; --ok-fondo:#E1F2E5; --revisar:#7A5A00; --revisar-fondo:#FBF1CC; --mal:#9A2A0A; --mal-fondo:#FDE5DA;
+  --espera:#2557A7; --espera-fondo:#E3ECFA; --neutro:#4F4853; --peligro:#C2410C;
+  --esp-1:4px; --esp-2:8px; --esp-3:12px; --esp-4:16px; --esp-5:20px; --esp-6:24px; --esp-8:32px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--color-fondo);color:var(--color-texto);font-family:Figtree,system-ui,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--color-foco);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+h1{font-size:28px;font-weight:800;line-height:1.2} h2{font-size:18px;font-weight:700} h3{font-size:17px;font-weight:600}
+[hidden]{display:none!important}
+svg.icono{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.num,table{font-variant-numeric:tabular-nums}
+.pagina{max-width:1232px;margin:0 auto;padding:var(--esp-6);display:flex;flex-direction:column;gap:var(--esp-6)}
+.cabeza{display:flex;align-items:center;gap:var(--esp-3);flex-wrap:wrap}
+.cabeza .logo{width:40px;height:40px;flex:none}
+.cabeza .quien{margin-left:auto;display:flex;align-items:center;gap:var(--esp-3)}
+.pequeno{font-size:13px;font-weight:500;color:var(--color-texto-suave)}
+.tarjeta{background:var(--color-superficie);border:1px solid var(--color-borde);border-radius:12px;padding:var(--esp-5);display:flex;flex-direction:column;gap:var(--esp-4);min-width:0}
+.encabezado{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:var(--esp-3)}
+.filtros{display:flex;flex-wrap:wrap;gap:var(--esp-3);align-items:flex-end}
+.campo{display:flex;flex-direction:column;gap:var(--esp-1)}
+.campo label{font-size:13px;font-weight:600;color:var(--color-texto-suave)}
+input[type=date],input[type=email],input[type=password],select,textarea{height:44px;padding:0 var(--esp-3);border:1px solid var(--color-borde);border-radius:10px;background:var(--color-superficie)}
+textarea{height:auto;min-height:88px;padding:var(--esp-3);resize:vertical;width:100%}
+.pestanas{display:flex;gap:var(--esp-1);border-bottom:1px solid var(--color-borde);overflow-x:auto}
+.pestana{border:0;background:none;padding:var(--esp-3) var(--esp-4);font-size:15px;font-weight:600;color:var(--color-texto-suave);border-bottom:3px solid transparent;margin-bottom:-1px;display:inline-flex;align-items:center;gap:var(--esp-2);min-height:44px;white-space:nowrap}
+.pestana[aria-selected="true"]{color:var(--color-marca);border-bottom-color:var(--color-marca)}
+.pestana:hover{color:var(--color-marca)}
+.contador{font-size:12px;font-weight:700;background:var(--mal-fondo);color:var(--mal);border-radius:999px;padding:1px 8px}
+.boton{height:44px;padding:0 18px;border-radius:10px;border:0;background:var(--color-marca);color:#fff;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:var(--esp-2);transition:background .15s;white-space:nowrap}
+.boton:hover{background:var(--color-marca-hover)}
+.boton.secundario{background:var(--color-superficie);color:var(--color-marca);border:1px solid var(--color-marca)}
+.boton.secundario:hover{background:var(--color-marca-suave)}
+.boton.compacto{height:36px;padding:0 14px;font-size:14px;border-radius:8px}
+.boton.texto{background:none;color:var(--color-marca);padding:0 var(--esp-2);height:36px}
+.boton.texto:hover{background:var(--color-marca-suave)}
+.boton.peligro-texto{background:none;color:var(--peligro);padding:0 var(--esp-2);height:36px}
+.boton.peligro-texto:hover{background:var(--mal-fondo)}
+.boton.peligro{background:var(--peligro)}
+.boton[aria-disabled="true"]{background:var(--color-deshabilitado-fondo);color:var(--color-deshabilitado-texto);border-color:transparent;cursor:not-allowed}
+.acciones{display:flex;gap:var(--esp-2);flex-wrap:wrap;align-items:center}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--esp-4)}
+.cifra{display:flex;flex-direction:column;gap:var(--esp-1)}
+.cifra .etiqueta{font-size:13px;font-weight:600;color:var(--color-texto-suave)}
+.cifra .valor{font-size:30px;font-weight:800}
+.tarjeta.alerta{background:var(--mal-fondo);border-color:#F6CBB8} .tarjeta.alerta *{color:var(--mal)}
+.caja{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-texto-suave);font-weight:600;padding:var(--esp-2) 10px;border-bottom:1px solid var(--color-borde);text-align:left;white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:middle}
+tfoot td{font-weight:700;border-bottom:0}
+.d{text-align:right;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.c-ok{color:var(--ok);background:var(--ok-fondo)} .c-rev{color:var(--revisar);background:var(--revisar-fondo)}
+.c-mal{color:var(--mal);background:var(--mal-fondo)} .c-esp{color:var(--espera);background:var(--espera-fondo)}
+.c-neu{color:var(--neutro);background:var(--color-divisor)}
+.nota{border-radius:10px;padding:var(--esp-3) var(--esp-4);font-size:14px;display:flex;gap:var(--esp-3);align-items:flex-start}
+.nota .cuerpo{display:flex;flex-direction:column;gap:var(--esp-1);min-width:0;overflow-wrap:anywhere}
+.nota.ok{background:var(--ok-fondo);color:var(--ok)} .nota.mal{background:var(--mal-fondo);color:var(--mal)}
+.nota.aviso{background:var(--revisar-fondo);color:var(--revisar)} .nota.info{background:var(--color-divisor);color:var(--color-texto)}
+.nota ul{margin:0;padding-left:var(--esp-5)}
+.vacio{padding:var(--esp-8) var(--esp-4);text-align:center;color:var(--color-texto-suave)}
+.estado-carga{display:flex;align-items:center;gap:var(--esp-2);color:var(--color-texto-suave);font-size:14px}
+.girando{animation:girar 1s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+.entrar{max-width:420px;margin:12vh auto 0}
+.archivo-listo{border:1px solid var(--color-divisor);border-radius:10px;padding:var(--esp-4);display:flex;flex-direction:column;gap:var(--esp-2)}
+.archivo-listo .fila-arch{display:flex;justify-content:space-between;align-items:center;gap:var(--esp-3);flex-wrap:wrap}
+dialog{border:0;border-radius:14px;padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:0 20px 50px rgba(34,22,31,.25)}
+dialog::backdrop{background:rgba(34,22,31,.35)}
+dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(--esp-4)}
+.error-campo{font-size:13px;font-weight:600;color:var(--mal)}
+.error-campo:empty{display:none}
+#anuncio{position:fixed;left:50%;bottom:var(--esp-6);transform:translateX(-50%);background:var(--color-texto);color:#fff;padding:var(--esp-3) 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+#anuncio.ver{opacity:1}
+@media (max-width:560px){.pagina{padding:var(--esp-5)}.cifra .valor{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Íconos de Lucide (ISC) -->
+  <symbol id="i-dia" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-subir" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+  <symbol id="i-transf" viewBox="0 0 24 24"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></symbol>
+  <symbol id="i-revisar" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-caja" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></symbol>
+  <symbol id="i-ventas" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+  <symbol id="i-copiar" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-cargando" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-salir" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+</svg>
+<svg class="logo-def" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#74305F"/><path d="M50 48 V78" fill="none" stroke="#FFFFFF" stroke-width="12" stroke-linecap="round"/><path d="M37 27 L46 36 L64 15" fill="none" stroke="#E9C6DC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<!-- Entrar -->
+<main id="vista-entrar" class="pagina" hidden>
+  <section class="tarjeta entrar" aria-labelledby="t-entrar">
+    <div class="cabeza"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg><h1 id="t-entrar">Tino</h1></div>
+    <p class="pequeno">Entre con el correo y la clave que le dieron. La sesión no se guarda en este computador.</p>
+    <form id="form-entrar" class="tarjeta" style="border:0;padding:0;gap:var(--esp-3)">
+      <div class="campo"><label for="correo">Correo</label><input type="email" id="correo" autocomplete="username" required></div>
+      <div class="campo"><label for="clave">Clave</label><input type="password" id="clave" autocomplete="current-password" required></div>
+      <p class="error-campo" id="error-entrar" role="alert"></p>
+      <button class="boton" id="boton-entrar" type="submit"><span>Entrar</span></button>
+    </form>
+  </section>
+</main>
+
+<!-- Programa -->
+<div id="vista-programa" class="pagina" hidden>
+  <header class="cabeza">
+    <svg class="logo" aria-hidden="true"><use href="#logo"/></svg>
+    <div><h1>Tino</h1><div class="pequeno" id="quien"></div></div>
+    <div class="quien"><button class="boton texto compacto" id="salir"><svg class="icono" aria-hidden="true"><use href="#i-salir"/></svg>Salir</button></div>
+  </header>
+
+  <nav class="pestanas" role="tablist" aria-label="Pantallas">
+    <button class="pestana" role="tab" data-panel="revision" aria-selected="true"><svg class="icono" aria-hidden="true"><use href="#i-dia"/></svg>Revisión del día</button>
+    <button class="pestana" role="tab" data-panel="archivos" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-subir"/></svg>Archivos <span class="contador" id="n-errores" hidden></span></button>
+    <button class="pestana" role="tab" data-panel="transferencias" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-transf"/></svg>Transferencias</button>
+    <button class="pestana" role="tab" data-panel="confirmar" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-revisar"/></svg>Por confirmar</button>
+    <button class="pestana" role="tab" data-panel="descuadres" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-caja"/></svg>Descuadres</button>
+    <button class="pestana" role="tab" data-panel="ventas" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-ventas"/></svg>Ventas con tarjeta</button>
+  </nav>
+
+  <!-- Revisión del día -->
+  <section class="tarjeta" role="tabpanel" id="panel-revision">
+    <div><h2>Revisión del día</h2><p class="pequeno">Lo anotado en cada punto contra el banco y los datáfonos, con lo que ya está subido. Se guarda al revisar.</p></div>
+    <div class="filtros">
+      <div class="campo"><label for="rev-fecha">Día que se revisa</label><input type="date" id="rev-fecha"></div>
+      <button class="boton" id="rev-boton"><span>Revisar el día</span></button>
+    </div>
+    <div id="rev-estado"></div>
+  </section>
+
+  <!-- Archivos -->
+  <section class="tarjeta" role="tabpanel" id="panel-archivos" hidden>
+    <div class="encabezado">
+      <div><h2>Archivos</h2><p class="pequeno">Excel del día, extracto de Bancolombia y reportes de Bold y Redeban. Tino reconoce cuál es cuál.</p></div>
+      <button class="boton" id="arch-elegir"><svg class="icono" aria-hidden="true"><use href="#i-subir"/></svg><span>Elegir archivos</span></button>
+    </div>
+    <div id="arch-listos" style="display:flex;flex-direction:column;gap:var(--esp-3)"></div>
+    <div id="arch-errores"></div>
+    <h3>Historial</h3>
+    <div class="caja" id="arch-historial"></div>
+  </section>
+
+  <!-- Transferencias -->
+  <section class="tarjeta" role="tabpanel" id="panel-transferencias" hidden>
+    <div class="encabezado">
+      <div><h2>Transferencias</h2><p class="pequeno">Cada transferencia anotada y si llegó al banco. Las sospechosas van primero.</p></div>
+      <button class="boton secundario compacto" id="tr-copiar"><svg class="icono" aria-hidden="true"><use href="#i-copiar"/></svg>Copiar como números</button>
+    </div>
+    <div class="filtros">
+      <div class="campo"><label for="tr-desde">Desde</label><input type="date" id="tr-desde"></div>
+      <div class="campo"><label for="tr-hasta">Hasta</label><input type="date" id="tr-hasta"></div>
+      <button class="boton" id="tr-ver"><span>Ver</span></button>
+    </div>
+    <div class="cifras" id="tr-cifras"></div>
+    <div class="caja" id="tr-tabla"></div>
+  </section>
+
+  <!-- Por confirmar -->
+  <section class="tarjeta" role="tabpanel" id="panel-confirmar" hidden>
+    <div><h2>Por confirmar</h2><p class="pequeno">Parejas que Tino propone y no confirma solo: llegó otro día o el monto parece mal escrito. Una persona decide, con nota.</p></div>
+    <div class="caja" id="pc-tabla"></div>
+  </section>
+
+  <!-- Descuadres -->
+  <section class="tarjeta" role="tabpanel" id="panel-descuadres" hidden>
+    <div class="encabezado">
+      <div><h2>Descuadres</h2><p class="pequeno">Lo que faltó o sobró cada día, con la causa más probable. Si no hay causa, dice "Sin causa clara".</p></div>
+      <button class="boton secundario compacto" id="de-copiar"><svg class="icono" aria-hidden="true"><use href="#i-copiar"/></svg>Copiar como números</button>
+    </div>
+    <div class="filtros">
+      <div class="campo"><label for="de-desde">Desde</label><input type="date" id="de-desde"></div>
+      <div class="campo"><label for="de-hasta">Hasta</label><input type="date" id="de-hasta"></div>
+      <button class="boton" id="de-ver"><span>Ver</span></button>
+    </div>
+    <div class="cifras" id="de-cifras"></div>
+    <div class="caja" id="de-tabla"></div>
+  </section>
+
+  <!-- Ventas con tarjeta -->
+  <section class="tarjeta" role="tabpanel" id="panel-ventas" hidden>
+    <div><h2>Ventas con tarjeta</h2><p class="pequeno">Vendido por punto y por mes, con lo que está subido de Bold y Redeban. No incluye efectivo ni transferencias.</p></div>
+    <div class="filtros">
+      <div class="campo"><label for="ve-desde">Desde</label><input type="date" id="ve-desde"></div>
+      <div class="campo"><label for="ve-hasta">Hasta</label><input type="date" id="ve-hasta"></div>
+      <button class="boton" id="ve-boton"><span>Armar el tablero</span></button>
+    </div>
+    <div id="ve-estado"></div>
+  </section>
+</div>
+
+<dialog id="decidir" aria-labelledby="dec-titulo">
+  <form method="dialog" class="dentro" id="dec-form">
+    <h2 id="dec-titulo"></h2>
+    <p id="dec-texto" class="pequeno"></p>
+    <div class="campo" id="dec-campo-estado" hidden>
+      <label for="dec-estado">Cómo se cierra</label>
+      <select id="dec-estado">
+        <option value="explicado">Explicado: se confirmó la causa</option>
+        <option value="resuelto">Resuelto: la plata apareció o se corrigió</option>
+        <option value="aceptado">Aceptado: se asume la diferencia</option>
+      </select>
+    </div>
+    <div class="campo"><label for="dec-nota">Nota (obligatoria)</label><textarea id="dec-nota" aria-describedby="dec-error"></textarea></div>
+    <p class="error-campo" id="dec-error" role="alert"></p>
+    <div class="acciones" style="justify-content:flex-end">
+      <button class="boton secundario" value="cancelar" type="button" id="dec-cancelar">Cancelar</button>
+      <button class="boton" id="dec-ok" type="submit"><span></span></button>
+    </div>
+  </form>
+</dialog>
+<div id="anuncio" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const api = () => window.pywebview.api;
+  const escapar = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const icono = (id, clase = '') => `<svg class="icono ${clase}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const miles = (n) => Math.abs(n ?? 0).toLocaleString('es-CO');
+  const pesos = (n) => (n == null ? '' : (n < 0 ? '−' : '') + '$ ' + miles(n));
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const fecha = (f) => { if (!f) return ''; const [a, m, d] = f.slice(0, 10).split('-').map(Number); return `${DIAS[new Date(Date.UTC(a, m - 1, d)).getUTCDay()]} ${d} ${MESES[m - 1]}`; };
+  const cargando = (texto) => `<p class="estado-carga">${icono('cargando', 'girando')}${escapar(texto)}</p>`;
+  const vacio = (texto) => `<p class="vacio">${escapar(texto)}</p>`;
+  const nota = (clase, titulo, texto) => `<div class="nota ${clase}">${icono(clase === 'ok' ? 'ok' : 'alerta')}<div class="cuerpo"><b>${escapar(titulo)}</b>${texto ? `<span>${texto}</span>` : ''}</div></div>`;
+  const avisa = (msg) => { const x = $('anuncio'); x.textContent = msg; x.classList.add('ver'); setTimeout(() => x.classList.remove('ver'), 2600); };
+
+  // Toda llamada a Python vuelve como {datos} o {error}: el error se muestra donde pasó.
+  async function llamar(metodo, ...args) {
+    const r = await api()[metodo](...args);
+    if (r && r.error) throw new Error(r.error);
+    return r ? r.datos : null;
+  }
+  async function ocupado(boton, trabajo) {
+    if (boton.getAttribute('aria-disabled') === 'true') return;
+    boton.setAttribute('aria-disabled', 'true');
+    boton.insertAdjacentHTML('afterbegin', icono('cargando', 'girando'));
+    try { return await trabajo(); } finally { boton.setAttribute('aria-disabled', 'false'); boton.querySelector('svg.girando')?.remove(); }
+  }
+  function copiar(filas) {
+    const texto = filas.map((f) => f.join('\t')).join('\n');
+    const respaldo = () => { const t = document.createElement('textarea'); t.value = texto; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); avisa(ok ? 'Copiado. Péguelo en Excel: quedan números que se pueden sumar.' : 'No se pudo copiar.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(() => avisa('Copiado. Péguelo en Excel: quedan números que se pueden sumar.'), respaldo);
+    else respaldo();
+  }
+
+  // Decidir: siempre con nota ------------------------------------------------
+  let alDecidir = null;
+  function decidir({ titulo, texto, boton, peligro, conEstado }, accion) {
+    $('dec-titulo').textContent = titulo; $('dec-texto').textContent = texto || '';
+    $('dec-ok').querySelector('span').textContent = boton;
+    $('dec-ok').classList.toggle('peligro', !!peligro);
+    $('dec-campo-estado').hidden = !conEstado;
+    $('dec-nota').value = ''; $('dec-error').textContent = '';
+    alDecidir = accion; $('decidir').showModal(); $('dec-nota').focus();
+  }
+  $('dec-cancelar').addEventListener('click', () => $('decidir').close());
+  $('dec-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nota = $('dec-nota').value.trim();
+    if (!nota) { $('dec-error').textContent = 'Escriba una nota: queda en el historial con su nombre.'; $('dec-nota').focus(); return; }
+    try {
+      await ocupado($('dec-ok'), () => alDecidir(nota, $('dec-estado').value));
+      $('decidir').close();
+    } catch (err) { $('dec-error').textContent = err.message; }
+  });
+
+  // Pestañas --------------------------------------------------------------
+  const pestanas = [...document.querySelectorAll('.pestana')];
+  const alAbrir = {};
+  function mostrar(tab) {
+    pestanas.forEach((p) => { const activa = p === tab; p.setAttribute('aria-selected', activa); p.tabIndex = activa ? 0 : -1; $('panel-' + p.dataset.panel).hidden = !activa; });
+    (alAbrir[tab.dataset.panel] || (() => {}))();
+  }
+  pestanas.forEach((p, i) => {
+    p.addEventListener('click', () => mostrar(p));
+    p.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      const otra = pestanas[(i + (e.key === 'ArrowRight' ? 1 : pestanas.length - 1)) % pestanas.length];
+      mostrar(otra); otra.focus();
+    });
+  });
+
+  // Entrar ----------------------------------------------------------------
+  function abrirPrograma(yo) {
+    $('vista-entrar').hidden = true; $('vista-programa').hidden = false;
+    $('quien').textContent = `${yo.empresa} · ${yo.nombre}`;
+    contarErrores();
+  }
+  $('form-entrar').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('error-entrar').textContent = '';
+    try { abrirPrograma(await ocupado($('boton-entrar'), () => llamar('entrar', $('correo').value.trim(), $('clave').value))); }
+    catch (err) { $('error-entrar').textContent = err.message; }
+  });
+  $('salir').addEventListener('click', async () => { await llamar('salir'); location.reload(); });
+
+  // Revisión del día --------------------------------------------------------
+  $('rev-boton').addEventListener('click', () => ocupado($('rev-boton'), async () => {
+    if (!$('rev-fecha').value) { $('rev-estado').innerHTML = nota('mal', 'Elija el día que quiere revisar.'); return; }
+    $('rev-estado').innerHTML = cargando('Revisando con lo que está subido…');
+    try {
+      const r = await llamar('revisar_dia', $('rev-fecha').value);
+      $('rev-estado').innerHTML = r.puntos ? nota('ok', `Listo: ${r.puntos} punto(s) con Excel ese día. Se abrió en otra ventana.`, 'También quedó guardada: los descuadres y las transferencias de ese día ya están en sus pantallas.')
+        : nota('aviso', 'Ese día no tiene ningún Excel subido.', 'Suba el Excel del día en Archivos y vuelva a revisar.');
+    } catch (err) { $('rev-estado').innerHTML = nota('mal', 'No se pudo revisar.', escapar(err.message)); }
+  }));
+
+  // Archivos --------------------------------------------------------------
+  const FUENTE = { excel_dia: 'Excel del día', banco: 'Extracto del banco', bold: 'Reporte de Bold', redeban: 'Reporte de Redeban', siigo: 'Siigo', correo: 'Correo' };
+  const rango = (a, b) => (a ? (a === b ? fecha(a) : `${fecha(a)} a ${fecha(b)}`) : '');
+  async function contarErrores() {
+    try { const n = (await llamar('errores')).length; $('n-errores').hidden = !n; $('n-errores').textContent = n; } catch (_) {}
+  }
+  alAbrir.archivos = async () => {
+    $('arch-historial').innerHTML = cargando('Cargando el historial…');
+    try {
+      const [lista, errores] = await Promise.all([llamar('archivos'), llamar('errores')]);
+      $('n-errores').hidden = !errores.length; $('n-errores').textContent = errores.length;
+      $('arch-errores').innerHTML = errores.length ? nota('aviso', `${errores.length} nombre(s) por resolver`, `Tino no los reconoce y no adivina: ${errores.slice(0, 8).map((e) => escapar(e.texto)).join(', ')}${errores.length > 8 ? '…' : ''}. Hay que agregarlos como alias en la base.`) : '';
+      $('arch-historial').innerHTML = !lista.length ? vacio('Todavía no hay archivos subidos.') :
+        `<table><thead><tr><th>Archivo</th><th>Qué es</th><th>Días</th><th class="d">Filas</th><th>Estado</th><th></th></tr></thead><tbody>${lista.map((a) => `<tr>
+          <td>${escapar(a.nombre)}<div class="pequeno">Subido ${fecha(a.creado_en)}</div></td><td>${FUENTE[a.fuente] || a.fuente}</td><td>${rango(a.desde, a.hasta)}</td>
+          <td class="d">${miles(a.filas)}</td><td>${a.estado === 'cargado' ? '<span class="chip c-ok">● Cargado</span>' : '<span class="chip c-neu">— Deshecho</span>'}</td>
+          <td class="d">${a.estado === 'cargado' ? `<button class="boton peligro-texto compacto" data-deshacer="${a.id}" data-nombre="${escapar(a.nombre)}">Deshacer</button>` : ''}</td></tr>`).join('')}</tbody></table>`;
+      $('arch-historial').querySelectorAll('[data-deshacer]').forEach((b) => b.addEventListener('click', () => decidir(
+        { titulo: 'Deshacer este archivo', texto: `${b.dataset.nombre} deja de contar en todas las pantallas. No se borra: queda en el historial y se puede volver a subir corregido.`, boton: 'Deshacer el archivo', peligro: true },
+        async () => { await llamar('deshacer', b.dataset.deshacer); avisa('Archivo deshecho.'); alAbrir.archivos(); })));
+    } catch (err) { $('arch-historial').innerHTML = nota('mal', 'No se pudo cargar el historial.', escapar(err.message)); }
+  };
+  $('arch-elegir').addEventListener('click', () => ocupado($('arch-elegir'), async () => {
+    $('arch-listos').innerHTML = cargando('Leyendo los archivos… cada Excel tarda cerca de un minuto.');
+    try {
+      const listos = await llamar('elegir_y_preparar');
+      if (!listos.length) { $('arch-listos').innerHTML = ''; return; }
+      $('arch-listos').innerHTML = listos.map((a, i) => `<div class="archivo-listo" id="listo-${i}">
+        <div class="fila-arch"><div><b>${escapar(a.nombre)}</b><div class="pequeno">${a.error ? '' : `${FUENTE[a.fuente] || a.fuente} · ${rango(a.resumen.desde, a.resumen.hasta)}`}</div></div>
+        ${a.error ? '<span class="chip c-mal">■ No se puede subir</span>' : `<button class="boton compacto" data-subir="${a.clave}" data-i="${i}"><span>Subir</span></button>`}</div>
+        ${a.error ? `<span class="error-campo">${escapar(a.error)}</span>` : `<span class="pequeno">${a.resumen.dias ? `${a.resumen.dias} día(s), ${miles(a.resumen.pagos)} pagos anotados` : `${miles(a.resumen.movimientos)} movimientos`}${a.resumen.errores ? ` · ${a.resumen.errores} nombre(s) sin reconocer` : ''}</span>`}
+        ${a.avisos && a.avisos.length ? `<details><summary class="pequeno">${a.avisos.length} aviso(s) del archivo</summary><ul class="pequeno">${a.avisos.map((x) => `<li>${escapar(x)}</li>`).join('')}</ul></details>` : ''}
+        <div class="resultado"></div></div>`).join('');
+      $('arch-listos').querySelectorAll('[data-subir]').forEach((b) => b.addEventListener('click', () => ocupado(b, async () => {
+        const caja = $('listo-' + b.dataset.i).querySelector('.resultado');
+        caja.innerHTML = cargando('Subiendo y revisando los días que trae…');
+        try {
+          const r = await llamar('subir', b.dataset.subir);
+          caja.innerHTML = nota('ok', 'Subido.', `Se revisaron ${r.dias_revisados} día(s) con Excel.`); b.remove(); alAbrir.archivos();
+        } catch (err) { caja.innerHTML = nota('mal', 'No se subió.', escapar(err.message)); }
+      })));
+    } catch (err) { $('arch-listos').innerHTML = nota('mal', 'No se pudieron leer los archivos.', escapar(err.message)); }
+  }));
+
+  // Transferencias --------------------------------------------------------
+  const ESTADO_TR = { confirmada: '<span class="chip c-ok">● Llegó</span>', propuesta: '<span class="chip c-rev">▲ Por confirmar</span>',
+    sospechosa: '<span class="chip c-mal">■ No llegó</span>', pendiente: '<span class="chip c-esp">— Esperando banco</span>', rechazada: '<span class="chip c-neu">— No es</span>' };
+  let transferencias = [];
+  async function verTransferencias() {
+    $('tr-tabla').innerHTML = cargando('Cargando…'); $('tr-cifras').innerHTML = '';
+    try {
+      transferencias = await llamar('transferencias', $('tr-desde').value, $('tr-hasta').value);
+      const sosp = transferencias.filter((t) => t.estado === 'sospechosa');
+      const sumar = (l) => l.reduce((a, t) => a + t.monto, 0);
+      $('tr-cifras').innerHTML = `<div class="tarjeta cifra ${sosp.length ? 'alerta' : ''}"><span class="etiqueta">No llegaron</span><span class="valor num">${sosp.length}</span><span class="pequeno">${sosp.length ? pesos(sumar(sosp)) + ' en total' : 'Ninguna'}</span></div>
+        <div class="tarjeta cifra"><span class="etiqueta">Por confirmar</span><span class="valor num">${transferencias.filter((t) => t.estado === 'propuesta').length}</span><span class="pequeno">Llegaron otro día o con otro monto</span></div>
+        <div class="tarjeta cifra"><span class="etiqueta">Llegaron</span><span class="valor num">${transferencias.filter((t) => t.estado === 'confirmada').length}</span><span class="pequeno">de ${transferencias.length} anotadas</span></div>`;
+      $('tr-tabla').innerHTML = !transferencias.length ? vacio('No hay transferencias anotadas en esas fechas.') :
+        `<table><thead><tr><th>Día</th><th>Punto</th><th class="d">Monto</th><th>Estado</th><th>En el banco</th><th></th></tr></thead><tbody>${transferencias.map((t, i) => `<tr>
+          <td>${fecha(t.fecha)}<div class="pequeno">fila ${t.fila_origen ?? ''}</div></td><td>${escapar(t.punto)}</td><td class="d"><b>${pesos(t.monto)}</b></td><td>${ESTADO_TR[t.estado] || escapar(t.estado)}</td>
+          <td>${t.fecha_banco ? `${fecha(t.fecha_banco)}<div class="pequeno">ref ${escapar(t.referencia || '')}</div>` : (t.nota ? `<span class="pequeno">${escapar(t.nota)}</span>` : '')}</td>
+          <td class="d">${['sospechosa', 'propuesta', 'pendiente'].includes(t.estado) ? `${t.estado === 'propuesta' ? `<button class="boton texto compacto" data-i="${i}" data-dec="confirmada">Confirmar</button>` : ''}<button class="boton peligro-texto compacto" data-i="${i}" data-dec="rechazada">No es</button>` : ''}</td></tr>`).join('')}</tbody>
+          <tfoot><tr><td colspan="2">Total anotado</td><td class="d">${pesos(sumar(transferencias))}</td><td colspan="3"></td></tr></tfoot></table>`;
+      $('tr-tabla').querySelectorAll('[data-dec]').forEach((b) => b.addEventListener('click', () => {
+        const t = transferencias[b.dataset.i], confirmar = b.dataset.dec === 'confirmada';
+        decidir({ titulo: confirmar ? 'Confirmar la transferencia' : 'Marcar como "No es"', texto: `${escapar(t.punto)}, ${fecha(t.fecha)}, ${pesos(t.monto)}. ${confirmar ? 'Queda confirmada con la línea del banco que Tino propuso.' : 'Queda como no recibida, con su nota, en el historial.'}`, boton: confirmar ? 'Confirmar' : 'Marcar "No es"', peligro: !confirmar },
+          async (n) => { await llamar('decidir_transferencia', t.pago_id, b.dataset.dec, n); avisa('Guardado.'); verTransferencias(); });
+      }));
+    } catch (err) { $('tr-tabla').innerHTML = nota('mal', 'No se pudieron cargar las transferencias.', escapar(err.message)); }
+  }
+  $('tr-ver').addEventListener('click', () => ocupado($('tr-ver'), verTransferencias));
+  $('tr-copiar').addEventListener('click', () => copiar([['Fecha', 'Punto', 'Monto', 'Estado']].concat(transferencias.map((t) => [t.fecha, t.punto, t.monto, t.estado]))));
+
+  // Por confirmar ---------------------------------------------------------
+  const TIPO = { otro_dia: 'Llegó otro día', mal_digitado: 'Monto mal escrito', junto_con: 'Cuadra junto con otra fecha', dia_tarde: 'Llegó un día tarde', manual: 'Manual' };
+  alAbrir.confirmar = async () => {
+    $('pc-tabla').innerHTML = cargando('Cargando…');
+    try {
+      const lista = await llamar('por_confirmar');
+      $('pc-tabla').innerHTML = !lista.length ? vacio('No hay nada por confirmar.') :
+        `<table><thead><tr><th>Qué pasó</th><th>Punto</th><th>Anotado</th><th>Lo que llegó</th><th></th></tr></thead><tbody>${lista.map((c, i) => `<tr>
+          <td><span class="chip c-rev">▲ ${TIPO[c.tipo] || c.tipo}</span></td><td>${escapar(c.punto)}</td>
+          <td><b class="num">${pesos(c.monto_anotado)}</b><div class="pequeno">${fecha(c.fecha_anotada)} · ${c.medio_tipo === 'tarjeta' ? 'tarjeta' : 'transferencia'} · fila ${c.fila_origen ?? ''}</div></td>
+          <td><b class="num">${pesos(c.monto_externo)}</b><div class="pequeno">${fecha(c.fecha_externa)} · ${c.fuente === 'banco' ? 'banco' : escapar(c.fuente)}</div></td>
+          <td class="d"><button class="boton texto compacto" data-i="${i}" data-dec="confirmada">Confirmar</button><button class="boton peligro-texto compacto" data-i="${i}" data-dec="rechazada">No es</button></td></tr>`).join('')}</tbody></table>`;
+      $('pc-tabla').querySelectorAll('[data-dec]').forEach((b) => b.addEventListener('click', () => {
+        const c = lista[b.dataset.i], confirmar = b.dataset.dec === 'confirmada';
+        decidir({ titulo: confirmar ? 'Confirmar la pareja' : 'No es la misma', texto: `Anotado ${pesos(c.monto_anotado)} el ${fecha(c.fecha_anotada)}; llegó ${pesos(c.monto_externo)} el ${fecha(c.fecha_externa)}.`, boton: confirmar ? 'Confirmar' : 'Marcar "No es"', peligro: !confirmar },
+          async (n) => { await llamar('decidir_cruce', c.id, b.dataset.dec, n); avisa('Guardado.'); alAbrir.confirmar(); });
+      }));
+    } catch (err) { $('pc-tabla').innerHTML = nota('mal', 'No se pudo cargar.', escapar(err.message)); }
+  };
+
+  // Descuadres ------------------------------------------------------------
+  const MOTOR = { cuadra: '<span class="chip c-ok">● Cuadra</span>', explicado: '<span class="chip c-rev">▲ Explicado</span>', sin_explicar: '<span class="chip c-mal">■ Sin causa clara</span>' };
+  const CIERRE = { abierto: '', explicado: 'Cerrado: explicado', resuelto: 'Cerrado: resuelto', aceptado: 'Cerrado: aceptado' };
+  let descuadres = [];
+  async function verDescuadres() {
+    $('de-tabla').innerHTML = cargando('Cargando…'); $('de-cifras').innerHTML = '';
+    try {
+      descuadres = await llamar('descuadres', $('de-desde').value, $('de-hasta').value);
+      const abiertos = descuadres.filter((d) => d.descuadre_estado === 'abierto' && d.estado_motor === 'sin_explicar');
+      $('de-cifras').innerHTML = `<div class="tarjeta cifra ${abiertos.length ? 'alerta' : ''}"><span class="etiqueta">Sin causa clara, abiertos</span><span class="valor num">${abiertos.length}</span><span class="pequeno">${abiertos.length ? pesos(abiertos.reduce((a, d) => a + d.descuadre, 0)) + ' en total' : 'Ninguno'}</span></div>
+        <div class="tarjeta cifra"><span class="etiqueta">Días revisados</span><span class="valor num">${descuadres.length}</span><span class="pequeno">${descuadres.filter((d) => d.estado_motor === 'cuadra').length} cuadran</span></div>`;
+      $('de-tabla').innerHTML = !descuadres.length ? vacio('No hay días revisados en esas fechas. Revíselos en "Revisión del día" o suba sus archivos.') :
+        `<table><thead><tr><th>Día</th><th>Punto</th><th>Asesora</th><th class="d">Descuadre</th><th class="d">Explicado</th><th>Estado</th><th>Causa</th><th></th></tr></thead><tbody>${descuadres.map((d, i) => `<tr>
+          <td>${fecha(d.fecha)}</td><td>${escapar(d.punto)}</td><td>${escapar(d.asesoras_texto)}</td><td class="d"><b>${pesos(d.descuadre)}</b></td><td class="d">${pesos(d.explicado)}</td>
+          <td>${MOTOR[d.estado_motor] || ''}${CIERRE[d.descuadre_estado] ? `<div class="pequeno">${CIERRE[d.descuadre_estado]}</div>` : ''}</td><td>${escapar(d.causa)}</td>
+          <td class="d"><button class="boton texto compacto" data-pruebas="${i}">Pruebas</button>${d.descuadre_estado === 'abierto' && d.estado_motor !== 'cuadra' ? `<button class="boton texto compacto" data-cerrar="${i}">Cerrar</button>` : ''}</td></tr>
+          <tr hidden id="pruebas-${i}"><td colspan="8"></td></tr>`).join('')}</tbody>
+          <tfoot><tr><td colspan="3">Total</td><td class="d">${pesos(descuadres.reduce((a, d) => a + d.descuadre, 0))}</td><td class="d">${pesos(descuadres.reduce((a, d) => a + d.explicado, 0))}</td><td colspan="3"></td></tr></tfoot></table>`;
+      $('de-tabla').querySelectorAll('[data-cerrar]').forEach((b) => b.addEventListener('click', () => {
+        const d = descuadres[b.dataset.cerrar];
+        decidir({ titulo: 'Cerrar el descuadre', texto: `${escapar(d.punto)}, ${fecha(d.fecha)}: ${pesos(d.descuadre)}. No se borra: queda cerrado con su nota.`, boton: 'Cerrar el descuadre', conEstado: true },
+          async (n, estado) => { await llamar('cerrar_descuadre', d.descuadre_id, estado, n); avisa('Guardado.'); verDescuadres(); });
+      }));
+      $('de-tabla').querySelectorAll('[data-pruebas]').forEach((b) => b.addEventListener('click', async () => {
+        const fila = $('pruebas-' + b.dataset.pruebas); fila.hidden = !fila.hidden;
+        if (fila.hidden) return;
+        const celda = fila.querySelector('td'); celda.innerHTML = cargando('Cargando…');
+        try {
+          const p = await llamar('pruebas', descuadres[b.dataset.pruebas].descuadre_id);
+          const TIPO_P = { causa: 'Explica', senal: 'Para revisar', pista: 'Pista, no explica' };
+          celda.innerHTML = !p.length ? '<span class="pequeno">Sin pruebas: nada lo explica.</span>' : `<ul class="pequeno">${p.map((x) => `<li><b>${escapar(x.causa)}</b> · ${TIPO_P[x.tipo]}${x.tipo === 'causa' ? ' · ' + pesos(x.monto) : ''}${x.total && x.tipo !== 'causa' ? ' · ' + pesos(x.total) : ''}</li>`).join('')}</ul>`;
+        } catch (err) { celda.innerHTML = `<span class="error-campo">${escapar(err.message)}</span>`; }
+      }));
+    } catch (err) { $('de-tabla').innerHTML = nota('mal', 'No se pudieron cargar los descuadres.', escapar(err.message)); }
+  }
+  $('de-ver').addEventListener('click', () => ocupado($('de-ver'), verDescuadres));
+  $('de-copiar').addEventListener('click', () => copiar([['Fecha', 'Punto', 'Descuadre', 'Explicado', 'Sin explicar', 'Estado']].concat(descuadres.map((d) => [d.fecha, d.punto, d.descuadre, d.explicado, d.sin_explicar, d.estado_motor]))));
+
+  // Ventas con tarjeta ----------------------------------------------------
+  $('ve-boton').addEventListener('click', () => ocupado($('ve-boton'), async () => {
+    $('ve-estado').innerHTML = cargando('Armando el tablero…');
+    try {
+      const r = await llamar('tablero', $('ve-desde').value, $('ve-hasta').value);
+      $('ve-estado').innerHTML = r.cobros ? nota('ok', `Listo: ${miles(r.cobros)} cobros. Se abrió en otra ventana.`) : nota('aviso', 'No hay cobros de Bold ni Redeban subidos en esas fechas.');
+    } catch (err) { $('ve-estado').innerHTML = nota('mal', 'No se pudo armar el tablero.', escapar(err.message)); }
+  }));
+
+  // Arranque --------------------------------------------------------------
+  window.addEventListener('pywebviewready', async () => {
+    const e = await llamar('estado');
+    ['rev-fecha', 'tr-desde', 'tr-hasta', 'de-desde', 'de-hasta', 've-hasta'].forEach((id) => { $(id).value = e.ayer; });
+    $('ve-desde').value = e.ayer.slice(0, 8) + '01';
+    if (e.correo) $('correo').value = e.correo;
+    if (e.sesion) abrirPrograma(e.sesion);
+    else { $('vista-entrar').hidden = false; (e.correo ? $('clave') : $('correo')).focus(); }
+  });
+})();
+</script>
+</body>
+</html>

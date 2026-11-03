@@ -39,6 +39,9 @@ def main():
              "--paths", str(RAIZ), "--paths", str(RAIZ / "motores"), "--paths", str(RAIZ / "motores" / "conciliador"),
              # excel_diario lo importa dentro de una función: PyInstaller no lo ve solo.
              "--hidden-import", "cierre.lector_xlsx",
+             # El modo conectado se importa al arrancar, según exista tino.json.
+             "--hidden-import", "panel.servicio", "--hidden-import", "panel.datos.cliente",
+             "--add-data", f"{RAIZ / 'panel' / 'tino.html'}{os.pathsep}.",
              "--add-data", f"{RAIZ / 'panel' / 'revision' / 'plantilla.html'}{os.pathsep}revision",
              "--add-data", f"{RAIZ / 'panel' / 'tablero' / 'plantilla.html'}{os.pathsep}tablero",
              str(RAIZ / "panel" / "app.py")]

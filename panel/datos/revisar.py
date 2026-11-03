@@ -44,7 +44,7 @@ def leer(c, emp, desde, hasta):
     """Lo vigente entre desde y hasta, con un margen de días para los vecinos."""
     d0 = (dt.date.fromisoformat(desde) - 7 * UN_DIA).isoformat()
     d1 = (dt.date.fromisoformat(hasta) + 7 * UN_DIA).isoformat()
-    nombre = {p["id"]: p["nombre"] for p in emp.puntos}
+    nombre = emp.etiqueta
 
     jornadas = _rango(c, "v_jornada", d0, d1, "id,punto_id,fecha,reporte_id,venta_teorica,descuadre_reportado,"
                                               "asesoras_texto")

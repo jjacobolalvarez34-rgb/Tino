@@ -28,11 +28,14 @@ class Empresa:
         alias_a = c.leer("asesora_alias", columnas="asesora_id,punto_id,texto_normalizado")
 
         self.por_id = {p["id"]: p for p in self.puntos}
-        self.id_por_nombre = {p["nombre"]: p["id"] for p in self.puntos}
-        if len(self.id_por_nombre) != len(self.puntos):
-            raise ValueError("Dos puntos activos tienen el mismo nombre: no se puede saber cuál es cuál.")
-        nombre = {p["id"]: p["nombre"] for p in self.puntos}
-        por_codigo = {p["codigo"]: p["nombre"] for p in self.puntos}
+        # Cómo se llama cada punto en pantalla. Si dos se llaman igual, llevan su código al
+        # lado: el código es único en la empresa y así nunca se confunden.
+        repetidos = {n for n in (p["nombre"] for p in self.puntos) if sum(q["nombre"] == n for q in self.puntos) > 1}
+        nombre = {p["id"]: f"{p['nombre']} ({p['codigo']})" if p["nombre"] in repetidos else p["nombre"]
+                  for p in self.puntos}
+        self.etiqueta = nombre
+        self.id_por_nombre = {v: k for k, v in nombre.items()}
+        por_codigo = {p["codigo"]: nombre[p["id"]] for p in self.puntos}
         mapeo = {p["fuente"]: p["mapeo_columnas"] or {} for p in perfiles}
 
         self.terminal_id = {(t["proveedor"], str(t["codigo_terminal"]).strip().upper()): t["id"] for t in terminales}

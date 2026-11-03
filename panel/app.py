@@ -25,16 +25,126 @@ from panel.tablero import armar as tablero  # noqa: E402
 # en el disco del sistema: en el computador de pruebas, C: está lleno (D-034).
 PROPIO = Path(sys.executable).parent if CONGELADO else RAIZ / ".ventana"
 INICIO = (Path(sys._MEIPASS) if CONGELADO else Path(__file__).parent) / "inicio.html"
+CONECTADO = (Path(sys._MEIPASS) if CONGELADO else Path(__file__).parent) / "tino.html"
 
 
-def buscar_puntos():
-    """puntos.json junto al programa o en una carpeta Tino-datos de más arriba."""
+def buscar(nombre):
+    """Un archivo de configuración junto al programa o en una carpeta Tino-datos de más arriba."""
     inicio = Path(sys.executable).parent if CONGELADO else RAIZ
     for carpeta in [inicio, *inicio.parents]:
-        for candidato in (carpeta / "puntos.json", carpeta / "Tino-datos" / "puntos.json"):
+        for candidato in (carpeta / nombre, carpeta / "Tino-datos" / nombre):
             if candidato.exists():
                 return candidato
     return None
+
+
+def buscar_puntos():
+    return buscar("puntos.json")
+
+
+def abrir_html(titulo, ruta):
+    import webview
+    webview.create_window(f"Tino · {titulo}", url=Path(ruta).as_uri(), width=1280, height=720,
+                          min_size=(400, 500), background_color="#F7F5F7")
+
+
+class ApiConectada:
+    """El programa conectado a la base: cada método devuelve {datos} o {error}.
+
+    tino.json trae la dirección de Supabase y la llave pública, nunca la de servicio. La
+    sesión vive solo en memoria: al cerrar el programa hay que volver a entrar.
+    """
+
+    def __init__(self, servicio, carpeta, correo=""):
+        self._s, self._carpeta, self._correo = servicio, Path(carpeta), correo
+        self._ventana, self._sesion = None, None
+
+    def _envolver(self, trabajo):
+        try:
+            return {"datos": trabajo()}
+        except Exception as e:  # noqa: BLE001 - se muestra en la pantalla
+            return {"error": str(e) or e.__class__.__name__}
+
+    def estado(self):
+        ayer = (dt.date.today() - dt.timedelta(days=1)).isoformat()
+        return {"datos": {"ayer": ayer, "correo": self._correo, "sesion": self._sesion}}
+
+    def entrar(self, correo, clave):
+        def trabajo():
+            self._sesion = self._s.entrar(correo, clave)
+            return self._sesion
+        return self._envolver(trabajo)
+
+    def salir(self):
+        self._s.c.token, self._sesion = None, None
+        return {"datos": True}
+
+    def archivos(self):
+        return self._envolver(self._s.archivos)
+
+    def errores(self):
+        return self._envolver(self._s.errores)
+
+    def elegir_y_preparar(self):
+        import webview
+        rutas = self._ventana.create_file_dialog(
+            webview.FileDialog.OPEN, allow_multiple=True,
+            file_types=("Archivos de Tino (*.xlsx;*.pdf)", "Excel (*.xlsx)", "Extracto en PDF (*.pdf)"))
+        return self._envolver(lambda: self._s.preparar(list(rutas or [])))
+
+    def subir(self, clave):
+        return self._envolver(lambda: self._s.subir(clave))
+
+    def deshacer(self, archivo_id):
+        return self._envolver(lambda: self._s.deshacer(archivo_id))
+
+    def _guardar_y_abrir(self, nombre, plantilla, datos, titulo):
+        import json
+        carpeta = self._carpeta / nombre[0]
+        carpeta.mkdir(parents=True, exist_ok=True)
+        salida = carpeta / nombre[1]
+        texto = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
+        salida.write_text(plantilla.read_text(encoding="utf-8").replace("/*DATOS*/null", texto), encoding="utf-8")
+        abrir_html(titulo, salida)
+
+    def revisar_dia(self, fecha):
+        def trabajo():
+            r = self._s.revision_dia(fecha)
+            con_excel = sum(1 for p in r["puntos"] if not p.get("sin_excel"))
+            if con_excel:
+                self._guardar_y_abrir(("revisiones", f"revision_{fecha}.html"), revision.PLANTILLA, r, f"revisión {fecha}")
+            return {"puntos": con_excel}
+        return self._envolver(trabajo)
+
+    def transferencias(self, desde, hasta):
+        return self._envolver(lambda: self._s.transferencias(desde, hasta))
+
+    def decidir_transferencia(self, pago_id, estado, nota):
+        return self._envolver(lambda: self._s.decidir_transferencia(pago_id, estado, nota))
+
+    def por_confirmar(self):
+        return self._envolver(self._s.por_confirmar)
+
+    def decidir_cruce(self, cruce_id, estado, nota):
+        return self._envolver(lambda: self._s.decidir_cruce(cruce_id, estado, nota))
+
+    def descuadres(self, desde, hasta):
+        return self._envolver(lambda: self._s.descuadres(desde, hasta))
+
+    def pruebas(self, descuadre_id):
+        return self._envolver(lambda: self._s.pruebas(descuadre_id))
+
+    def cerrar_descuadre(self, descuadre_id, estado, nota):
+        return self._envolver(lambda: self._s.cerrar_descuadre(descuadre_id, estado, nota))
+
+    def tablero(self, desde, hasta):
+        def trabajo():
+            cobros = self._s.cobros(desde, hasta)
+            if cobros:
+                self._guardar_y_abrir(("tableros", f"tablero_{desde}_a_{hasta}.html"), tablero.PLANTILLA,
+                                      tablero.armar_datos(cobros, []), "ventas con tarjeta")
+            return {"cobros": len(cobros)}
+        return self._envolver(trabajo)
 
 
 class Api:
@@ -104,11 +214,23 @@ def ventana():
     (PROPIO / "tmp").mkdir(exist_ok=True)
     os.environ["TEMP"] = os.environ["TMP"] = str(PROPIO / "tmp")
     os.environ["WEBVIEW2_USER_DATA_FOLDER"] = str(PROPIO / "ventana")
+    import json
     import webview
 
-    api = Api()
-    api._ventana = webview.create_window("Tino", html=INICIO.read_text(encoding="utf-8"), js_api=api,
-                                         width=820, height=700, min_size=(420, 560), background_color="#F7F5F7")
+    config = buscar("tino.json")
+    if config:
+        # Conectado a la base: entrar, subir archivos y revisar desde Supabase.
+        from panel.datos.cliente import Cliente
+        from panel.servicio import Servicio
+        datos = json.loads(config.read_text(encoding="utf-8"))
+        api = ApiConectada(Servicio(Cliente(datos["url"], datos["llave_publica"])), config.parent,
+                           datos.get("correo", ""))
+        html, ancho, alto = CONECTADO, 1240, 760
+    else:
+        # Sin conexión: elegir archivos sueltos y armar la revisión o el tablero.
+        api, html, ancho, alto = Api(), INICIO, 820, 700
+    api._ventana = webview.create_window("Tino", html=html.read_text(encoding="utf-8"), js_api=api,
+                                         width=ancho, height=alto, min_size=(420, 560), background_color="#F7F5F7")
     webview.start(private_mode=False, storage_path=str(PROPIO / "ventana"))
 
 
