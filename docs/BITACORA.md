@@ -40,8 +40,11 @@ Hecho:
   (dirección y llave pública), y sin conexión si no.
 - Las fotos de pantalla completa capturaron la pantalla de Jacobo mientras usaba el PC:
   se borraron. Las pruebas de la ventana ahora leen su contenido, sin fotos.
+- Usuario de Milagros en tino-pruebas: `tino.baseddatos@gmail.com`, dueño. La clave está
+  en `D:\Repositorios\Tino-datos\usuario_milagros.json`.
 Falta:
-- Un usuario de Milagros en tino-pruebas para entrar al programa (pendiente: qué correo).
+- Tarea 006: subir el `.zip` de Bancolombia, copiar el PDF con nombre claro y exportar
+  `TRANSFERENCIAS {fecha}.xlsx` como el conciliador (7). Hoy Tino no lo hace.
 - `SUPABASE_DB_URL` está vacía en `.env`: Jacobo aplica las migraciones a mano.
 - "Angie" en la hoja del 27 de Plaza Imperial no está en los alias de ese punto.
 Dudas:
