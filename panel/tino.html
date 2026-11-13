@@ -37,7 +37,7 @@ svg.icono{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-
 .filtros{display:flex;flex-wrap:wrap;gap:var(--esp-3);align-items:flex-end}
 .campo{display:flex;flex-direction:column;gap:var(--esp-1)}
 .campo label{font-size:13px;font-weight:600;color:var(--color-texto-suave)}
-input[type=date],input[type=email],input[type=password],select,textarea{height:44px;padding:0 var(--esp-3);border:1px solid var(--color-borde);border-radius:10px;background:var(--color-superficie)}
+input[type=date],input[type=email],input[type=text],input[type=password],select,textarea{height:44px;padding:0 var(--esp-3);border:1px solid var(--color-borde);border-radius:10px;background:var(--color-superficie)}
 textarea{height:auto;min-height:88px;padding:var(--esp-3);resize:vertical;width:100%}
 .pestanas{display:flex;gap:var(--esp-1);border-bottom:1px solid var(--color-borde);overflow-x:auto}
 .pestana{border:0;background:none;padding:var(--esp-3) var(--esp-4);font-size:15px;font-weight:600;color:var(--color-texto-suave);border-bottom:3px solid transparent;margin-bottom:-1px;display:inline-flex;align-items:center;gap:var(--esp-2);min-height:44px;white-space:nowrap}
@@ -91,6 +91,20 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
 #anuncio{position:fixed;left:50%;bottom:var(--esp-6);transform:translateX(-50%);background:var(--color-texto);color:#fff;padding:var(--esp-3) 18px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
 #anuncio.ver{opacity:1}
 @media (max-width:560px){.pagina{padding:var(--esp-5)}.cifra .valor{font-size:24px}}
+/* Programa: menú al costado, contenido a la derecha */
+.app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.lateral{background:var(--color-superficie);border-right:1px solid var(--color-borde);padding:var(--esp-5) var(--esp-3);display:flex;flex-direction:column;gap:var(--esp-5);position:sticky;top:0;height:100vh;overflow-y:auto}
+.lateral .cabeza{padding:0 var(--esp-2)}
+.lateral h1{font-size:22px}
+.lateral .pestanas{flex-direction:column;border-bottom:0;gap:2px;overflow:visible}
+.lateral .pestana{border-bottom:0;border-left:3px solid transparent;margin:0;border-radius:0 10px 10px 0;justify-content:flex-start;width:100%;text-align:left}
+.lateral .pestana[aria-selected="true"]{background:var(--color-marca-suave);border-left-color:var(--color-marca)}
+.lateral .pestana:hover{background:var(--color-divisor)}
+.lateral .salir{margin-top:auto;justify-content:flex-start}
+.app .pagina{margin:0;max-width:1232px;width:100%}
+@media (max-width:900px){.app{grid-template-columns:1fr}.lateral{position:static;height:auto;border-right:0;border-bottom:1px solid var(--color-borde);gap:var(--esp-3)}
+  .lateral .pestanas{flex-direction:row;overflow-x:auto}.lateral .pestana{width:auto;border-left:0;border-bottom:3px solid transparent;border-radius:0}
+  .lateral .pestana[aria-selected="true"]{border-bottom-color:var(--color-marca)}.lateral .salir{margin-top:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -107,6 +121,9 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
   <symbol id="i-cargando" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
   <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
   <symbol id="i-alerta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></symbol>
+  <symbol id="i-excel" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/></symbol>
   <symbol id="i-salir" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
 </svg>
 <svg class="logo-def" width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -128,21 +145,26 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
 </main>
 
 <!-- Programa -->
-<div id="vista-programa" class="pagina" hidden>
+<div id="vista-programa" class="app" hidden>
+ <aside class="lateral">
   <header class="cabeza">
     <svg class="logo" aria-hidden="true"><use href="#logo"/></svg>
     <div><h1>Tino</h1><div class="pequeno" id="quien"></div></div>
-    <div class="quien"><button class="boton texto compacto" id="salir"><svg class="icono" aria-hidden="true"><use href="#i-salir"/></svg>Salir</button></div>
   </header>
 
-  <nav class="pestanas" role="tablist" aria-label="Pantallas">
+  <nav class="pestanas" role="tablist" aria-label="Pantallas" aria-orientation="vertical">
     <button class="pestana" role="tab" data-panel="revision" aria-selected="true"><svg class="icono" aria-hidden="true"><use href="#i-dia"/></svg>Revisión del día</button>
     <button class="pestana" role="tab" data-panel="archivos" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-subir"/></svg>Archivos <span class="contador" id="n-errores" hidden></span></button>
     <button class="pestana" role="tab" data-panel="transferencias" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-transf"/></svg>Transferencias</button>
+    <button class="pestana" role="tab" data-panel="sinorigen" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>Sin origen</button>
     <button class="pestana" role="tab" data-panel="confirmar" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-revisar"/></svg>Por confirmar</button>
     <button class="pestana" role="tab" data-panel="descuadres" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-caja"/></svg>Descuadres</button>
     <button class="pestana" role="tab" data-panel="ventas" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-ventas"/></svg>Ventas con tarjeta</button>
+    <button class="pestana" role="tab" data-panel="ajustes" aria-selected="false" tabindex="-1"><svg class="icono" aria-hidden="true"><use href="#i-ajustes"/></svg>Ajustes</button>
   </nav>
+  <button class="boton texto compacto salir" id="salir"><svg class="icono" aria-hidden="true"><use href="#i-salir"/></svg>Salir</button>
+ </aside>
+ <main class="pagina">
 
   <!-- Revisión del día -->
   <section class="tarjeta" role="tabpanel" id="panel-revision">
@@ -170,8 +192,12 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
   <section class="tarjeta" role="tabpanel" id="panel-transferencias" hidden>
     <div class="encabezado">
       <div><h2>Transferencias</h2><p class="pequeno">Cada transferencia anotada y si llegó al banco. Las sospechosas van primero.</p></div>
-      <button class="boton secundario compacto" id="tr-copiar"><svg class="icono" aria-hidden="true"><use href="#i-copiar"/></svg>Copiar como números</button>
+      <div class="acciones">
+        <button class="boton secundario compacto" id="tr-exportar"><svg class="icono" aria-hidden="true"><use href="#i-excel"/></svg><span>Exportar a Excel</span></button>
+        <button class="boton secundario compacto" id="tr-copiar"><svg class="icono" aria-hidden="true"><use href="#i-copiar"/></svg>Copiar como números</button>
+      </div>
     </div>
+    <div id="tr-exportado"></div>
     <div class="filtros">
       <div class="campo"><label for="tr-desde">Desde</label><input type="date" id="tr-desde"></div>
       <div class="campo"><label for="tr-hasta">Hasta</label><input type="date" id="tr-hasta"></div>
@@ -179,6 +205,19 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
     </div>
     <div class="cifras" id="tr-cifras"></div>
     <div class="caja" id="tr-tabla"></div>
+  </section>
+
+  <!-- Sin origen -->
+  <section class="tarjeta" role="tabpanel" id="panel-sinorigen" hidden>
+    <div><h2>Pagos sin origen</h2><p class="pequeno">Pagos de clientes que llegaron al banco sin el código de un punto (Nequi, otros bancos). Tino no adivina: muestra la posible pareja y una persona asigna el punto, con nota.</p></div>
+    <div class="filtros">
+      <div class="campo"><label for="so-desde">Desde</label><input type="date" id="so-desde"></div>
+      <div class="campo"><label for="so-hasta">Hasta</label><input type="date" id="so-hasta"></div>
+      <button class="boton" id="so-ver"><span>Ver</span></button>
+    </div>
+    <div id="so-senales"></div>
+    <div class="caja" id="so-tabla"></div>
+    <div id="so-asignados"></div>
   </section>
 
   <!-- Por confirmar -->
@@ -212,7 +251,76 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
     </div>
     <div id="ve-estado"></div>
   </section>
+
+  <!-- Ajustes -->
+  <section class="tarjeta" role="tabpanel" id="panel-ajustes" hidden>
+    <div class="encabezado">
+      <div><h2>Puntos de venta</h2><p class="pequeno">Cada punto con su código de pago (QR o llave), sus datáfonos y cómo se llama en su Excel del día. Así Tino ubica cada pago.</p></div>
+      <button class="boton secundario compacto" id="aj-nuevo"><span>Agregar punto</span></button>
+    </div>
+    <div class="caja" id="aj-puntos"></div>
+  </section>
+  <section class="tarjeta" id="panel-siigo" hidden>
+    <div><h2>Siigo</h2><p class="pequeno">Trae las facturas de venta directo de Siigo Nube. Las credenciales salen de Siigo Nube → Alianzas → Mi credencial API, y se guardan solo en este computador.</p></div>
+    <div class="filtros">
+      <div class="campo"><label for="si-usuario">Usuario API</label><input type="email" id="si-usuario" autocomplete="off"></div>
+      <div class="campo"><label for="si-llave">Llave de acceso</label><input type="password" id="si-llave" autocomplete="off" placeholder="(sin cambios)"></div>
+      <div class="campo"><label for="si-partner">Partner-Id</label><input type="text" id="si-partner" autocomplete="off"></div>
+      <button class="boton secundario" id="si-guardar"><span>Guardar y probar</span></button>
+    </div>
+    <div id="si-estado"></div>
+    <h3>Traer facturas</h3>
+    <div class="filtros">
+      <div class="campo"><label for="si-desde">Desde</label><input type="date" id="si-desde"></div>
+      <div class="campo"><label for="si-hasta">Hasta</label><input type="date" id="si-hasta"></div>
+      <div class="campo"><label for="si-campo">El punto de cada factura sale de</label><select id="si-campo"></select></div>
+      <button class="boton secundario" id="si-valores"><span>1. Ver qué trae</span></button>
+      <button class="boton" id="si-traer"><span>3. Traer facturas</span></button>
+    </div>
+    <div id="si-mapa"></div>
+    <div id="si-resultado"></div>
+  </section>
+ </main>
 </div>
+
+<dialog id="punto" aria-labelledby="pu-titulo">
+  <form method="dialog" class="dentro" id="pu-form">
+    <h2 id="pu-titulo">Punto de venta</h2>
+    <div class="filtros">
+      <div class="campo"><label for="pu-codigo">Código</label><input type="text" id="pu-codigo" style="width:110px"></div>
+      <div class="campo" style="flex:1"><label for="pu-nombre">Nombre</label><input type="text" id="pu-nombre" style="width:100%"></div>
+    </div>
+    <div class="filtros">
+      <div class="campo"><label for="pu-tipo">Tipo</label><select id="pu-tipo"><option value="detal">Detal</option><option value="mayorista">Mayorista</option></select></div>
+      <label class="pequeno" style="display:flex;gap:8px;align-items:center;min-height:44px"><input type="checkbox" id="pu-activo" checked> Activo</label>
+    </div>
+    <div class="campo"><label for="pu-pago">Código de pago (QR o llave)</label><input type="text" id="pu-pago" inputmode="numeric"></div>
+    <div class="campo"><label>Datáfonos</label><div id="pu-datafonos" class="pequeno"></div>
+      <div class="filtros"><select id="pu-prov"><option value="bold">Bold</option><option value="redeban">Redeban</option><option value="otro">Otro</option></select>
+        <input type="text" id="pu-terminal" placeholder="Como aparece en el reporte"><button type="button" class="boton texto compacto" id="pu-agregar-dat">Agregar</button></div></div>
+    <div class="campo"><label>Nombres en el Excel del día</label><div id="pu-nombres" class="pequeno"></div>
+      <div class="filtros"><input type="text" id="pu-nombre-excel" placeholder="Como aparece en el Excel"><button type="button" class="boton texto compacto" id="pu-agregar-nom">Agregar</button></div></div>
+    <p class="error-campo" id="pu-error" role="alert"></p>
+    <div class="acciones" style="justify-content:flex-end">
+      <button class="boton secundario" type="button" id="pu-cancelar">Cerrar</button>
+      <button class="boton" id="pu-ok" type="submit"><span>Guardar</span></button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="asignar" aria-labelledby="as-titulo">
+  <form method="dialog" class="dentro" id="as-form">
+    <h2 id="as-titulo">Asignar el pago a un punto</h2>
+    <p id="as-texto" class="pequeno"></p>
+    <div class="campo"><label for="as-punto">Punto</label><select id="as-punto"></select></div>
+    <div class="campo"><label for="as-nota">Nota (obligatoria)</label><textarea id="as-nota"></textarea></div>
+    <p class="error-campo" id="as-error" role="alert"></p>
+    <div class="acciones" style="justify-content:flex-end">
+      <button class="boton secundario" type="button" id="as-cancelar">Cancelar</button>
+      <button class="boton" id="as-ok" type="submit"><span>Asignar</span></button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="decidir" aria-labelledby="dec-titulo">
   <form method="dialog" class="dentro" id="dec-form">
@@ -297,13 +405,15 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
   const alAbrir = {};
   function mostrar(tab) {
     pestanas.forEach((p) => { const activa = p === tab; p.setAttribute('aria-selected', activa); p.tabIndex = activa ? 0 : -1; $('panel-' + p.dataset.panel).hidden = !activa; });
+    $('panel-siigo').hidden = tab.dataset.panel !== 'ajustes';
     (alAbrir[tab.dataset.panel] || (() => {}))();
   }
   pestanas.forEach((p, i) => {
     p.addEventListener('click', () => mostrar(p));
     p.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const otra = pestanas[(i + (e.key === 'ArrowRight' ? 1 : pestanas.length - 1)) % pestanas.length];
+      if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) return;
+      e.preventDefault();
+      const otra = pestanas[(i + (['ArrowRight', 'ArrowDown'].includes(e.key) ? 1 : pestanas.length - 1)) % pestanas.length];
       mostrar(otra); otra.focus();
     });
   });
@@ -370,7 +480,7 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
         caja.innerHTML = cargando('Subiendo y revisando los días que trae…');
         try {
           const r = await llamar('subir', b.dataset.subir);
-          caja.innerHTML = nota('ok', 'Subido.', `Se revisaron ${r.dias_revisados} día(s) con Excel.`); b.remove(); alAbrir.archivos();
+          caja.innerHTML = nota('ok', 'Subido.', `Se revisaron ${r.dias_revisados} día(s) con Excel.` + (r.copia ? `<br>Copia del extracto: ${escapar(r.copia)}` : '')); b.remove(); alAbrir.archivos();
         } catch (err) { caja.innerHTML = nota('mal', 'No se subió.', escapar(err.message)); }
       })));
     } catch (err) { $('arch-listos').innerHTML = nota('mal', 'No se pudieron leer los archivos.', escapar(err.message)); }
@@ -404,6 +514,157 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
   }
   $('tr-ver').addEventListener('click', () => ocupado($('tr-ver'), verTransferencias));
   $('tr-copiar').addEventListener('click', () => copiar([['Fecha', 'Punto', 'Monto', 'Estado']].concat(transferencias.map((t) => [t.fecha, t.punto, t.monto, t.estado]))));
+
+  // Exportar transferencias -------------------------------------------------
+  $('tr-exportar').addEventListener('click', () => ocupado($('tr-exportar'), async () => {
+    try {
+      const ruta = await llamar('exportar_transferencias', $('tr-desde').value, $('tr-hasta').value);
+      $('tr-exportado').innerHTML = nota('ok', 'Excel listo y abierto.', `Guardado en ${escapar(ruta)}`);
+    } catch (err) { $('tr-exportado').innerHTML = nota('mal', 'No se pudo exportar.', escapar(err.message)); }
+  }));
+
+  // Sin origen ------------------------------------------------------------
+  let sinOrigen = { pendientes: [], asignados: [], puntos: [] };
+  let alAsignar = null;
+  function abrirAsignar(p, sugerido) {
+    $('as-texto').textContent = `${fecha(p.fecha)} · ${pesos(p.valor)} · ${p.descripcion}`;
+    $('as-punto').innerHTML = `<option value="">— Sin punto —</option>` + sinOrigen.puntos.map((x) => `<option value="${x.id}">${escapar(x.nombre)}</option>`).join('');
+    $('as-punto').value = sugerido || p.punto_id || '';
+    $('as-nota').value = ''; $('as-error').textContent = '';
+    alAsignar = (punto, n) => llamar('asignar', p.id, punto || null, n);
+    $('asignar').showModal(); $('as-punto').focus();
+  }
+  $('as-cancelar').addEventListener('click', () => $('asignar').close());
+  $('as-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const n = $('as-nota').value.trim();
+    if (!n) { $('as-error').textContent = 'Escriba una nota: por ejemplo, quién mandó el comprobante.'; $('as-nota').focus(); return; }
+    try {
+      await ocupado($('as-ok'), () => alAsignar($('as-punto').value, n));
+      $('asignar').close(); avisa('Asignado. Se revisaron otra vez esos días.'); verSinOrigen();
+    } catch (err) { $('as-error').textContent = err.message; }
+  });
+  async function verSinOrigen() {
+    $('so-tabla').innerHTML = cargando('Cargando…'); $('so-senales').innerHTML = ''; $('so-asignados').innerHTML = '';
+    try {
+      sinOrigen = await llamar('sin_origen', $('so-desde').value, $('so-hasta').value);
+      const s = sinOrigen;
+      $('so-senales').innerHTML = s.senales.length ? nota('aviso', 'Revisar si cambiaron el QR de un punto',
+        s.senales.map((x) => `${escapar(x.punto)} el ${fecha(x.fecha)}: anotó ${x.anotadas} transferencia(s) y ninguna llegó con su código.`).join('<br>')) : '';
+      $('so-tabla').innerHTML = !s.pendientes.length ? vacio('No hay pagos sin punto en esas fechas.') :
+        `<table><thead><tr><th>Día</th><th>Descripción</th><th class="d">Valor</th><th>Posible punto</th><th></th></tr></thead><tbody>${s.pendientes.map((p, i) => `<tr>
+          <td>${fecha(p.fecha)}</td><td>${escapar(p.descripcion)}<div class="pequeno">${escapar(p.etiqueta || '')}</div></td><td class="d"><b>${pesos(p.valor)}</b></td>
+          <td>${p.sugerencias.length ? p.sugerencias.map((x) => `<span class="chip c-rev">▲ ${escapar(x.punto)}</span> <span class="pequeno">no le llegó una de ${pesos(p.valor)} el ${fecha(x.fecha)}</span>`).join('<br>') : '<span class="pequeno">Ninguno</span>'}</td>
+          <td class="d"><button class="boton texto compacto" data-i="${i}">Asignar</button></td></tr>`).join('')}</tbody>
+          <tfoot><tr><td colspan="2">${s.pendientes.length} pago(s) sin punto</td><td class="d">${pesos(s.pendientes.reduce((a, p) => a + p.valor, 0))}</td><td colspan="2"></td></tr></tfoot></table>`;
+      $('so-tabla').querySelectorAll('[data-i]').forEach((b) => b.addEventListener('click', () => {
+        const p = s.pendientes[b.dataset.i]; abrirAsignar(p, p.sugerencias.length === 1 ? p.sugerencias[0].punto_id : '');
+      }));
+      $('so-asignados').innerHTML = s.asignados.length ? `<h3>Asignados a mano</h3><div class="caja"><table><thead><tr><th>Día</th><th>Descripción</th><th class="d">Valor</th><th>Punto</th><th>Nota</th><th></th></tr></thead><tbody>${s.asignados.map((p, i) => `<tr>
+          <td>${fecha(p.fecha)}</td><td>${escapar(p.descripcion)}</td><td class="d">${pesos(p.valor)}</td><td>${escapar(p.punto)}</td><td class="pequeno">${escapar(p.nota)}</td>
+          <td class="d"><button class="boton texto compacto" data-j="${i}">Cambiar</button></td></tr>`).join('')}</tbody></table></div>` : '';
+      $('so-asignados').querySelectorAll('[data-j]').forEach((b) => b.addEventListener('click', () => abrirAsignar(s.asignados[b.dataset.j])));
+    } catch (err) { $('so-tabla').innerHTML = nota('mal', 'No se pudieron cargar los pagos sin origen.', escapar(err.message)); }
+  }
+  $('so-ver').addEventListener('click', () => ocupado($('so-ver'), verSinOrigen));
+
+  // Ajustes: puntos de venta ------------------------------------------------
+  let puntos = [], puntoActual = null;
+  const PROV = { bold: 'Bold', redeban: 'Redeban', otro: 'Otro' };
+  async function verPuntos() {
+    $('aj-puntos').innerHTML = cargando('Cargando…');
+    try {
+      puntos = await llamar('puntos');
+      $('aj-puntos').innerHTML = !puntos.length ? vacio('Todavía no hay puntos. Agregue el primero.') :
+        `<table><thead><tr><th>Código</th><th>Punto</th><th>Código de pago</th><th>Datáfonos</th><th>Nombre en el Excel</th><th>Estado</th><th></th></tr></thead><tbody>${puntos.map((p, i) => `<tr>
+          <td>${escapar(p.codigo)}</td><td><b>${escapar(p.nombre)}</b><div class="pequeno">${p.tipo === 'mayorista' ? 'Mayorista' : 'Detal'}</div></td>
+          <td class="num">${escapar(p.codigo_pago) || '<span class="chip c-rev">▲ Falta</span>'}</td>
+          <td class="pequeno">${p.datafonos.map((d) => `${PROV[d.proveedor]}: ${escapar(d.codigo_terminal)}`).join('<br>') || '—'}</td>
+          <td class="pequeno">${p.nombres_excel.map(escapar).join('<br>') || '—'}</td>
+          <td>${p.activo ? '<span class="chip c-ok">● Activo</span>' : '<span class="chip c-neu">— Inactivo</span>'}</td>
+          <td class="d"><button class="boton texto compacto" data-i="${i}">Editar</button></td></tr>`).join('')}</tbody></table>`;
+      $('aj-puntos').querySelectorAll('[data-i]').forEach((b) => b.addEventListener('click', () => abrirPunto(puntos[b.dataset.i])));
+    } catch (err) { $('aj-puntos').innerHTML = nota('mal', 'No se pudieron cargar los puntos.', escapar(err.message)); }
+  }
+  function pintarPunto(p) {
+    $('pu-datafonos').innerHTML = (p.datafonos || []).map((d) => `${PROV[d.proveedor]}: ${escapar(d.codigo_terminal)} <button type="button" class="boton peligro-texto compacto" data-quitar-dat="${d.id}">Quitar</button>`).join('<br>') || 'Ninguno';
+    $('pu-nombres').innerHTML = (p.nombres_excel || []).map((n) => `${escapar(n)} <button type="button" class="boton peligro-texto compacto" data-quitar-nom="${escapar(n)}">Quitar</button>`).join('<br>') || 'Ninguno';
+    $('pu-datafonos').querySelectorAll('[data-quitar-dat]').forEach((b) => b.addEventListener('click', () => cambioPunto(() => llamar('quitar_datafono', b.dataset.quitarDat))));
+    $('pu-nombres').querySelectorAll('[data-quitar-nom]').forEach((b) => b.addEventListener('click', () => cambioPunto(() => llamar('nombre_excel', p.codigo, b.dataset.quitarNom, true))));
+  }
+  function abrirPunto(p) {
+    puntoActual = p || null;
+    $('pu-titulo').textContent = p ? `Punto ${p.codigo}` : 'Nuevo punto de venta';
+    $('pu-codigo').value = p ? p.codigo : ''; $('pu-codigo').disabled = !!p;
+    $('pu-nombre').value = p ? p.nombre : ''; $('pu-tipo').value = p ? p.tipo : 'detal';
+    $('pu-activo').checked = p ? p.activo : true; $('pu-pago').value = p ? p.codigo_pago : '';
+    ['pu-prov', 'pu-terminal', 'pu-agregar-dat', 'pu-nombre-excel', 'pu-agregar-nom'].forEach((id) => { $(id).disabled = !p; });
+    $('pu-error').textContent = p ? '' : 'Guarde el punto primero; después agregue sus datáfonos y nombres.';
+    pintarPunto(p || {}); $('punto').showModal(); (p ? $('pu-nombre') : $('pu-codigo')).focus();
+  }
+  async function cambioPunto(trabajo) {
+    try { await trabajo(); puntos = await llamar('puntos'); puntoActual = puntos.find((x) => x.id === puntoActual.id); pintarPunto(puntoActual); $('pu-error').textContent = ''; verPuntos(); }
+    catch (err) { $('pu-error').textContent = err.message; }
+  }
+  $('aj-nuevo').addEventListener('click', () => abrirPunto(null));
+  $('pu-cancelar').addEventListener('click', () => $('punto').close());
+  $('pu-agregar-dat').addEventListener('click', () => cambioPunto(async () => { await llamar('agregar_datafono', puntoActual.id, $('pu-prov').value, $('pu-terminal').value); $('pu-terminal').value = ''; }));
+  $('pu-agregar-nom').addEventListener('click', () => cambioPunto(async () => { await llamar('nombre_excel', puntoActual.codigo, $('pu-nombre-excel').value, false); $('pu-nombre-excel').value = ''; }));
+  $('pu-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await ocupado($('pu-ok'), async () => {
+        await llamar('guardar_punto', { id: puntoActual && puntoActual.id, codigo: $('pu-codigo').value, nombre: $('pu-nombre').value, tipo: $('pu-tipo').value, activo: $('pu-activo').checked });
+        puntos = await llamar('puntos');
+        const actual = puntos.find((x) => x.codigo === ($('pu-codigo').value || '').trim().toUpperCase());
+        if (actual && $('pu-pago').value.trim() && $('pu-pago').value.trim() !== actual.codigo_pago) await llamar('poner_codigo_pago', actual.id, $('pu-pago').value);
+        if (!puntoActual && actual) { abrirPunto((await llamar('puntos')).find((x) => x.id === actual.id)); avisa('Punto creado. Ahora agregue sus datáfonos y nombres.'); }
+        else { $('punto').close(); avisa('Guardado.'); }
+        verPuntos();
+      });
+    } catch (err) { $('pu-error').textContent = err.message; }
+  });
+
+  // Ajustes: Siigo ----------------------------------------------------------
+  let siigoMapa = {};
+  async function verSiigo() {
+    try {
+      const e = await llamar('siigo_estado');
+      $('si-usuario').value = e.usuario; $('si-partner').value = e.partner_id;
+      $('si-campo').innerHTML = Object.entries(e.campos).map(([k, v]) => `<option value="${k}">${escapar(v)}</option>`).join('');
+      $('si-campo').value = e.campo; siigoMapa = e.puntos || {};
+      $('si-estado').innerHTML = e.configurado ? nota('ok', 'Siigo está conectado.') : nota('info', 'Siigo no está conectado todavía.', 'Escriba el usuario, la llave de acceso y el Partner-Id, y pulse «Guardar y probar».');
+    } catch (err) { $('si-estado').innerHTML = nota('mal', 'No se pudo leer la configuración de Siigo.', escapar(err.message)); }
+  }
+  $('si-guardar').addEventListener('click', () => ocupado($('si-guardar'), async () => {
+    try { await llamar('siigo_guardar', $('si-usuario').value, $('si-llave').value, $('si-partner').value); $('si-llave').value = ''; await verSiigo(); }
+    catch (err) { $('si-estado').innerHTML = nota('mal', 'Siigo no aceptó la conexión.', escapar(err.message)); }
+  }));
+  $('si-valores').addEventListener('click', () => ocupado($('si-valores'), async () => {
+    $('si-mapa').innerHTML = cargando('Trayendo las facturas de Siigo…'); $('si-resultado').innerHTML = '';
+    try {
+      const r = await llamar('siigo_valores', $('si-desde').value, $('si-hasta').value, $('si-campo').value);
+      const lista = puntos.length ? puntos : await llamar('puntos');
+      $('si-mapa').innerHTML = `<p class="pequeno">2. Siigo trajo ${r.facturas} factura(s). Diga de qué punto es cada ${escapar($('si-campo').selectedOptions[0].textContent.toLowerCase())}:</p>
+        <div class="caja"><table><thead><tr><th>Valor en Siigo</th><th class="d">Facturas</th><th>Punto</th></tr></thead><tbody>${r.valores.map((v) => `<tr>
+          <td><b>${escapar(v.valor)}</b> <span class="pequeno">${escapar(v.nombre)}</span></td><td class="d">${v.facturas}</td>
+          <td><select data-valor="${escapar(v.valor)}"><option value="">— Ninguno —</option>${lista.filter((p) => p.activo).map((p) => `<option value="${escapar(p.codigo)}" ${siigoMapa[v.valor] === p.codigo ? 'selected' : ''}>${escapar(p.nombre)}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table></div>`;
+      $('si-mapa').querySelectorAll('select').forEach((s) => s.addEventListener('change', () => { siigoMapa[s.dataset.valor] = s.value; }));
+    } catch (err) { $('si-mapa').innerHTML = nota('mal', 'No se pudieron traer las facturas.', escapar(err.message)); }
+  }));
+  $('si-traer').addEventListener('click', () => ocupado($('si-traer'), async () => {
+    $('si-resultado').innerHTML = cargando('Guardando las facturas…');
+    try {
+      await llamar('siigo_guardar_perfil', $('si-campo').value, siigoMapa);
+      const r = await llamar('siigo_traer', $('si-desde').value, $('si-hasta').value);
+      const resumen = await llamar('facturas', $('si-desde').value, $('si-hasta').value);
+      $('si-resultado').innerHTML = nota(r.sin_punto ? 'aviso' : 'ok', `${r.nuevas} factura(s) nuevas, ${r.repetidas} que ya estaban, ${r.anuladas} anulada(s) en Siigo.`,
+        (r.sin_punto ? `${r.sin_punto} sin punto: quedaron en Archivos como nombres por resolver. ` : '') + escapar(r.nota || ''))
+        + (resumen.length ? `<div class="caja"><table><thead><tr><th>Día</th><th>Punto</th><th class="d">Facturas</th><th class="d">Total</th><th class="d">Anuladas</th></tr></thead><tbody>${resumen.map((x) => `<tr><td>${fecha(x.fecha)}</td><td>${escapar(x.punto)}</td><td class="d">${x.facturas}</td><td class="d">${pesos(x.total)}</td><td class="d">${x.anuladas}</td></tr>`).join('')}</tbody>
+          <tfoot><tr><td colspan="2">Total</td><td class="d">${resumen.reduce((a, x) => a + x.facturas, 0)}</td><td class="d">${pesos(resumen.reduce((a, x) => a + x.total, 0))}</td><td></td></tr></tfoot></table></div>` : '');
+    } catch (err) { $('si-resultado').innerHTML = nota('mal', 'No se pudieron traer las facturas.', escapar(err.message)); }
+  }));
+  alAbrir.ajustes = () => { $('panel-siigo').hidden = false; verPuntos(); verSiigo(); };
 
   // Por confirmar ---------------------------------------------------------
   const TIPO = { otro_dia: 'Llegó otro día', mal_digitado: 'Monto mal escrito', junto_con: 'Cuadra junto con otra fecha', dia_tarde: 'Llegó un día tarde', manual: 'Manual' };
@@ -475,7 +736,8 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
   // Arranque --------------------------------------------------------------
   window.addEventListener('pywebviewready', async () => {
     const e = await llamar('estado');
-    ['rev-fecha', 'tr-desde', 'tr-hasta', 'de-desde', 'de-hasta', 've-hasta'].forEach((id) => { $(id).value = e.ayer; });
+    ['rev-fecha', 'tr-desde', 'tr-hasta', 'de-desde', 'de-hasta', 've-hasta', 'so-desde', 'so-hasta', 'si-hasta'].forEach((id) => { $(id).value = e.ayer; });
+    $('si-desde').value = e.ayer.slice(0, 8) + '01';
     $('ve-desde').value = e.ayer.slice(0, 8) + '01';
     if (e.correo) $('correo').value = e.correo;
     if (e.sesion) abrirPrograma(e.sesion);

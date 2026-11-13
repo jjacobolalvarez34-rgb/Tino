@@ -38,6 +38,9 @@ class Empresa:
         por_codigo = {p["codigo"]: nombre[p["id"]] for p in self.puntos}
         mapeo = {p["fuente"]: p["mapeo_columnas"] or {} for p in perfiles}
 
+        # Un punto desactivado no recibe pagos ni cobros: sus códigos y datáfonos no cuentan.
+        terminales = [t for t in terminales if t["punto_id"] in nombre]
+        codigos = [c for c in codigos if c["punto_id"] in nombre]
         self.terminal_id = {(t["proveedor"], str(t["codigo_terminal"]).strip().upper()): t["id"] for t in terminales}
         self.proveedor_del_punto = {}
         for t in terminales:

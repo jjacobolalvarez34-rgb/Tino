@@ -70,8 +70,28 @@ class ClientePsql:
                          for k, v in argumentos.items())
         return self._sql(f"select to_json(public.{funcion}({args}))")
 
+    @staticmethod
+    def _valor(v):
+        if v is None:
+            return "null"
+        if isinstance(v, bool):
+            return "true" if v else "false"
+        if isinstance(v, (dict, list)):
+            return _literal(json.dumps(v)) + "::jsonb"
+        return _literal(v)
+
+    @staticmethod
+    def _donde(filtros):
+        return " and ".join(f"{c} is {v}" if o == "is" else f"{c} {OPERADORES[o]} {_literal(v)}" for c, o, v in filtros)
+
+    def crear(self, tabla, filas):
+        columnas = ", ".join(sorted({k for f in filas for k in f}))
+        return self._sql(f"with c as (insert into public.{tabla} ({columnas}) select {columnas} from "
+                         f"jsonb_populate_recordset(null::public.{tabla}, {_literal(json.dumps(filas))}::jsonb) "
+                         f"returning *) select coalesce(json_agg(c), '[]') from c")
+
     def cambiar(self, tabla, filtros, valores):
-        sets = ", ".join(f"{k} = {_literal(v) if v is not None else 'null'}" for k, v in valores.items())
-        donde = " and ".join(f"{c} {OPERADORES[o]} {_literal(v)}" for c, o, v in filtros)
+        sets = ", ".join(f"{k} = {self._valor(v)}" for k, v in valores.items())
+        donde = self._donde(filtros)
         return self._sql(f"with c as (update public.{tabla} set {sets} where {donde} returning *) "
                          f"select coalesce(json_agg(c), '[]') from c")

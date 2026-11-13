@@ -221,6 +221,195 @@ class Servicio:
             salida, n = carpeta / f"{base} ({n}).xlsx", n + 1
         return str(exportar.escribir(salida, fechas, puntos, por_dia, sin))
 
+    # Ajustes: puntos de venta ----------------------------------------------
+    def _recargar(self):
+        self.emp = Empresa(self.c)
+        return True
+
+    def _perfil(self, fuente):
+        filas = self.c.leer("perfil_fuente", [("fuente", "eq", fuente), ("activo", "eq", "true")],
+                            "id,nombre,mapeo_columnas", "creado_en")
+        return filas[0] if filas else None
+
+    def _guardar_perfil(self, fuente, nombre, mapeo):
+        perfil = self._perfil(fuente)
+        if perfil:
+            self.c.cambiar("perfil_fuente", [("id", "eq", perfil["id"])], {"mapeo_columnas": mapeo})
+        else:
+            self.c.crear("perfil_fuente", [{"empresa_id": self.emp.config_base["empresa_id"], "fuente": fuente,
+                                            "nombre": nombre, "mapeo_columnas": mapeo}])
+
+    def puntos(self):
+        """Cada punto con su código de pago, sus datáfonos y cómo se llama en el Excel."""
+        puntos = self.c.leer("punto_venta", columnas="id,codigo,nombre,tipo,activo", orden="codigo")
+        codigos = self.c.leer("codigo_recaudo", [("activo_hasta", "is", "null")], "punto_id,codigo", "codigo")
+        terminales = self.c.leer("terminal_datafono", [("activo_hasta", "is", "null")],
+                                 "id,punto_id,proveedor,codigo_terminal", "codigo_terminal")
+        nombres = ((self._perfil("excel_dia") or {}).get("mapeo_columnas") or {}).get("puntos", {})
+        for p in puntos:
+            p["codigo_pago"] = next((c["codigo"] for c in codigos if c["punto_id"] == p["id"]), "")
+            p["datafonos"] = [t for t in terminales if t["punto_id"] == p["id"]]
+            p["nombres_excel"] = sorted(t for t, cod in nombres.items() if cod == p["codigo"])
+        return puntos
+
+    def guardar_punto(self, datos):
+        """Crea un punto o cambia su nombre, tipo o si está activo. El código no cambia."""
+        nombre, tipo = (datos.get("nombre") or "").strip(), datos.get("tipo") or "detal"
+        if not nombre:
+            raise ErrorBase("Escriba el nombre del punto.")
+        if datos.get("id"):
+            self.c.cambiar("punto_venta", [("id", "eq", datos["id"])],
+                           {"nombre": nombre, "tipo": tipo, "activo": bool(datos.get("activo", True))})
+        else:
+            codigo = (datos.get("codigo") or "").strip().upper()
+            if not codigo:
+                raise ErrorBase("Escriba un código corto para el punto, como P12.")
+            self.c.crear("punto_venta", [{"empresa_id": self.emp.config_base["empresa_id"], "codigo": codigo,
+                                          "nombre": nombre, "tipo": tipo}])
+        return self._recargar()
+
+    def poner_codigo_pago(self, punto_id, codigo):
+        """El código del QR o la llave del punto. El anterior se cierra, no se borra."""
+        codigo = "".join(ch for ch in (codigo or "") if ch.isdigit())
+        if len(codigo) < 4:
+            raise ErrorBase("El código de pago tiene al menos 4 dígitos.")
+        hoy = dt.date.today().isoformat()
+        self.c.cambiar("codigo_recaudo", [("punto_id", "eq", punto_id), ("activo_hasta", "is", "null")],
+                       {"activo_hasta": hoy})
+        self.c.crear("codigo_recaudo", [{"empresa_id": self.emp.config_base["empresa_id"], "punto_id": punto_id,
+                                         "codigo": codigo, "activo_desde": hoy}])
+        return self._recargar()
+
+    def agregar_datafono(self, punto_id, proveedor, codigo):
+        codigo = (codigo or "").strip()
+        if proveedor not in ("bold", "redeban", "otro") or not codigo:
+            raise ErrorBase("Elija el proveedor y escriba cómo aparece el datáfono en su reporte.")
+        self.c.crear("terminal_datafono", [{"empresa_id": self.emp.config_base["empresa_id"], "punto_id": punto_id,
+                                            "proveedor": proveedor, "codigo_terminal": codigo,
+                                            "activo_desde": dt.date.today().isoformat()}])
+        return self._recargar()
+
+    def quitar_datafono(self, terminal_id):
+        """El datáfono deja de estar en el punto desde hoy; queda en el historial."""
+        self.c.cambiar("terminal_datafono", [("id", "eq", terminal_id)], {"activo_hasta": dt.date.today().isoformat()})
+        return self._recargar()
+
+    def nombre_excel(self, codigo_punto, texto, quitar=False):
+        """Cómo se llama el punto en su Excel del día (perfil de la empresa, no código)."""
+        texto = " ".join((texto or "").lower().split())
+        if not texto:
+            raise ErrorBase("Escriba el nombre como aparece en el Excel.")
+        perfil = self._perfil("excel_dia")
+        mapeo = dict((perfil or {}).get("mapeo_columnas") or {})
+        puntos = dict(mapeo.get("puntos", {}))
+        if quitar:
+            puntos.pop(texto, None)
+        else:
+            puntos[texto] = codigo_punto
+        mapeo["puntos"] = puntos
+        self._guardar_perfil("excel_dia", "Excel diario de cada punto", mapeo)
+        return self._recargar()
+
+    # Ajustes: Siigo --------------------------------------------------------
+    def _archivo_siigo(self):
+        return Path(self.carpeta or ".") / "siigo.json"
+
+    def _siigo(self):
+        import json
+        from ingesta import siigo
+        a = self._archivo_siigo()
+        if not a.exists():
+            raise ErrorBase("Primero guarde el usuario, la llave y el Partner-Id de Siigo.")
+        d = json.loads(a.read_text(encoding="utf-8"))
+        return siigo.Siigo(d.get("usuario"), d.get("llave"), d.get("partner_id"))
+
+    def siigo_estado(self):
+        import json
+        from ingesta import siigo
+        a = self._archivo_siigo()
+        d = json.loads(a.read_text(encoding="utf-8")) if a.exists() else {}
+        perfil = ((self._perfil("siigo") or {}).get("mapeo_columnas") or {})
+        return {"configurado": bool(d.get("llave")), "usuario": d.get("usuario", ""),
+                "partner_id": d.get("partner_id", ""), "campo": perfil.get("campo", "cost_center"),
+                "puntos": perfil.get("puntos", {}), "campos": siigo.CAMPOS}
+
+    def siigo_guardar(self, usuario, llave, partner_id):
+        """Guarda las credenciales en la carpeta de la empresa (nunca en la base ni en el
+        repositorio) y prueba que Siigo las acepte."""
+        import json
+        from ingesta import siigo
+        a = self._archivo_siigo()
+        viejo = json.loads(a.read_text(encoding="utf-8")) if a.exists() else {}
+        datos = {"usuario": (usuario or "").strip(), "llave": (llave or "").strip() or viejo.get("llave", ""),
+                 "partner_id": "".join(ch for ch in (partner_id or "") if ch.isalnum())}
+        try:
+            siigo.Siigo(datos["usuario"], datos["llave"], datos["partner_id"]).probar()
+        except siigo.ErrorSiigo as e:
+            raise ErrorBase(str(e)) from None
+        a.parent.mkdir(parents=True, exist_ok=True)
+        a.write_text(json.dumps(datos, indent=2), encoding="utf-8")
+        return True
+
+    def siigo_valores(self, desde, hasta, campo):
+        """Trae las facturas y dice qué valores tiene el campo elegido, para asignarles punto."""
+        from ingesta import siigo
+        try:
+            s = self._siigo()
+            self._facturas_siigo = (desde, hasta, s.facturas(desde, hasta))
+            nombres = s.catalogo(campo)
+        except siigo.ErrorSiigo as e:
+            raise ErrorBase(str(e)) from None
+        cuenta = siigo.valores_encontrados(self._facturas_siigo[2], campo)
+        return {"facturas": len(self._facturas_siigo[2]),
+                "valores": [{"valor": v, "nombre": nombres.get(v, ""), "facturas": n}
+                            for v, n in sorted(cuenta.items(), key=lambda x: -x[1])]}
+
+    def siigo_guardar_perfil(self, campo, puntos):
+        from ingesta import siigo
+        if campo not in siigo.CAMPOS:
+            raise ErrorBase("Elija de dónde sale el punto de cada factura.")
+        self._guardar_perfil("siigo", "Siigo", {"campo": campo, "puntos": {k: v for k, v in puntos.items() if v}})
+        return True
+
+    def siigo_traer(self, desde, hasta):
+        """Trae las facturas del rango y las guarda sin repetir las que ya estaban."""
+        from ingesta import siigo
+        perfil = (self._perfil("siigo") or {}).get("mapeo_columnas") or {}
+        if not perfil.get("puntos"):
+            raise ErrorBase("Primero diga de qué punto es cada factura (paso 2).")
+        cache = getattr(self, "_facturas_siigo", None)
+        try:
+            facturas = cache[2] if cache and cache[:2] == (desde, hasta) else self._siigo().facturas(desde, hasta)
+        except siigo.ErrorSiigo as e:
+            raise ErrorBase(str(e)) from None
+        productos = self.c.leer("producto", columnas="id,codigo_siigo", orden="id")
+        por_codigo = {p["codigo"]: p["id"] for p in self.emp.puntos}
+        carga = siigo.normalizar(facturas, perfil, por_codigo,
+                                 {p["codigo_siigo"]: p["id"] for p in productos if p["codigo_siigo"]}, desde, hasta)
+        try:
+            r = self.c.rpc("importar_facturas", {"p": carga})
+        except ErrorBase as e:
+            if e.codigo == "23505":
+                return {"nuevas": 0, "repetidas": len(carga["facturas"]), "anuladas": 0,
+                        "sin_punto": len(carga["errores"]), "nota": "Nada cambió en Siigo desde la última vez."}
+            raise
+        return {**r, "sin_punto": len(carga["errores"])}
+
+    def facturas(self, desde, hasta):
+        """Resumen por punto y día de las facturas traídas."""
+        filas = self.c.leer("v_factura", [("fecha", "gte", desde), ("fecha", "lte", hasta)],
+                            "punto_id,fecha,total,anulada", "fecha")
+        resumen = {}
+        for f in filas:
+            r = resumen.setdefault((f["fecha"], f["punto_id"]), {"fecha": f["fecha"], "punto": self._nombre(f["punto_id"]),
+                                                                 "facturas": 0, "total": 0, "anuladas": 0})
+            if f["anulada"]:
+                r["anuladas"] += 1
+            else:
+                r["facturas"] += 1
+                r["total"] += f["total"]
+        return sorted(resumen.values(), key=lambda r: (r["fecha"], r["punto"]))
+
     # Por confirmar -----------------------------------------------------------
     def por_confirmar(self):
         filas = self.c.leer("v_cruce", [("estado", "eq", "propuesta")],

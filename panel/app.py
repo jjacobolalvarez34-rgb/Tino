@@ -89,7 +89,7 @@ class ApiConectada:
         import webview
         rutas = self._ventana.create_file_dialog(
             webview.FileDialog.OPEN, allow_multiple=True,
-            file_types=("Archivos de Tino (*.xlsx;*.pdf)", "Excel (*.xlsx)", "Extracto en PDF (*.pdf)"))
+            file_types=("Archivos de Tino (*.xlsx;*.pdf;*.zip)", "Excel (*.xlsx)", "Extracto (*.pdf;*.zip)"))
         return self._envolver(lambda: self._s.preparar(list(rutas or [])))
 
     def subir(self, clave):
@@ -136,6 +136,56 @@ class ApiConectada:
 
     def cerrar_descuadre(self, descuadre_id, estado, nota):
         return self._envolver(lambda: self._s.cerrar_descuadre(descuadre_id, estado, nota))
+
+    def exportar_transferencias(self, desde, hasta):
+        def trabajo():
+            ruta = self._s.exportar_transferencias(desde, hasta)
+            if hasattr(os, "startfile"):
+                os.startfile(ruta)  # se abre en Excel
+            return ruta
+        return self._envolver(trabajo)
+
+    def sin_origen(self, desde, hasta):
+        return self._envolver(lambda: self._s.sin_origen(desde, hasta))
+
+    def asignar(self, movimiento_id, punto_id, nota):
+        return self._envolver(lambda: self._s.asignar(movimiento_id, punto_id, nota))
+
+    def puntos(self):
+        return self._envolver(self._s.puntos)
+
+    def guardar_punto(self, datos):
+        return self._envolver(lambda: self._s.guardar_punto(datos))
+
+    def poner_codigo_pago(self, punto_id, codigo):
+        return self._envolver(lambda: self._s.poner_codigo_pago(punto_id, codigo))
+
+    def agregar_datafono(self, punto_id, proveedor, codigo):
+        return self._envolver(lambda: self._s.agregar_datafono(punto_id, proveedor, codigo))
+
+    def quitar_datafono(self, terminal_id):
+        return self._envolver(lambda: self._s.quitar_datafono(terminal_id))
+
+    def nombre_excel(self, codigo_punto, texto, quitar=False):
+        return self._envolver(lambda: self._s.nombre_excel(codigo_punto, texto, quitar))
+
+    def siigo_estado(self):
+        return self._envolver(self._s.siigo_estado)
+
+    def siigo_guardar(self, usuario, llave, partner_id):
+        return self._envolver(lambda: self._s.siigo_guardar(usuario, llave, partner_id))
+
+    def siigo_valores(self, desde, hasta, campo):
+        return self._envolver(lambda: self._s.siigo_valores(desde, hasta, campo))
+
+    def siigo_guardar_perfil(self, campo, puntos):
+        return self._envolver(lambda: self._s.siigo_guardar_perfil(campo, puntos))
+
+    def siigo_traer(self, desde, hasta):
+        return self._envolver(lambda: self._s.siigo_traer(desde, hasta))
+
+    def facturas(self, desde, hasta):
+        return self._envolver(lambda: self._s.facturas(desde, hasta))
 
     def tablero(self, desde, hasta):
         def trabajo():
@@ -223,14 +273,15 @@ def ventana():
         from panel.datos.cliente import Cliente
         from panel.servicio import Servicio
         datos = json.loads(config.read_text(encoding="utf-8"))
-        api = ApiConectada(Servicio(Cliente(datos["url"], datos["llave_publica"])), config.parent,
+        api = ApiConectada(Servicio(Cliente(datos["url"], datos["llave_publica"]), carpeta=config.parent), config.parent,
                            datos.get("correo", ""))
         html, ancho, alto = CONECTADO, 1240, 760
     else:
         # Sin conexión: elegir archivos sueltos y armar la revisión o el tablero.
         api, html, ancho, alto = Api(), INICIO, 820, 700
     api._ventana = webview.create_window("Tino", html=html.read_text(encoding="utf-8"), js_api=api,
-                                         width=ancho, height=alto, min_size=(420, 560), background_color="#F7F5F7")
+                                         width=ancho, height=alto, min_size=(420, 560), background_color="#F7F5F7",
+                                         maximized=html == CONECTADO)
     webview.start(private_mode=False, storage_path=str(PROPIO / "ventana"))
 
 

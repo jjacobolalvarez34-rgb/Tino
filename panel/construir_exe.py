@@ -41,6 +41,7 @@ def main():
              "--hidden-import", "cierre.lector_xlsx",
              # El modo conectado se importa al arrancar, según exista tino.json.
              "--hidden-import", "panel.servicio", "--hidden-import", "panel.datos.cliente",
+             "--hidden-import", "ingesta.siigo", "--hidden-import", "panel.datos.exportar",
              "--add-data", f"{RAIZ / 'panel' / 'tino.html'}{os.pathsep}.",
              "--add-data", f"{RAIZ / 'panel' / 'revision' / 'plantilla.html'}{os.pathsep}revision",
              "--add-data", f"{RAIZ / 'panel' / 'tablero' / 'plantilla.html'}{os.pathsep}tablero",
