@@ -149,6 +149,24 @@ contra los últimos 4 de cada `codigo`. Si dos puntos comparten esos dígitos, g
 último de la lista. Sin coincidencia, `null`. `referencia` es texto: una línea sin
 referencia (`null`) no se manda aquí, va directo a "sin identificar".
 
+### `clasificar_linea_banco` · `{linea, reglas}` → objeto o `null`
+Lee cualquier línea de un extracto con el formato "fecha, descripción, valor al final"
+y dice qué es, según las reglas de la empresa. Ninguna categoría va fija en el código:
+salen del perfil del banco. Cada regla es `{prefijo, categoria, etiqueta, con_codigo}`.
+1. Quita espacios de los extremos. Debe cumplir
+   `^(?P<fecha>[0-9]{4}/[0-9]{2}/[0-9]{2})\s+(?P<resto>.*)$`. Si no, `null`.
+2. Valor: igual que en `leer_linea_transferencia`, sobre `resto`. Sin valor o si
+   `a_pesos` da `null`, `null`.
+3. `descripcion`: lo que hay antes del valor, partido por espacios y unido con un solo
+   espacio.
+4. Para comparar, `descripcion` y cada `prefijo` pasan a mayúsculas **solo de la a a la
+   z**. La primera regla cuya forma en mayúsculas sea el comienzo de la descripción gana.
+5. Si ninguna gana: `categoria` es `abono` si el valor es mayor que 0 y `cargo` si no;
+   `etiqueta` es `null` y `con_codigo` falso.
+6. `referencia`: si la regla tiene `con_codigo`, la primera coincidencia de
+   `\b([0-9]{7,10})\b` en `descripcion`; si no, `null`.
+7. Devuelve `{"fecha": "AAAA-MM-DD", "descripcion", "valor", "categoria", "etiqueta", "referencia"}`.
+
 ### `estadisticas_ventas` · `{cobros}` → resultado
 Estadísticas descriptivas de cobros con tarjeta. Cada cobro es
 `{fecha, hora, punto, proveedor, franquicia, bruto, comision, retenciones, prestamo, neto}`.

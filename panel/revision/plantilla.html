@@ -156,7 +156,7 @@ td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:top}
   }).join('');
 
   $('sin-origen').innerHTML = `<h2>Pagos sin punto</h2><p class="pequeno" style="margin:var(--esp-1) 0 var(--esp-3)">Llegaron al banco sin un código de punto reconocible. Tino no adivina de qué punto son: asígnelos a mano.</p>`
-    + (D.sin_origen.length ? `<div class="caja"><table><thead><tr><th>Referencia</th><th class="d">Valor</th></tr></thead><tbody>${D.sin_origen.map((s) => `<tr><td>${escapar(s.referencia || 'sin referencia')}</td><td class="d">${pesos(s.valor)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="pequeno">Ninguno.</p>');
+    + (D.sin_origen.length ? `<div class="caja"><table><thead><tr><th>Descripción</th><th class="d">Valor</th></tr></thead><tbody>${D.sin_origen.map((s) => `<tr><td>${escapar(s.descripcion || s.referencia || 'sin referencia')}${s.etiqueta ? `<div class="pequeno">${escapar(s.etiqueta)}</div>` : ''}</td><td class="d">${pesos(s.valor)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="pequeno">Ninguno.</p>');
 
   if (D.avisos.length) {
     $('avisos').hidden = false;

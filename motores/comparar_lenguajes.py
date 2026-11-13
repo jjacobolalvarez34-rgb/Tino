@@ -109,6 +109,12 @@ def generar(r):
                         "tolerancia_cuadra": r.choice([0, 100, 1000]),
                         "porcentaje_explicado": r.choice([50, 80, 100]), "reglas_sin_peso": ["R05"]}),
         ("leer_linea_transferencia", {"linea": linea_banco(r)}),
+        ("clasificar_linea_banco", {"linea": linea_banco(r).replace(r.choice(["PAGO QR", "PAGO LLAVE"]), r.choice(
+            ["ABONO NETO VISA", "TRANSFERENCIA DESDE NEQUI", "pago qr", "Ñame", "PAGO A NOMINA", "PAGO QR"])),
+            "reglas": r.sample([{"prefijo": p, "categoria": c, "etiqueta": e, "con_codigo": k} for p, c, e, k in (
+                ("PAGO QR", "transferencia", None, True), ("pago llave", "transferencia", None, True),
+                ("TRANSFERENCIA DESDE", "sin_codigo", "Nequi", False), ("ABONO", "deposito", "Datáfono", False),
+                ("", "todo", None, False), ("ñ", "rara", "x", True))], r.randint(0, 5))}),
         ("punto_por_referencia", {"referencia": str(r.randint(0, 99999999)),
                                   "puntos": [{"punto": f"P{i}", "codigo": str(r.randint(10000000, 99999999))}
                                              for i in range(r.randint(0, 5))]}),

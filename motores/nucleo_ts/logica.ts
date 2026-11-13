@@ -352,6 +352,52 @@ export function leer_linea_transferencia(linea: string): Transferencia | null {
   };
 }
 
+export type ReglaBanco = { prefijo: string; categoria: string; etiqueta: string | null; con_codigo: boolean };
+export type LineaBanco = {
+  fecha: string;
+  descripcion: string;
+  valor: number;
+  categoria: string;
+  etiqueta: string | null;
+  referencia: string | null;
+};
+
+const RE_LINEA_BANCO = /^(?<fecha>[0-9]{4}\/[0-9]{2}\/[0-9]{2})[ \t\n\r\f\v]+(?<resto>[^\n]*)$/;
+const mayusculas = (texto: string) => texto.replace(/[a-z]/g, (c) => c.toUpperCase());
+
+// Cualquier línea del extracto, clasificada con las reglas del perfil de la empresa.
+export function clasificar_linea_banco(linea: string, reglas: ReglaBanco[]): LineaBanco | null {
+  const partes = RE_LINEA_BANCO.exec(linea.replace(RE_ESPACIOS_EXTREMOS, ""));
+  if (partes === null || partes.groups === undefined) return null;
+  const { fecha, resto } = partes.groups;
+  const valor = RE_VALOR_LINEA.exec(resto);
+  if (valor === null) return null;
+  const pesos = a_pesos(valor[1]);
+  if (pesos === null) return null;
+
+  const descripcion = resto
+    .slice(0, valor.index)
+    .split(/[ \t\n\r\f\v]+/)
+    .filter((p) => p !== "")
+    .join(" ");
+  const clave = mayusculas(descripcion);
+  const regla = reglas.find((r) => clave.startsWith(mayusculas(r.prefijo))) ?? {
+    prefijo: "",
+    categoria: pesos > 0 ? "abono" : "cargo",
+    etiqueta: null,
+    con_codigo: false,
+  };
+  const referencia = regla.con_codigo ? RE_REFERENCIA.exec(descripcion) : null;
+  return {
+    fecha: fecha.replaceAll("/", "-"),
+    descripcion,
+    valor: pesos,
+    categoria: regla.categoria,
+    etiqueta: regla.etiqueta,
+    referencia: referencia === null ? null : referencia[1],
+  };
+}
+
 // Por caracteres y no por unidades UTF-16, que es lo que contaría slice sobre el texto.
 function ultimos_cuatro(texto: string): string {
   return [...texto].slice(-4).join("");
@@ -768,6 +814,13 @@ const FUNCIONES = new Map<string, Registro>([
   [
     "leer_linea_transferencia",
     { parametros: ["linea"], llamar: (e) => leer_linea_transferencia(e.linea as string) },
+  ],
+  [
+    "clasificar_linea_banco",
+    {
+      parametros: ["linea", "reglas"],
+      llamar: (e) => clasificar_linea_banco(e.linea as string, e.reglas as ReglaBanco[]),
+    },
   ],
   [
     "punto_por_referencia",

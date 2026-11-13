@@ -53,6 +53,8 @@ class Empresa:
             "excel": {texto: por_codigo[cod] for texto, cod in mapeo.get("excel_dia", {}).get("puntos", {}).items()
                       if cod in por_codigo},
             "ignorar": [n for f in ("bold", "redeban") for n in mapeo.get(f, {}).get("ignorar", [])],
+            # Formato del banco y reglas propias para leer su extracto (D-040).
+            "banco": mapeo.get("banco", {}),
             "config": self._config(self.config_base),
         }
 

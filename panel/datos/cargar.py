@@ -19,8 +19,7 @@ from ingesta import excel_diario, tarjetas  # noqa: E402
 FUENTES = {"excel_dia": "Excel del día", "banco": "Extracto del banco", "tarjetas": "Reporte de Bold o Redeban"}
 
 
-class ArchivoNoValido(Exception):
-    pass
+from ingesta.archivos import ArchivoNoValido  # noqa: E402,F401  (la usan quienes importan este módulo)
 
 
 def huella(ruta):
@@ -109,12 +108,17 @@ def _excel(ruta, emp):
 def _banco(ruta, emp):
     b = lector_banco.leer(ruta, emp.lectores)
     if not b["fechas"]:
-        raise ArchivoNoValido("El PDF no trae movimientos con fecha: ¿es el extracto de Bancolombia?")
-    movimientos = [{"fila_origen": t["fila_origen"], "fuente": "banco", "tipo": "transferencia", "fecha": t["fecha"],
+        raise ArchivoNoValido("El PDF no trae movimientos con fecha: ¿es el extracto del banco?")
+    # Todo el extracto, ordenado por tipo: lo que no es una transferencia también entra.
+    movimientos = [{"fila_origen": t["fila_origen"], "fuente": "banco", "tipo": t["tipo"], "fecha": t["fecha"],
                     "punto_id": emp.id_por_nombre.get(t["punto"]) if t["punto"] else None,
-                    "referencia": t["referencia"], "descripcion": t["tipo"], "bruto": t["valor"]}
-                   for t in b["transferencias"] + b["sin_origen"]]
-    return {"movimientos": movimientos, "desde": min(b["fechas"]), "hasta": max(b["fechas"])}, b["avisos"]
+                    "referencia": t["referencia"], "descripcion": t["descripcion"], "etiqueta": t["etiqueta"],
+                    "bruto": t["valor"]}
+                   for t in b["transferencias"] + b["sin_origen"] + b["otros"]]
+    sin = len(b["sin_origen"])
+    avisos = b["avisos"] + ([f"{sin} pago(s) de clientes sin punto: asígnelos en «Sin origen»."] if sin else [])
+    return {"movimientos": movimientos, "desde": min(b["fechas"]), "hasta": max(b["fechas"]),
+            "banco": b["banco"]}, avisos
 
 
 def _tarjetas(ruta, emp):
@@ -134,7 +138,7 @@ def _tarjetas(ruta, emp):
     return {"movimientos": movimientos, "desde": min(fechas), "hasta": max(fechas)}, avisos
 
 
-def preparar(ruta, emp, fuente=None):
+def preparar(ruta, emp, fuente=None, nombre=None):
     """Lee el archivo y devuelve (carga, avisos). No escribe nada."""
     fuente = fuente or detectar(ruta)
     leer = {"excel_dia": _excel, "banco": _banco, "tarjetas": _tarjetas}[fuente]
@@ -142,7 +146,7 @@ def preparar(ruta, emp, fuente=None):
     if fuente == "tarjetas":
         proveedores = {m["fuente"] for m in carga["movimientos"]}
         fuente = proveedores.pop() if len(proveedores) == 1 else "bold"
-    carga.update({"fuente": fuente, "nombre": Path(ruta).name, "hash": huella(ruta)})
+    carga.update({"fuente": fuente, "nombre": nombre or Path(ruta).name, "hash": huella(ruta)})
     return carga, avisos
 
 

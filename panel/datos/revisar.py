@@ -53,7 +53,7 @@ def leer(c, emp, desde, hasta):
     pagos = _rango(c, "v_pago_vigente", d0, d1, "id,jornada_id,medio_tipo,monto,archivo_id,fila_origen")
     detalle = _rango(c, "v_detalle_vigente", d0, d1, "id,jornada_id,texto_producto,cantidad,precio_lista,archivo_id")
     movs = _rango(c, "v_movimiento_vigente", d0, d1, "id,archivo_id,fuente,tipo,fecha,punto_id,bruto,prestamo,"
-                                                     "referencia,fila_origen")
+                                                     "referencia,descripcion,etiqueta,fila_origen")
     archivos = {a["id"]: a for a in c.leer("archivo_importado", [("estado", "eq", "cargado")],
                                            "id,fuente,desde,hasta,creado_en")}
 
@@ -80,25 +80,21 @@ def leer(c, emp, desde, hasta):
             dia["productos"].append({"precio": d["precio_lista"], "nombre": d["texto_producto"],
                                      "movimiento": 1 if d["cantidad"] else 0})
 
-    # Extracto: cada fecha, del último extracto cargado que la cubre.
-    extractos = sorted((a for a in archivos.values() if a["fuente"] == "banco" and a["desde"]),
-                       key=lambda a: a["creado_en"])
-    duenio = {}
-    for a in extractos:
-        for f in _dias(a["desde"], a["hasta"]):
-            duenio[f] = a["id"]
+    duenio = extractos_por_fecha(archivos.values())
     banco = {"por_dia": {}, "fechas": set(duenio), "sin_origen": []}
     lotes = {}
     for m in movs:
         if m["fuente"] == "banco":
-            if duenio.get(m["fecha"]) != m["archivo_id"]:
+            # Del extracto solo cruzan las transferencias: lo demás (datáfonos, consignaciones,
+            # cargos) tiene su propio lugar.
+            if duenio.get(m["fecha"]) != m["archivo_id"] or m["tipo"] != "transferencia":
                 continue
             if m["punto_id"] in nombre:
                 banco["por_dia"].setdefault((m["fecha"], nombre[m["punto_id"]]), []).append(
                     {"monto": m["bruto"], "id": m["id"]})
             elif m["punto_id"] is None:
                 banco["sin_origen"].append({"fecha": m["fecha"], "valor": m["bruto"], "referencia": m["referencia"],
-                                            "id": m["id"]})
+                                            "descripcion": m["descripcion"], "etiqueta": m["etiqueta"], "id": m["id"]})
         elif m["fuente"] in ("bold", "redeban") and m["punto_id"] in nombre:
             lotes.setdefault(m["archivo_id"], []).append(
                 {"proveedor": m["fuente"], "fecha": m["fecha"], "punto": nombre[m["punto_id"]], "bruto": m["bruto"],
@@ -114,6 +110,15 @@ def leer(c, emp, desde, hasta):
         a0, a1 = min(fechas), max(fechas)
         tarj["cubre"][punto] = set(_dias(a0, a1))
     return excel, banco, tarj
+
+
+def extractos_por_fecha(archivos):
+    """Cada fecha sale del último extracto cargado que la cubre (D-038)."""
+    duenio = {}
+    for a in sorted((a for a in archivos if a["fuente"] == "banco" and a["desde"]), key=lambda a: a["creado_en"]):
+        for f in _dias(a["desde"], a["hasta"]):
+            duenio[f] = a["id"]
+    return duenio
 
 
 def _pago(item_id):

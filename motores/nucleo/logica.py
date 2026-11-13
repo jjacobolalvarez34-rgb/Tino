@@ -212,6 +212,31 @@ def leer_linea_transferencia(linea):
             "referencia": refs[0] if refs else None, "valor": pesos}
 
 
+_RE_LINEA_BANCO = re.compile(r"^(?P<fecha>[0-9]{4}/[0-9]{2}/[0-9]{2})\s+(?P<resto>.*)\Z", re.ASCII)
+_MAYUSCULAS = str.maketrans("abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+
+def clasificar_linea_banco(linea, reglas):
+    """Cualquier línea del extracto, clasificada con las reglas del perfil de la empresa."""
+    m = _RE_LINEA_BANCO.match(linea.strip(_ESPACIOS))
+    if not m:
+        return None
+    valor = _RE_VALOR.search(m.group("resto"))
+    if not valor:
+        return None
+    pesos = a_pesos(valor.group(1))
+    if pesos is None:
+        return None
+    descripcion = " ".join(p for p in re.split(r"[ \t\n\r\f\v]+", m.group("resto")[:valor.start()]) if p)
+    clave = descripcion.translate(_MAYUSCULAS)
+    regla = next((r for r in reglas if clave.startswith(r["prefijo"].translate(_MAYUSCULAS))), None)
+    if regla is None:
+        regla = {"categoria": "abono" if pesos > 0 else "cargo", "etiqueta": None, "con_codigo": False}
+    refs = _RE_REFERENCIA.findall(descripcion) if regla["con_codigo"] else []
+    return {"fecha": m.group("fecha").replace("/", "-"), "descripcion": descripcion, "valor": pesos,
+            "categoria": regla["categoria"], "etiqueta": regla["etiqueta"], "referencia": refs[0] if refs else None}
+
+
 def punto_por_referencia(referencia, puntos):
     por_ultimos4 = {p["codigo"][-4:]: p["punto"] for p in puntos}
     return por_ultimos4.get(referencia[-4:])
@@ -405,7 +430,7 @@ def causa_precios(descuadre, productos, monto_minimo, max_productos, max_mostrad
 _FUNCIONES = {f.__name__: f for f in (
     a_pesos, restar, emparejar, parecidos, sobrantes_vecinos, cruzar, dia_habil_siguiente,
     bloques_deposito, coincide_deposito, cruces_redeban, estado_dia,
-    leer_linea_transferencia, punto_por_referencia, estadisticas_ventas, causas_de_cruce,
+    leer_linea_transferencia, clasificar_linea_banco, punto_por_referencia, estadisticas_ventas, causas_de_cruce,
     causa_compensacion, causa_billete, causa_precios)}
 
 

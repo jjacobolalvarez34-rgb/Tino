@@ -19,7 +19,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(RAIZ), str(RAIZ / "motores")]
 
 from ingesta import banco as lector_banco  # noqa: E402
-from ingesta import excel_diario, tarjetas  # noqa: E402
+from ingesta import archivos, excel_diario, tarjetas  # noqa: E402
 from revision import revisar  # noqa: E402
 
 # Empacado como .exe, la plantilla viaja dentro del programa.
@@ -27,6 +27,9 @@ PLANTILLA = (Path(sys._MEIPASS) / "revision" if getattr(sys, "frozen", False) el
 
 
 def leer_todo(a, puntos):
+    # Un .zip (como el del banco) se abre solo y cada archivo de adentro entra como uno más.
+    a = argparse.Namespace(**{k: [str(r) for r, _ in archivos.expandir(getattr(a, k))]
+                              for k in ("excel", "banco", "tarjetas")})
     avisos, excel = [], {}
     for ruta in a.excel:
         punto, dias, sus = excel_diario.leer(ruta, puntos)
