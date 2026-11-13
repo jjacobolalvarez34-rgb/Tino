@@ -1,0 +1,27 @@
+{
+  "name": "tino-web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tino en la web: las mismas pantallas del programa, sobre la misma base (Supabase).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "revisar": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.45.4",
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.16.11",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.1",
+    "typescript": "5.6.3"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

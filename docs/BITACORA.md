@@ -15,6 +15,41 @@ Dudas:
 -
 ```
 
+## 2026-11-13 · Extracto completo, Siigo, Ajustes, menú lateral y la web
+Hecho:
+- Tarea 006 hecha (criterios cumplidos): el `.zip` de Bancolombia se abre solo y entra
+  igual que el PDF; la copia queda como "Bancolombia movimientos 1 de septiembre a 30 de
+  septiembre del 2026.pdf"; el Excel de transferencias da los mismos totales por punto que
+  el conciliador en los 30 días de septiembre; los 18 pagos sin origen son los mismos que
+  encuentra el conciliador (Nequi y transferencias de cuenta); al asignar uno, esa
+  transferencia pasa de "no llegó" a "llegó".
+- Genérico (D-040): `clasificar_linea_banco` en los dos lenguajes (106 casos, 0 diferencias
+  al azar); reglas del perfil de cada empresa más las del formato del banco.
+- 0008 (extracto completo, asignar con nota) y 0009 (facturas). 284 pruebas locales.
+  Falta aplicarlas en Supabase: `D:\Repositorios\Tino-datos\aplicar_0008_y_0009.sql`.
+- Siigo (D-041): conector por API, probado con un Siigo inventado según la documentación
+  (7 pruebas). Ajustes en el `.exe`: conectar, ver qué trae, asignar puntos y traer.
+- Ajustes → Puntos de venta: crear y editar, código de pago, datáfonos, nombres en el Excel.
+- Menú al costado (D-043); el `.exe` abre maximizado.
+- Web en `web/` para Vercel (D-042): 8 pantallas, revisión en TypeScript igual a Python en
+  los 30 días. `next build` pasa. Next.js 14.2.35 (la 14.2.15 tenía una vulnerabilidad).
+- Investigación de API de facturación: docs/FUENTES/facturacion_api.md.
+Hallazgos:
+- ADDI no se puede cuadrar línea por línea: el punto anota lo vendido con ADDI y ADDI
+  paga después, en bloques y con otros montos ("PAGO DE PROV…").
+- C: bajó de 3,5 GB a 1,9 GB libres durante la sesión sin que Tino escribiera ahí (todo
+  quedó en D:). Hay una caché vieja de pip de 2023 en `C:\Users\Admin\AppData\Local\pip`
+  (716 MB) que Jacobo puede borrar si necesita espacio.
+Falta:
+- Aplicar 0008 y 0009 en tino-pruebas (sin eso el `.exe` conectado y la web fallan en
+  Transferencias y Sin origen).
+- Credenciales de Siigo de Milagros y un Partner-Id para probar con datos reales (tarea 007).
+- Publicar la web en Vercel y llevar la carga de archivos a la web (tarea 008).
+- Consignaciones: entran ordenadas, pero aún no se cruzan con lo anotado en el Excel.
+Dudas:
+- ¿Las facturas de Siigo deben compararse con el Excel del día (unidades y formas de pago)?
+  Está en las señales de las reglas; falta decidir cuándo.
+
 ## 2026-11-03 · Migraciones 0004 a 0007 y el programa conectado a la base
 Hecho:
 - 0004 (operación diaria), 0005 (bancos, conciliación, verificación y festivos 2024–2030),

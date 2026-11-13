@@ -230,6 +230,33 @@ ya no cuenta y el archivo corregido no podría confirmarse. Sus cruces se rechaz
 transferencias se rechazan o vuelven a pendiente y sus errores se dan por resueltos, todo
 con la nota "Se deshizo el archivo …" y en el historial.
 
+### D-040 · El extracto se lee con reglas de cada empresa, no con un modo por cliente
+13 nov 2026. Pedido de Jacobo: que funcione para cualquier empresa. Cada línea del
+extracto se clasifica con `clasificar_linea_banco` (contrato y dos lenguajes): primero las
+reglas del perfil del banco de la empresa (`perfil_fuente`), después las del formato del
+banco (lo que escribe Bancolombia, igual para todos sus clientes). El extracto entra
+completo, ordenado por tipo: transferencias con código, pagos sin código, depósitos de
+datáfonos, consignaciones, abonos y cargos. Nada de un cliente va en el código.
+
+### D-041 · Las facturas vienen del programa de facturación, con un conector por programa
+13 nov 2026. Tomada por Claude con autorización de Jacobo. Siigo primero, por su API. Cada
+conector entrega la misma forma (factura normalizada en pesos enteros, con su id de
+origen), y la base no la repite al traerla otra vez (0009). De qué punto es cada factura
+lo dice el perfil de la empresa (centro de costo, bodega, prefijo o tipo de documento).
+Las credenciales de Siigo se guardan solo en el computador de la empresa, nunca en la
+base ni en el repositorio. Ver docs/FUENTES/facturacion_api.md.
+
+### D-042 · La web usa el mismo núcleo y la misma revisión, en TypeScript
+13 nov 2026. Tomada por Claude. La web (web/, Next.js para Vercel) lee la base con la
+sesión del usuario y corre la revisión con `motores/nucleo_ts`. `web/lib/revision.ts` debe
+dar exactamente lo mismo que Python; lo exige `tests/web/comparar_revision.ts`. Subir
+archivos sigue en el `.exe` hasta que los lectores existan en TypeScript o como función
+de servidor.
+
+### D-043 · El menú va al costado
+13 nov 2026. Pedido de Jacobo. Con nueve pantallas, las pestañas arriba ya no caben bien.
+En pantallas angostas el menú pasa arriba.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

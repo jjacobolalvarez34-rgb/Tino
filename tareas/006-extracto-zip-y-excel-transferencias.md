@@ -1,6 +1,6 @@
 # 006 · Subir el .zip de Bancolombia y entregar el Excel de transferencias
 
-Estado: por hacer (anotada el 3 nov 2026, a pedido de Jacobo).
+Estado: hecha el 13 nov 2026 (ver BITACORA), de forma genérica con reglas por empresa (D-040).
 
 ## Objetivo
 

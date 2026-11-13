@@ -195,6 +195,8 @@ Las reglas se implementan con dos funciones de la base:
 | `0005_bancos_conciliacion.sql` | Movimientos externos, conciliación y verificación de transferencias | 3.1 y 3.2 |
 | `0006_descuadres.sql` | Causas, descuadres y evidencia | 3.3 |
 | `0007_vistas_panel.sql` | Vistas `v_*` para el panel y para copiar a Excel | 4.1 |
+| `0008_extracto_completo.sql` | El extracto entra completo con su tipo y etiqueta; asignar un pago a un punto exige nota | 3.1 |
+| `0009_facturas.sql` | Facturas del programa de facturación (Siigo) como ventas con su id de origen | 2.3 |
 | Siguientes | Costos, inventario y personal, cuando los clientes los pidan | Fases posteriores |
 
 ## Cómo se prueba la separación entre empresas

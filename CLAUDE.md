@@ -113,6 +113,11 @@ quiere entender cada decisión, no solo recibir código.
   (url y llave_publica de Supabase, fuera del repositorio) abre conectado; sin él, sin conexión.
 - Probar la operación diaria en Supabase con el cliente del programa:
   `python tests/rls/probar_operacion_supabase.py <archivo de contraseñas fuera del repositorio>`
+- Probar el conector de Siigo (con un Siigo inventado): `python -m unittest ingesta.test_siigo`
+- Exigir que la revisión web (TypeScript) dé lo mismo que Python, con una base local:
+  `python tests/web/volcar_revision.py <url local> <usuario> <desde> <hasta> <volcado.json en D:>` y
+  `node --experimental-strip-types tests/web/comparar_revision.ts <volcado.json>`
+- La web (web/, para Vercel): ver `web/README.md`. Siempre con `npm_config_cache` y `TEMP` en D:.
 - Empacar Tino.exe, todo en D: (con TEMP y TMP en D:, y el Python de
   `D:/Repositorios/Tino-datos/construir/venv`, que tiene PyInstaller y pywebview):
   `python panel/construir_exe.py --construir D:/Repositorios/Tino-datos/construir --destino D:/Repositorios/Tino-datos/app`
