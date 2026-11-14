@@ -6,7 +6,7 @@ solo se ordenan los datos y se juntan los resultados. Sigue `docs/REGLAS/`.
 """
 import datetime as dt
 
-from nucleo.logica import (causa_billete, causa_compensacion, causa_precios, causas_de_cruce, cruzar,
+from nucleo.logica import (causa_billete, causa_compensacion, causa_precios, causas_de_cruce, cruzar, emparejar,
                            estado_dia, sobrantes_vecinos)
 
 UN_DIA = dt.timedelta(days=1)
@@ -59,6 +59,29 @@ def _causas_del_descuadre(fecha, dias_punto, config):
     return causas
 
 
+def _consignaciones(fecha, excel, banco):
+    """Señal de las reglas: consignación anotada que no aparece en el extracto ese día ni el
+    siguiente. Las consignaciones llegan sin código de punto, así que se cruzan por monto
+    entre todos los puntos: primero con el mismo día; lo que quede, con lo que le sobre al
+    día siguiente. Devuelve {punto: [no aparecen]} y lo que llegó sin anotar ese día."""
+    def anotadas(f):
+        return [i for punto in sorted(excel) for i in excel[punto].get(f, {}).get("consignaciones", [])]
+
+    llegadas = banco.get("consignaciones", {})
+    siguiente = (dt.date.fromisoformat(fecha) + UN_DIA).isoformat()
+    anterior = (dt.date.fromisoformat(fecha) - UN_DIA).isoformat()
+    mismo = emparejar(anotadas(fecha), llegadas.get(fecha, []))
+    sobra_siguiente = emparejar(anotadas(siguiente), llegadas.get(siguiente, []))["sobran_b"]
+    tarde = emparejar(mismo["sobran_a"], sobra_siguiente)
+    no_aparecen = {}
+    for i in tarde["sobran_a"]:
+        no_aparecen.setdefault(i["punto"], []).append(i)
+    # Lo que llegó este día sin anotar: ni este día ni el anterior (que pudo llegar hoy).
+    sobra_anterior = emparejar(anotadas(anterior), llegadas.get(anterior, []))["sobran_a"]
+    sin_anotar = emparejar(sobra_anterior, mismo["sobran_b"])["sobran_b"]
+    return no_aparecen, sin_anotar
+
+
 def revisar(fecha, excel, banco, tarjetas, config):
     """Revisión de un día para todos los puntos con Excel.
 
@@ -69,6 +92,11 @@ def revisar(fecha, excel, banco, tarjetas, config):
               compensacion, billete y precios, de la empresa.
     """
     puntos = []
+    # Consignaciones: se pueden juzgar si el extracto cubre el día y el siguiente.
+    siguiente = (dt.date.fromisoformat(fecha) + UN_DIA).isoformat()
+    juzgar_consignaciones = fecha in banco["fechas"] and siguiente in banco["fechas"]
+    no_aparecen, consignaciones_sin_anotar = (_consignaciones(fecha, excel, banco) if juzgar_consignaciones
+                                              else ({}, []))
     for punto, dias_punto in sorted(excel.items()):
         dia = dias_punto.get(fecha)
         if dia is None:
@@ -77,6 +105,11 @@ def revisar(fecha, excel, banco, tarjetas, config):
         resultado = {"punto": punto, "asesoras": dia["asesoras"], "venta": dia["venta"],
                      "descuadre": dia["descuadre"], "cruces": {}, "causas": [], "sin_datos": []}
         descuadre = dia["descuadre"] or 0
+        if no_aparecen.get(punto):
+            # Una señal dice "revisar", nunca explica plata (docs/REGLAS/descuadres.md).
+            faltan = no_aparecen[punto]
+            resultado["causas"].append({"regla": "R20", "que": "consignacion_no_aparece", "tipo": "senal", "monto": 0,
+                                        "total": sum(i["monto"] for i in faltan), "items": faltan})
 
         if fecha in banco["fechas"]:
             c = _cruce(fecha, dias_punto, "transferencias",
@@ -109,4 +142,5 @@ def revisar(fecha, excel, banco, tarjetas, config):
         puntos.append(resultado)
     sin_origen = [s for s in banco.get("sin_origen", []) if s["fecha"] == fecha]
     sin_configurar = [c for c in CONFIG_CAUSAS if c not in config]
-    return {"fecha": fecha, "puntos": puntos, "sin_origen": sin_origen, "sin_configurar": sin_configurar}
+    return {"fecha": fecha, "puntos": puntos, "sin_origen": sin_origen, "sin_configurar": sin_configurar,
+            "consignaciones_sin_anotar": consignaciones_sin_anotar}
