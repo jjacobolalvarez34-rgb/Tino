@@ -15,6 +15,22 @@ Dudas:
 -
 ```
 
+## 2026-11-13 · Consignaciones, y las migraciones 0008 a 0010 en Supabase
+Hecho:
+- Señal de las reglas (descuadres.md): consignación anotada que no aparece en el extracto
+  ese día ni el siguiente. Se cruza por monto entre todos los puntos (las consignaciones
+  llegan sin código). Es señal: no explica plata. Python y TypeScript dan lo mismo en los
+  30 días de septiembre. Plaza Imperial anotó 6 y las 6 llegaron el mismo día.
+- 0010: la caja del Excel (consignaciones, gastos, base) entra con su fila. 289 pruebas.
+- Jacobo reactivó tino-pruebas (estaba pausado) y aplicó 0008, 0009 y 0010. En Supabase
+  pasan 57 + 12 pruebas, y el usuario de Milagros entra y ve sus 11 puntos configurados.
+- Clave del usuario de Milagros cambiada a pedido de Jacobo.
+Falta:
+- Que Jacobo suba los archivos de un mes en el `.exe` y lo revise con los datos reales.
+- Credenciales de Siigo (tarea 007) y publicar la web (tarea 008).
+Dudas:
+- Ninguna nueva.
+
 ## 2026-11-13 · Extracto completo, Siigo, Ajustes, menú lateral y la web
 Hecho:
 - Tarea 006 hecha (criterios cumplidos): el `.zip` de Bancolombia se abre solo y entra

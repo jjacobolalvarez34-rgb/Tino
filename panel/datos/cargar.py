@@ -74,6 +74,10 @@ def _excel(ruta, emp):
             j["pagos"].append({"medio_pago_id": emp.medio("tarjeta", punto_id), "monto": item["monto"],
                                "detalle_medio": "credito" if "|credito|" in item["id"] else "debito",
                                "fila_origen": _fila_de(item["id"])})
+        # La caja del día: consignaciones, gastos y base, cada una con su fila (0010).
+        j["caja"] = [{"tipo": m["tipo"], "concepto": {"consignacion": "Consignación", "gasto": "Gastos",
+                                                     "base": "Base"}.get(m["tipo"], m["tipo"]),
+                      "monto": m["monto"], "fila_origen": m["fila"]} for m in caja["movimientos"]]
         fila_asesoras = caja["fila_asesoras"]
         for texto in dia["lista_asesoras"] if fila_asesoras else []:
             asesora = emp.asesora(punto_id, texto)

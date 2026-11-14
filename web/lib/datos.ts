@@ -42,7 +42,7 @@ async function config(): Promise<Config> {
 export async function revisarRango(desde: string, hasta: string): Promise<number> {
   const d0 = correrDias(desde, -7), d1 = correrDias(hasta, 7);
   const rango: [string, "gte" | "lte", string][] = [["fecha", "gte", d0], ["fecha", "lte", d1]];
-  const [nombre, cfg, jornadas, reportes, pagos, detalle, movs, archivos] = await Promise.all([
+  const [nombre, cfg, jornadas, reportes, pagos, detalle, movs, archivos, caja] = await Promise.all([
     puntos(), config(),
     leer<Libre>("v_jornada", "id,punto_id,fecha,reporte_id,venta_teorica,descuadre_reportado,asesoras_texto", rango),
     leer<Libre>("v_reporte_vigente", "jornada_id,archivo_id", [], "jornada_id"),
@@ -50,8 +50,9 @@ export async function revisarRango(desde: string, hasta: string): Promise<number
     leer<Libre>("v_detalle_vigente", "id,jornada_id,texto_producto,cantidad,precio_lista,archivo_id", rango),
     leer<Libre>("v_movimiento_vigente", "id,archivo_id,fuente,tipo,fecha,punto_id,bruto,prestamo,referencia,descripcion,etiqueta,fila_origen", rango),
     leer<Libre>("archivo_importado", "id,fuente,desde,hasta,creado_en", [["estado", "eq", "cargado"]]),
+    leer<Libre>("v_caja_vigente", "id,jornada_id,tipo,monto,archivo_id,fila_origen", rango),
   ]);
-  const { excel, banco, tarjetas } = armar({ jornadas, reportes, pagos, detalle, movs, archivos }, nombre);
+  const { excel, banco, tarjetas } = armar({ jornadas, reportes, pagos, detalle, movs, archivos, caja }, nombre);
   let n = 0;
   for (const f of dias(desde, hasta)) {
     const r = revisar(f, excel, banco, tarjetas, cfg);

@@ -16,6 +16,7 @@ import {
 export type Dia = {
   transferencias: Item[];
   tarjetas: Item[];
+  consignaciones?: (Item & { punto: string })[];
   descuadre: number | null;
   venta: number | null;
   asesoras: string;
@@ -24,7 +25,10 @@ export type Dia = {
   reporte_id?: string | null;
 };
 export type Excel = Record<string, Record<string, Dia>>;
-export type Banco = { por_dia: Map<string, Item[]>; fechas: Set<string>; sin_origen: Record<string, unknown>[] };
+export type Banco = {
+  por_dia: Map<string, Item[]>; fechas: Set<string>; sin_origen: Record<string, unknown>[];
+  consignaciones?: Map<string, Item[]>;
+};
 export type Tarjetas = { por_dia: Map<string, Item[]>; cubre: Map<string, Set<string>> };
 export type Config = {
   tolerancia_cuadra: number;
@@ -103,8 +107,25 @@ function causasDelDescuadre(fecha: string, diasPunto: Record<string, Dia>, confi
   return causas;
 }
 
+// Señal de las reglas: consignación anotada que no aparece en el extracto ese día ni el
+// siguiente. Igual que _consignaciones de motores/revision.py.
+function consignaciones(fecha: string, excel: Excel, banco: Banco): [Record<string, Libre[]>, Item[]] {
+  const anotadas = (f: string) => Object.keys(excel).sort(porTexto).flatMap((p) => excel[p][f]?.consignaciones ?? []);
+  const llegadas = banco.consignaciones ?? new Map<string, Item[]>();
+  const siguiente = correr(fecha, 1), anterior = correr(fecha, -1);
+  const mismo = emparejar(anotadas(fecha), llegadas.get(fecha) ?? []);
+  const sobraSiguiente = emparejar(anotadas(siguiente), llegadas.get(siguiente) ?? []).sobran_b;
+  const tarde = emparejar(mismo.sobran_a, sobraSiguiente);
+  const noAparecen: Record<string, Libre[]> = {};
+  for (const i of tarde.sobran_a as Libre[]) (noAparecen[i.punto] ??= []).push(i);
+  const sobraAnterior = emparejar(anotadas(anterior), llegadas.get(anterior) ?? []).sobran_a;
+  return [noAparecen, emparejar(sobraAnterior, mismo.sobran_b).sobran_b];
+}
+
 export function revisar(fecha: string, excel: Excel, banco: Banco, tarjetas: Tarjetas, config: Config): Libre {
   const puntos: Libre[] = [];
+  const juzgar = banco.fechas.has(fecha) && banco.fechas.has(correr(fecha, 1));
+  const [noAparecen, consignacionesSinAnotar] = juzgar ? consignaciones(fecha, excel, banco) : [{}, []];
   for (const punto of Object.keys(excel).sort(porTexto)) {
     const diasPunto = excel[punto];
     const dia = diasPunto[fecha];
@@ -114,6 +135,11 @@ export function revisar(fecha: string, excel: Excel, banco: Banco, tarjetas: Tar
     }
     const r: Libre = { punto, asesoras: dia.asesoras, venta: dia.venta, descuadre: dia.descuadre, cruces: {}, causas: [], sin_datos: [] };
     const descuadre = dia.descuadre ?? 0;
+    if (noAparecen[punto]?.length) {
+      const faltan = noAparecen[punto];
+      r.causas.push({ regla: "R20", que: "consignacion_no_aparece", tipo: "senal", monto: 0,
+        total: faltan.reduce((a, i) => a + i.monto, 0), items: faltan });
+    }
     if (banco.fechas.has(fecha)) {
       const c = cruce(fecha, diasPunto, "transferencias", (f) => banco.por_dia.get(clave(f, punto)) ?? [], (f) => banco.fechas.has(f));
       r.cruces.transferencias = c;
@@ -137,14 +163,14 @@ export function revisar(fecha: string, excel: Excel, banco: Banco, tarjetas: Tar
   }
   const sin_origen = banco.sin_origen.filter((s) => s.fecha === fecha);
   const sin_configurar = ["compensacion", "billete", "precios"].filter((c) => !(c in config));
-  return { fecha, puntos, sin_origen, sin_configurar };
+  return { fecha, puntos, sin_origen, sin_configurar, consignaciones_sin_anotar: consignacionesSinAnotar };
 }
 
 // ---------------------------------------------------------------------------
 // De las filas de la base a lo que espera revisar (como panel/datos/revisar.py)
 // ---------------------------------------------------------------------------
 export type Filas = {
-  jornadas: Libre[]; reportes: Libre[]; pagos: Libre[]; detalle: Libre[]; movs: Libre[]; archivos: Libre[];
+  jornadas: Libre[]; reportes: Libre[]; pagos: Libre[]; detalle: Libre[]; movs: Libre[]; archivos: Libre[]; caja?: Libre[];
 };
 
 export function extractosPorFecha(archivos: Libre[]): Map<string, string> {
@@ -180,18 +206,26 @@ export function armar(f: Filas, nombre: Record<string, string>): { excel: Excel;
   const reportes = new Map(f.reportes.map((r) => [r.jornada_id, r.archivo_id]));
   const excel: Excel = {};
   const porJornada = new Map<string, Dia>();
+  const puntoDe = new Map<string, string>();
   for (const j of f.jornadas) {
     if (!(j.punto_id in nombre)) continue;
-    const dia: Dia = { transferencias: [], tarjetas: [], descuadre: j.descuadre_reportado, venta: j.venta_teorica,
+    const dia: Dia = { transferencias: [], tarjetas: [], consignaciones: [], descuadre: j.descuadre_reportado, venta: j.venta_teorica,
       asesoras: j.asesoras_texto ?? "", productos: [], jornada_id: j.id, reporte_id: j.reporte_id };
     (excel[nombre[j.punto_id]] ??= {})[j.fecha] = dia;
     porJornada.set(j.id, dia);
+    puntoDe.set(j.id, nombre[j.punto_id]);
   }
   for (const p of f.pagos) {
     const dia = porJornada.get(p.jornada_id);
     if (!dia || (p.archivo_id && p.archivo_id !== reportes.get(p.jornada_id))) continue;
     const rol = p.medio_tipo === "transferencia" ? "transferencias" : p.medio_tipo === "tarjeta" ? "tarjetas" : null;
     if (rol) dia[rol].push({ monto: p.monto, id: `${p.id}|fila ${p.fila_origen ?? 0}` });
+  }
+  for (const m of f.caja ?? []) {
+    const dia = porJornada.get(m.jornada_id);
+    if (dia && m.tipo === "consignacion" && (!m.archivo_id || m.archivo_id === reportes.get(m.jornada_id))) {
+      dia.consignaciones!.push({ monto: m.monto, id: `${m.id}|fila ${m.fila_origen ?? 0}`, punto: puntoDe.get(m.jornada_id)! });
+    }
   }
   for (const d of f.detalle) {
     const dia = porJornada.get(d.jornada_id);
@@ -200,11 +234,16 @@ export function armar(f: Filas, nombre: Record<string, string>): { excel: Excel;
     }
   }
   const duenio = extractosPorFecha(f.archivos);
-  const banco: Banco = { por_dia: new Map(), fechas: new Set(duenio.keys()), sin_origen: [] };
+  const banco: Banco = { por_dia: new Map(), fechas: new Set(duenio.keys()), sin_origen: [], consignaciones: new Map() };
   const lotes = new Map<string, Libre[]>();
   for (const m of f.movs) {
     if (m.fuente === "banco") {
-      if (duenio.get(m.fecha) !== m.archivo_id || m.tipo !== "transferencia") continue;
+      if (duenio.get(m.fecha) !== m.archivo_id) continue;
+      if (m.tipo === "consignacion" && m.bruto > 0) {
+        if (!banco.consignaciones!.has(m.fecha)) banco.consignaciones!.set(m.fecha, []);
+        banco.consignaciones!.get(m.fecha)!.push({ monto: m.bruto, id: m.id });
+      }
+      if (m.tipo !== "transferencia") continue;
       if (m.punto_id in nombre) {
         const k = clave(m.fecha, nombre[m.punto_id]);
         if (!banco.por_dia.has(k)) banco.por_dia.set(k, []);
@@ -240,7 +279,7 @@ export function armar(f: Filas, nombre: Record<string, string>): { excel: Excel;
 // Lo que se guarda (como para_guardar de Python)
 // ---------------------------------------------------------------------------
 const CODIGO: Record<string, string> = {
-  "R30|no_llego": "transferencia_no_llego", "R30|sin_anotar": "transferencia_sin_anotar",
+  "R20|consignacion_no_aparece": "consignacion_no_aparece", "R30|no_llego": "transferencia_no_llego", "R30|sin_anotar": "transferencia_sin_anotar",
   "R30|mal_digitado": "transferencia_mal_digitada", "R33|no_llego": "tarjeta_no_aparece",
   "R33|sin_anotar": "tarjeta_sin_anotar", "R33|mal_digitado": "tarjeta_mal_digitada",
 };

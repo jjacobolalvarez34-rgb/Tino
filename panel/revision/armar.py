@@ -35,9 +35,14 @@ def leer_todo(a, puntos):
         punto, dias, sus = excel_diario.leer(ruta, puntos)
         avisos += [f"{Path(ruta).name}: {x}" for x in sus]
         if punto:
+            for f, d in dias.items():
+                # Consignaciones anotadas, para cruzarlas con el extracto (señal R20).
+                d["consignaciones"] = [{"monto": m["monto"], "id": f"{punto}|{f}|consignacion|fila {m['fila']}",
+                                        "punto": punto} for m in d.get("caja", {}).get("movimientos", [])
+                                       if m["tipo"] == "consignacion"]
             excel.setdefault(punto, {}).update(dias)
 
-    banco = {"por_dia": {}, "fechas": set(), "sin_origen": []}
+    banco = {"por_dia": {}, "fechas": set(), "sin_origen": [], "consignaciones": {}}
     for ruta in a.banco:
         b = lector_banco.leer(ruta, puntos)
         avisos += b["avisos"]
@@ -45,6 +50,9 @@ def leer_todo(a, puntos):
         banco["sin_origen"] += b["sin_origen"]
         for t in b["transferencias"]:
             banco["por_dia"].setdefault((t["fecha"], t["punto"]), []).append({"monto": t["valor"], "id": t["id"]})
+        for m in b["otros"]:
+            if m["categoria"] == "consignacion" and m["valor"] > 0:
+                banco["consignaciones"].setdefault(m["fecha"], []).append({"monto": m["valor"], "id": m["id"]})
 
     lotes = []
     for ruta in a.tarjetas:

@@ -24,7 +24,7 @@ from nucleo.logica import emparejar  # noqa: E402
 from revision import revisar  # noqa: E402
 
 UN_DIA = dt.timedelta(days=1)
-CODIGO = {("R30", "no_llego"): "transferencia_no_llego", ("R30", "sin_anotar"): "transferencia_sin_anotar",
+CODIGO = {("R20", "consignacion_no_aparece"): "consignacion_no_aparece", ("R30", "no_llego"): "transferencia_no_llego", ("R30", "sin_anotar"): "transferencia_sin_anotar",
           ("R30", "mal_digitado"): "transferencia_mal_digitada", ("R33", "no_llego"): "tarjeta_no_aparece",
           ("R33", "sin_anotar"): "tarjeta_sin_anotar", ("R33", "mal_digitado"): "tarjeta_mal_digitada"}
 
@@ -54,19 +54,21 @@ def leer(c, emp, desde, hasta):
     detalle = _rango(c, "v_detalle_vigente", d0, d1, "id,jornada_id,texto_producto,cantidad,precio_lista,archivo_id")
     movs = _rango(c, "v_movimiento_vigente", d0, d1, "id,archivo_id,fuente,tipo,fecha,punto_id,bruto,prestamo,"
                                                      "referencia,descripcion,etiqueta,fila_origen")
+    caja = _rango(c, "v_caja_vigente", d0, d1, "id,jornada_id,tipo,monto,archivo_id,fila_origen")
     archivos = {a["id"]: a for a in c.leer("archivo_importado", [("estado", "eq", "cargado")],
                                            "id,fuente,desde,hasta,creado_en")}
 
     # Excel: lo de cada jornada sale del archivo de su reporte vigente.
-    excel, clave = {}, {}
+    excel, clave, punto_de = {}, {}, {}
     for j in jornadas:
         if j["punto_id"] not in nombre:
             continue
-        dia = {"transferencias": [], "tarjetas": [], "descuadre": j["descuadre_reportado"],
+        dia = {"transferencias": [], "tarjetas": [], "consignaciones": [], "descuadre": j["descuadre_reportado"],
                "venta": j["venta_teorica"], "asesoras": j["asesoras_texto"] or "", "productos": [],
                "jornada_id": j["id"], "reporte_id": j["reporte_id"]}
         excel.setdefault(nombre[j["punto_id"]], {})[j["fecha"]] = dia
         clave[j["id"]] = dia
+        punto_de[j["id"]] = nombre[j["punto_id"]]
     for p in pagos:
         dia = clave.get(p["jornada_id"])
         if dia is None or (p["archivo_id"] and p["archivo_id"] != reportes.get(p["jornada_id"])):
@@ -74,6 +76,12 @@ def leer(c, emp, desde, hasta):
         rol = {"transferencia": "transferencias", "tarjeta": "tarjetas"}.get(p["medio_tipo"])
         if rol:
             dia[rol].append({"monto": p["monto"], "id": f"{p['id']}|fila {p['fila_origen'] or 0}"})
+    for m in caja:
+        dia = clave.get(m["jornada_id"])
+        if dia is not None and m["tipo"] == "consignacion" and (
+                not m["archivo_id"] or m["archivo_id"] == reportes.get(m["jornada_id"])):
+            dia["consignaciones"].append({"monto": m["monto"], "id": f"{m['id']}|fila {m['fila_origen'] or 0}",
+                                          "punto": punto_de[m["jornada_id"]]})
     for d in detalle:
         dia = clave.get(d["jornada_id"])
         if dia is not None and (not d["archivo_id"] or d["archivo_id"] == reportes.get(d["jornada_id"])):
@@ -81,13 +89,17 @@ def leer(c, emp, desde, hasta):
                                      "movimiento": 1 if d["cantidad"] else 0})
 
     duenio = extractos_por_fecha(archivos.values())
-    banco = {"por_dia": {}, "fechas": set(duenio), "sin_origen": []}
+    banco = {"por_dia": {}, "fechas": set(duenio), "sin_origen": [], "consignaciones": {}}
     lotes = {}
     for m in movs:
         if m["fuente"] == "banco":
-            # Del extracto solo cruzan las transferencias: lo demás (datáfonos, consignaciones,
+            if duenio.get(m["fecha"]) != m["archivo_id"]:
+                continue
+            if m["tipo"] == "consignacion" and m["bruto"] > 0:
+                banco["consignaciones"].setdefault(m["fecha"], []).append({"monto": m["bruto"], "id": m["id"]})
+            # Del extracto cruzan las transferencias y las consignaciones; lo demás (datáfonos,
             # cargos) tiene su propio lugar.
-            if duenio.get(m["fecha"]) != m["archivo_id"] or m["tipo"] != "transferencia":
+            if m["tipo"] != "transferencia":
                 continue
             if m["punto_id"] in nombre:
                 banco["por_dia"].setdefault((m["fecha"], nombre[m["punto_id"]]), []).append(

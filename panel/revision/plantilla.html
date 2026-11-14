@@ -130,15 +130,17 @@ td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:top}
     + `</tbody></table>` + (D.puntos.some((p) => p.sin_excel) ? `<p class="pequeno">Sin Excel ese día: ${D.puntos.filter((p) => p.sin_excel).map((p) => escapar(p.punto)).join(', ')}.</p>` : '');
 
   const grupo = (titulo, items, ayuda) => items.length ? `<div class="grupo"><h3>${titulo}</h3><span class="pequeno">${ayuda}</span><ul>${items.map((i) => `<li><span>${escapar(i.texto)}</span><b class="num">${pesos(i.monto)}</b></li>`).join('')}</ul></div>` : '';
-  const DEL_DESCUADRE = ['compensacion', 'billete', 'precios'];
+  const DEL_DESCUADRE = ['compensacion', 'billete', 'precios', 'consignacion_no_aparece'];
   const delDescuadre = (p) => p.causas.filter((c) => DEL_DESCUADRE.includes(c.que));
   const combo = (c) => c.map((x) => (x.nombres.length ? x.nombres.join(' o ') : 'un producto') + ` (${pesos(x.precio)})`).join(' + ');
   $('detalle').innerHTML = lista.filter((p) => Object.values(p.cruces).some((c) => c.no_llegaron.length || c.no_anotadas.length || c.mal_digitadas.length || c.otro_dia.length) || p.sin_datos.length || delDescuadre(p).length).map((p) => {
     const bloques = [];
-    const otras = delDescuadre(p).filter((c) => c.que !== 'precios');
+    const otras = delDescuadre(p).filter((c) => !['precios', 'consignacion_no_aparece'].includes(c.que));
     bloques.push(grupo('Otras explicaciones del descuadre', otras.map((c) => ({
       texto: c.que === 'compensacion' ? `El ${fechaCorta(c.fecha)} quedó ${pesos(c.total)}` : nombreCausa(c), monto: c.monto,
     })), 'Un error de conteo o de base que se arrastra, o billetes contados de más o de menos.'));
+    const consig = delDescuadre(p).find((c) => c.que === 'consignacion_no_aparece');
+    if (consig) bloques.push(grupo('Para revisar: consignación que no aparece en el banco', consig.items.map((i) => ({ texto: fila(i.id) || 'consignación', monto: i.monto })), 'No está en el extracto ese día ni el siguiente. Es una señal: no explica el descuadre.'));
     const pista = delDescuadre(p).find((c) => c.que === 'precios');
     if (pista) {
       bloques.push(`<div class="grupo"><h3>Pista: el descuadre es lo que valen estos productos</h3><span class="pequeno">Casi cualquier monto redondo se arma así: es una pista, no explica el descuadre.${pista.cuantas > pista.productos.length ? ` Hay ${pista.cuantas} combinaciones posibles.` : ''}</span><ul>${pista.productos.map((c) => `<li><span>${escapar(combo(c))}</span></li>`).join('')}</ul></div>`);
@@ -155,6 +157,8 @@ td{padding:10px;border-bottom:1px solid var(--color-divisor);vertical-align:top}
     return `<section class="tarjeta punto"><div class="encabezado" style="margin:0"><h2>${escapar(p.punto)}</h2>${ESTADOS[p.estado.estado]}</div><div class="grupos">${bloques.join('')}</div>${faltan}</section>`;
   }).join('');
 
+  const sinAnotar = D.consignaciones_sin_anotar || [];
+  if (sinAnotar.length) $('detalle').insertAdjacentHTML('beforeend', `<section class="tarjeta"><h2>Consignaciones que nadie anotó</h2><p class="pequeno" style="margin:var(--esp-1) 0 var(--esp-3)">Llegaron al banco ese día y no están en el Excel de ningún punto, ni el día anterior.</p><div class="caja"><table><thead><tr><th>Consignación</th><th class="d">Valor</th></tr></thead><tbody>${sinAnotar.map((c) => `<tr><td>${escapar(c.descripcion || 'consignación')}</td><td class="d">${pesos(c.monto)}</td></tr>`).join('')}</tbody></table></div></section>`);
   $('sin-origen').innerHTML = `<h2>Pagos sin punto</h2><p class="pequeno" style="margin:var(--esp-1) 0 var(--esp-3)">Llegaron al banco sin un código de punto reconocible. Tino no adivina de qué punto son: asígnelos a mano.</p>`
     + (D.sin_origen.length ? `<div class="caja"><table><thead><tr><th>Descripción</th><th class="d">Valor</th></tr></thead><tbody>${D.sin_origen.map((s) => `<tr><td>${escapar(s.descripcion || s.referencia || 'sin referencia')}${s.etiqueta ? `<div class="pequeno">${escapar(s.etiqueta)}</div>` : ''}</td><td class="d">${pesos(s.valor)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="pequeno">Ninguno.</p>');
 

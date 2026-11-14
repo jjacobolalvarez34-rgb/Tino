@@ -25,7 +25,7 @@ leer_original = c.leer
 def leer_y_guardar(tabla, filtros=(), columnas="*", orden="id"):
     r = leer_original(tabla, filtros, columnas, orden)
     nombre = {"v_jornada": "jornadas", "v_reporte_vigente": "reportes", "v_pago_vigente": "pagos",
-              "v_detalle_vigente": "detalle", "v_movimiento_vigente": "movs", "archivo_importado": "archivos"}[tabla]
+              "v_detalle_vigente": "detalle", "v_movimiento_vigente": "movs", "archivo_importado": "archivos", "v_caja_vigente": "caja"}[tabla]
     filas[nombre] = r
     return r
 
