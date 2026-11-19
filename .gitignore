@@ -31,3 +31,7 @@ graphify-out/
 
 # Temporales y datos de la ventana de Tino al correrla desde el código
 .ventana/
+
+# Credenciales locales: nunca al repositorio
+usuario.json
+*.credenciales.json
