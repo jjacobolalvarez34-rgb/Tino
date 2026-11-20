@@ -1,5 +1,10 @@
-// Usuarios de la empresa: listar, crear sin invitar, invitar o recuperar la clave, cambiar rol
-// y punto, desactivar y activar. Solo dueño y soporte.
+// Usuarios de la empresa: listar, crear sin invitar, dar una clave temporal, invitar o recuperar
+// la clave por correo, cambiar rol y punto, desactivar y activar. Solo dueño y soporte.
+//
+// Sin correo (como hoy): el usuario se crea ya confirmado con una clave temporal que se le
+// muestra una sola vez a quien lo creó, para entregarla en persona. Queda marcado con
+// clave_temporal y la primera vez que entra Tino le pide cambiarla (Marco y /entrar lo mandan a
+// /clave). La clave temporal no se guarda en ninguna parte.
 //
 // Corre en el servidor porque crear un acceso necesita la llave de servicio de Supabase
 // (SUPABASE_SERVICE_ROLE_KEY), que nunca llega al navegador. Todo lo que toca la tabla usuario
@@ -19,6 +24,15 @@ const ROLES = ["dueno", "encargada", "finanzas", "asesora", "soporte", "lider", 
 const CON_PUNTO = ["asesora", "responsable_punto"];
 
 const error = (texto: string, estado = 400) => NextResponse.json({ error: texto }, { status: estado });
+
+// Clave temporal fácil de dictar: 12 letras y números sin los que se confunden (0/O, 1/l/I),
+// en tres grupos. 31^12 combinaciones: suficiente para una clave que se cambia al primer ingreso.
+const LETRAS = "abcdefghjkmnpqrstuvwxyz23456789";
+function claveTemporal() {
+  const b = randomBytes(12);
+  const s = [...b].map((x) => LETRAS[x % LETRAS.length]).join("");
+  return `${s.slice(0, 4)}-${s.slice(4, 8)}-${s.slice(8)}`;
+}
 
 async function quien(req: NextRequest) {
   const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
@@ -49,9 +63,9 @@ export async function GET(req: NextRequest) {
   if (er) { console.error("[Tino] usuarios", er); return error("No se pudo leer la lista de usuarios. Intente de nuevo.", 500); }
   const filas = await Promise.all((data ?? []).map(async (u) => {
     const { data: a } = await adm.auth.admin.getUserById(u.id);
-    const meta = (a.user?.user_metadata ?? {}) as { invitado_en?: string };
+    const meta = (a.user?.user_metadata ?? {}) as { invitado_en?: string; clave_temporal?: boolean };
     return { ...u, correo: a.user?.email ?? "", ultimo_ingreso: a.user?.last_sign_in_at ?? null,
-             invitado_en: meta.invitado_en ?? null, es_yo: u.id === q.fila!.id };
+             invitado_en: meta.invitado_en ?? null, clave_temporal: !!meta.clave_temporal, es_yo: u.id === q.fila!.id };
   }));
   return NextResponse.json({ usuarios: filas });
 }
@@ -75,9 +89,10 @@ export async function POST(req: NextRequest) {
     if (!ROLES.includes(rol)) return error("Elija un rol.");
     if (rol === "soporte" && q.fila.rol !== "soporte") return error("Solo soporte crea usuarios de soporte.", 403);
     if (CON_PUNTO.includes(rol) && !punto) return error("Ese rol necesita un punto.");
-    // Se crea el acceso sin mandar ningún correo: queda "sin invitar" hasta que el dueño decida.
+    // Se crea el acceso ya confirmado y sin mandar ningún correo, con una clave temporal.
+    const clave = claveTemporal();
     const { data: nuevo, error: er } = await adm.auth.admin.createUser({
-      email: correo, email_confirm: true, password: randomBytes(24).toString("base64url"), user_metadata: { nombre },
+      email: correo, email_confirm: true, password: clave, user_metadata: { nombre, clave_temporal: true },
     });
     if (er || !nuevo.user) {
       return error(/already|registered|exists/i.test(er?.message ?? "") ? "Ese correo ya tiene acceso a Tino." : "No se pudo crear el acceso.");
@@ -90,13 +105,25 @@ export async function POST(req: NextRequest) {
       await adm.auth.admin.deleteUser(nuevo.user.id);
       return error(er2.code === "23503" ? "Ese punto no es de su empresa." : "No se pudo guardar el usuario.");
     }
-    return NextResponse.json({ ok: true, id: nuevo.user.id });
+    return NextResponse.json({ ok: true, id: nuevo.user.id, clave });
   }
 
   const id = String(b.id ?? "");
   const { data: u } = await q.yo.from("usuario").select("id,rol,activo").eq("id", id).maybeSingle();
   if (!u) return error("No se encontró ese usuario en su empresa.", 404);
   const esYo = id === q.fila.id;
+
+  if (accion === "clave_temporal") {
+    if (esYo) return error("Su propia clave se cambia en «Cambiar mi clave».");
+    if (!u.activo) return error("Actívelo antes de darle una clave.");
+    const { data: a } = await adm.auth.admin.getUserById(id);
+    const clave = claveTemporal();
+    const { error: er } = await adm.auth.admin.updateUserById(id, {
+      password: clave, user_metadata: { ...(a.user?.user_metadata ?? {}), clave_temporal: true },
+    });
+    if (er) { console.error("[Tino] clave temporal", er); return error("No se pudo cambiar la clave. Intente de nuevo.", 500); }
+    return NextResponse.json({ ok: true, clave });
+  }
 
   if (accion === "invitar" || accion === "recuperar") {
     const { data: a } = await adm.auth.admin.getUserById(id);

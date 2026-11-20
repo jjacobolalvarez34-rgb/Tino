@@ -1,6 +1,7 @@
 "use client";
 // Usuarios: quién entra a Tino y con qué rol. Solo dueño y soporte. Crear no manda ningún
-// correo: el usuario queda "sin invitar" hasta que se toque "Invitar".
+// correo: Tino da una clave temporal que se muestra una sola vez para entregarla en persona, y la
+// persona la cambia la primera vez que entra. Invitar por correo queda para cuando haya correo.
 import { useEffect, useState } from "react";
 import { Marco, useMarco } from "@/components/Marco";
 import { Avatar } from "@/components/Avatar";
@@ -14,7 +15,8 @@ export default function PaginaUsuarios() {
 }
 
 type Usuario = { id: string; nombre: string; rol: string; punto_id: string | null; activo: boolean; correo: string;
-  ultimo_ingreso: string | null; invitado_en: string | null; es_yo: boolean };
+  ultimo_ingreso: string | null; invitado_en: string | null; clave_temporal: boolean; es_yo: boolean };
+type Entrega = { nombre: string; correo: string; clave: string };
 
 const CON_PUNTO = ["asesora", "responsable_punto"];
 
@@ -40,7 +42,8 @@ function Usuarios() {
   const [puntos, setPuntos] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [nuevo, setNuevo] = useState(false);
-  const [confirmar, setConfirmar] = useState<{ u: Usuario; accion: "invitar" | "recuperar" | "desactivar" } | null>(null);
+  const [confirmar, setConfirmar] = useState<{ u: Usuario; accion: "invitar" | "recuperar" | "desactivar" | "clave_temporal" } | null>(null);
+  const [entrega, setEntrega] = useState<Entrega | null>(null);
   const [editando, setEditando] = useState<string | null>(null);
   const [recarga, setRecarga] = useState(0);
   const puede = ["dueno", "soporte"].includes(yo.rol);
@@ -51,13 +54,18 @@ function Usuarios() {
       .catch((e) => setError(textoDeError(e)));
   }, [recarga, puede]);
 
-  async function hacer(cuerpo: Record<string, unknown>, ok: string) {
-    try { await api("POST", cuerpo); avisar(ok); setConfirmar(null); setEditando(null); setRecarga((r) => r + 1); }
+  async function hacer(cuerpo: Record<string, unknown>, ok: string, quien?: { nombre: string; correo: string }) {
+    try {
+      const r = await api("POST", cuerpo);
+      avisar(ok); setConfirmar(null); setEditando(null); setNuevo(false); setRecarga((x) => x + 1);
+      if (r.clave && quien) setEntrega({ ...quien, clave: r.clave });
+    }
     catch (e) { avisar(textoDeError(e)); }
   }
 
   function estado(u: Usuario) {
     if (!u.activo) return <span className="chip c-neu">Desactivado</span>;
+    if (u.clave_temporal) return <span className="chip c-rev">▲ Clave temporal: la cambia al entrar</span>;
     if (u.ultimo_ingreso) return <span className="chip c-ok">● Activo · entró {fechaHora(u.ultimo_ingreso)}</span>;
     if (u.invitado_en) return <span className="chip c-esp">Invitado {fechaHora(u.invitado_en)}</span>;
     return <span className="chip c-rev">▲ Sin invitar</span>;
@@ -68,13 +76,14 @@ function Usuarios() {
     <>
       <header className="m-encabezado">
         <h1>Usuarios</h1>
-        <p className="m-contexto">Quién entra a Tino y qué puede ver. Crear un usuario no le manda ningún correo: usted decide cuándo invitarlo.</p>
+        <p className="m-contexto">Quién entra a Tino y qué puede ver. Crear un usuario no manda ningún correo: Tino le da una clave temporal para entregarla en persona, y la primera vez que entre se la pide cambiar.</p>
       </header>
       {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
+      {entrega && <ClaveTemporal entrega={entrega} alCerrar={() => setEntrega(null)} />}
       {!nuevo
         ? <button className="boton secundario" style={{ alignSelf: "flex-start" }} onClick={() => setNuevo(true)}><Icono id="mas" />Nuevo usuario</button>
         : <Formulario roles={ROL} puntos={puntos} soySoporte={yo.rol === "soporte"} alCerrar={() => setNuevo(false)}
-            alGuardar={(c) => hacer({ accion: "crear", ...c }, "Usuario creado, sin invitar todavía")} />}
+            alGuardar={(c) => hacer({ accion: "crear", ...c }, "Usuario creado", { nombre: c.nombre, correo: c.correo })} />}
       {!lista && !error && [0, 1, 2].map((i) => <div key={i} className="m-esqueleto" style={{ height: 64 }} />)}
       {lista && (
         <ul className="m-lista">
@@ -93,6 +102,7 @@ function Usuarios() {
                   alGuardar={(c) => hacer({ accion: "cambiar", id: u.id, rol: c.rol, punto_id: c.punto_id }, "Cambio guardado")} />
               ) : (
                 <div className="m-compromiso-acciones">
+                  {u.activo && !u.es_yo && <button className="boton secundario compacto" onClick={() => setConfirmar({ u, accion: "clave_temporal" })}>Clave temporal nueva</button>}
                   {u.activo && !u.ultimo_ingreso && <button className="boton secundario compacto" onClick={() => setConfirmar({ u, accion: "invitar" })}>Invitar</button>}
                   {u.activo && u.ultimo_ingreso && <button className="boton texto compacto" onClick={() => setConfirmar({ u, accion: "recuperar" })}>Recuperar clave</button>}
                   {!u.es_yo && <button className="boton texto compacto" onClick={() => setEditando(u.id)}><Icono id="lapiz" />Rol y {t.punto}</button>}
@@ -104,14 +114,18 @@ function Usuarios() {
               {confirmar?.u.id === u.id && (
                 <div className="nota aviso" role="alert">
                   <span className="cuerpo">
-                    <b>{confirmar.accion === "desactivar" ? `¿Desactivar a ${u.nombre}?` : confirmar.accion === "invitar" ? `¿Invitar a ${u.nombre}?` : `¿Mandar a ${u.nombre} un correo para cambiar la clave?`}</b>
+                    <b>{confirmar.accion === "desactivar" ? `¿Desactivar a ${u.nombre}?` : confirmar.accion === "invitar" ? `¿Invitar a ${u.nombre}?`
+                      : confirmar.accion === "clave_temporal" ? `¿Darle a ${u.nombre} una clave temporal nueva?` : `¿Mandar a ${u.nombre} un correo para cambiar la clave?`}</b>
                     <span>{confirmar.accion === "desactivar"
                       ? "Deja de poder entrar desde ya. No se borra nada: lo que registró se queda y lo puede activar otra vez."
-                      : `Le llega un correo a ${u.correo} con un enlace para poner su clave.`}</span>
+                      : confirmar.accion === "clave_temporal"
+                        ? "Su clave de ahora deja de servir. Tino le muestra la nueva una sola vez para que se la entregue, y al entrar la cambia."
+                        : `Le llega un correo a ${u.correo} con un enlace para poner su clave.`}</span>
                     <span className="m-compromiso-acciones">
                       <button className="boton compacto" onClick={() => hacer({ accion: confirmar.accion, id: u.id },
-                        confirmar.accion === "desactivar" ? "Desactivado" : "Correo enviado")}>
-                        {confirmar.accion === "desactivar" ? "Sí, desactivar" : "Sí, enviar el correo"}</button>
+                        confirmar.accion === "desactivar" ? "Desactivado" : confirmar.accion === "clave_temporal" ? "Clave temporal lista" : "Correo enviado",
+                        { nombre: u.nombre, correo: u.correo })}>
+                        {confirmar.accion === "desactivar" ? "Sí, desactivar" : confirmar.accion === "clave_temporal" ? "Sí, dar clave nueva" : "Sí, enviar el correo"}</button>
                       <button className="boton secundario compacto" onClick={() => setConfirmar(null)}>Cancelar</button>
                     </span>
                   </span>
@@ -122,6 +136,28 @@ function Usuarios() {
         </ul>
       )}
     </>
+  );
+}
+
+// La clave temporal se ve una sola vez: Tino no la guarda. Se entrega en persona o por un
+// mensaje privado, y la persona la cambia al entrar.
+function ClaveTemporal({ entrega, alCerrar }: { entrega: Entrega; alCerrar: () => void }) {
+  const [copiada, setCopiada] = useState(false);
+  async function copiar() {
+    try { await navigator.clipboard.writeText(entrega.clave); setCopiada(true); } catch { setCopiada(false); }
+  }
+  return (
+    <div className="nota ok" role="status">
+      <span className="cuerpo">
+        <b>Clave temporal de {entrega.nombre}</b>
+        <span>Entrar con <b>{entrega.correo}</b> y la clave <code className="m-clave">{entrega.clave}</code></span>
+        <span className="pequeno">Désela en persona o por un mensaje privado. Tino no la vuelve a mostrar; si se pierde, dele otra. Al entrar la primera vez, Tino le pide cambiarla.</span>
+        <span className="m-compromiso-acciones">
+          <button className="boton compacto" onClick={copiar}>{copiada ? "Copiada" : "Copiar la clave"}</button>
+          <button className="boton secundario compacto" onClick={alCerrar}>Ya la entregué</button>
+        </span>
+      </span>
+    </div>
   );
 }
 
@@ -163,7 +199,7 @@ function Formulario({ roles, puntos, soySoporte, usuario, alCerrar, alGuardar }:
       {falta && <p className="error-campo" role="alert">{falta}</p>}
       <div className="m-pie-acciones">
         <button type="button" className="boton secundario" onClick={alCerrar}>Cancelar</button>
-        <button type="submit" className="boton">{usuario ? "Guardar" : "Crear sin invitar"}</button>
+        <button type="submit" className="boton">{usuario ? "Guardar" : "Crear y ver la clave temporal"}</button>
       </div>
     </form>
   );

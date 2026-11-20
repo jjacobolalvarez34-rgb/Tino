@@ -1,6 +1,7 @@
 "use client";
-// Poner o cambiar la clave desde el enlace del correo (invitación o "Recuperar clave").
-// Supabase deja la sesión de recuperación en la dirección; aquí solo se elige la clave nueva.
+// Poner o cambiar la clave: desde el enlace del correo (invitación o "Recuperar clave"), o la
+// primera vez que se entra con una clave temporal (?primera=1). En los dos casos ya hay sesión y
+// aquí solo se elige la clave nueva; al guardarla se quita la marca clave_temporal.
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { base } from "@/lib/supabase";
@@ -12,6 +13,8 @@ export default function Clave() {
   const [otra, setOtra] = useState("");
   const [error, setError] = useState("");
   const [ocupado, setOcupado] = useState(false);
+  const [primera, setPrimera] = useState(false);
+  useEffect(() => { setPrimera(new URLSearchParams(window.location.search).has("primera")); }, []);
 
   useEffect(() => {
     const { data: sub } = base().auth.onAuthStateChange((evento, sesion) => {
@@ -28,9 +31,14 @@ export default function Clave() {
     if (clave.length < 10) { setError("Use al menos 10 caracteres."); return; }
     if (clave !== otra) { setError("Las dos claves no son iguales."); return; }
     setOcupado(true);
-    const { error: er } = await base().auth.updateUser({ password: clave });
+    const { error: er } = await base().auth.updateUser({ password: clave, data: { clave_temporal: false } });
     setOcupado(false);
-    if (er) { setError("No se pudo guardar. Pida otro enlace: este puede haber vencido."); return; }
+    if (er) {
+      console.error("[Tino] clave", er);
+      setError(/same|different/i.test(er.message) ? "La clave nueva tiene que ser distinta de la temporal."
+        : primera ? "No se pudo guardar. Intente de nuevo." : "No se pudo guardar. Pida otro enlace: este puede haber vencido.");
+      return;
+    }
     router.replace("/hoy");
   }
 
@@ -39,10 +47,11 @@ export default function Clave() {
       <section className="tarjeta entrar" aria-labelledby="t-clave">
         <div className="cabeza">
           <svg className="logo" aria-hidden="true"><use href="#logo" /></svg>
-          <h1 id="t-clave">Su clave</h1>
+          <h1 id="t-clave">{primera ? "Ponga su clave" : "Su clave"}</h1>
         </div>
+        {primera && listo && <p className="pequeno">Entró con una clave temporal. Elija una suya, de al menos 10 caracteres, que solo usted sepa.</p>}
         {listo === null && <p className="pequeno">Revisando el enlace…</p>}
-        {listo === false && <div className="nota aviso"><span>Este enlace no sirve o ya venció. Pida a quien administra Tino que le mande otro.</span></div>}
+        {listo === false && <div className="nota aviso"><span>{primera ? "La sesión se cerró. Entre otra vez con la clave temporal." : "Este enlace no sirve o ya venció. Pida a quien administra Tino que le mande otro."}</span></div>}
         {listo && (
           <form onSubmit={guardar} className="m-form">
             <div className="campo"><label htmlFor="c1">Clave nueva</label>

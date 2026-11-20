@@ -11,7 +11,7 @@ import { EscenaPortada } from "./EscenaPortada";
 import { Escenario } from "./Escenario";
 import { Icono } from "./Lucide";
 import { Chulito, LogoTino, SelloMamut } from "./Marcas";
-import { Avance, BotonPausa, Ventisca } from "./Movimiento";
+import { Avance, BotonPausa, BotonSonido, Ventisca } from "./Movimiento";
 import {
   CIERRE,
   EQUIPO,
@@ -107,6 +107,7 @@ function Cabecera() {
           <a href="#equipo">Equipo</a>
           <a href="/precios">Precios</a>
         </nav>
+        <BotonSonido />
         <BotonDemo variante="secundario" />
       </div>
       <Avance />

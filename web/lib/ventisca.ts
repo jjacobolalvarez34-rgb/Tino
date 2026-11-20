@@ -1,18 +1,21 @@
 "use client";
 // La "ventisca" de la portada (pedido de Jacobo, 20 nov): al pulsar una sección del menú, lo que
 // se ve se lo lleva el viento pedazo a pedazo (se corre a la derecha, gira y se desvanece),
-// suena un soplido corto y aparece la sección elegida. Solo transform y opacity, con la Web
+// suena un soplido corto (solo si la persona activó el sonido) y aparece la sección elegida. Solo transform y opacity, con la Web
 // Animations API: liviano en el celular. Corre siempre, aunque el sistema pida reducir
 // movimiento (D-065, decisión de Jacobo). Dentro del programa no se usa.
 
 const MAXIMO = 60;
 const DURACION = 700;
 
+// El sonido solo suena si la persona lo activó con el botón de la cabecera: la portada nunca
+// suena sola. Se recuerda en este navegador.
+const CLAVE_SONIDO = "tino-portada-sonido";
 export function sonidoActivo() {
-  try { return localStorage.getItem("tino-sonido") !== "no"; } catch { return true; }
+  try { return localStorage.getItem(CLAVE_SONIDO) === "si"; } catch { return false; }
 }
 export function guardarSonido(si: boolean) {
-  try { localStorage.setItem("tino-sonido", si ? "si" : "no"); } catch { /* sin almacenamiento: queda como está */ }
+  try { localStorage.setItem(CLAVE_SONIDO, si ? "si" : "no"); } catch { /* sin almacenamiento: dura hasta recargar */ }
 }
 
 let audio: AudioContext | null = null;

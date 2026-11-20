@@ -65,6 +65,8 @@ export function Marco({ children }: { children: React.ReactNode }) {
     (async () => {
       const { data } = await base().auth.getSession();
       if (!data.session) { router.replace("/entrar"); return; }
+      // Con clave temporal, lo primero es cambiarla (se creó sin correo, ver /api/usuarios).
+      if (data.session.user.user_metadata?.clave_temporal) { router.replace("/clave?primera=1"); return; }
       const uid = data.session.user.id;
       const [u, e] = await Promise.all([
         base().from("usuario").select("id,nombre,rol,empresa_id,punto_id").eq("id", uid).maybeSingle(),

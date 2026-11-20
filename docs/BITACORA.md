@@ -15,6 +15,17 @@ Dudas:
 -
 ```
 
+## 2026-11-20 (tarde, 2) · Clave temporal, sonido apagado y Salitre
+
+- Usuarios sin correo: crear da una clave temporal que se ve una sola vez; al entrar, Tino obliga a
+  cambiarla (marca clave_temporal). Botón «Clave temporal nueva». Irina quedó con clave temporal.
+- Portada: el sonido de la ventisca está apagado hasta que la persona lo active (botón en la cabecera).
+- Salitre cargado en tino-pruebas (31 días, 57.963.607). El perfil de venta por persona en pruebas
+  era el viejo (sin «v» ni «No abrió»); se actualizó.
+
+Falta: descartar los «No Abrió», total de octubre por punto, lista de nombres sin reconocer para
+Jacobo, y probar la clave temporal en la web.
+
 ## 2026-11-20 (tarde) · Ventisca en la portada y acceso de Irina
 
 - La ventisca pasó del programa a la portada (D-065, corrección): al pulsar una sección del menú

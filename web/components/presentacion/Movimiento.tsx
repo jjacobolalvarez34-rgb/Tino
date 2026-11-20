@@ -1,7 +1,8 @@
 "use client";
-// Dos piezas pequeñas de cliente: la línea de avance bajo la cabecera y el botón que pausa
-// el movimiento continuo de la página (avisos, franja y vaivén de las capas).
-import { useEffect, useRef } from "react";
+// Piezas pequeñas de cliente: la línea de avance bajo la cabecera, el botón que pausa el
+// movimiento continuo de la página (avisos, franja y vaivén de las capas), el botón de sonido y
+// la ventisca entre secciones.
+import { useEffect, useRef, useState } from "react";
 import { usePausa } from "./Escenario";
 import { Icono } from "./Lucide";
 import s from "./presentacion.module.css";
@@ -83,4 +84,25 @@ export function Ventisca() {
     return () => document.removeEventListener("click", alPulsar);
   }, []);
   return null;
+}
+
+// Sonido de la ventisca: apagado hasta que la persona lo active (la portada nunca suena sola).
+// Al activarlo suena una vez, para que sepa cómo es.
+export function BotonSonido() {
+  const [activo, setActivo] = useState(false);
+  useEffect(() => { import("@/lib/ventisca").then((v) => setActivo(v.sonidoActivo())); }, []);
+  const texto = activo ? "Apagar el sonido" : "Activar el sonido";
+  return (
+    <button type="button" className={s.pausa} role="switch" aria-checked={activo} aria-label="Sonido del viento al cambiar de sección"
+      title={texto}
+      onClick={async () => {
+        const v = await import("@/lib/ventisca");
+        const nuevo = !activo;
+        v.guardarSonido(nuevo);
+        setActivo(nuevo);
+        if (nuevo) v.soplar();
+      }}>
+      <Icono nombre={activo ? "volume-2" : "volume-x"} tamano={18} />
+    </button>
+  );
 }

@@ -14,10 +14,11 @@ export default function Entrar() {
     e.preventDefault();
     setError("");
     setOcupado(true);
-    const { error } = await base().auth.signInWithPassword({ email: correo.trim(), password: clave });
+    const { data, error } = await base().auth.signInWithPassword({ email: correo.trim(), password: clave });
     setOcupado(false);
     if (error) setError("Correo o clave incorrectos.");
-    else router.replace("/hoy");
+    // La primera vez, con la clave temporal que le entregaron, se cambia antes de seguir.
+    else router.replace(data.user?.user_metadata?.clave_temporal ? "/clave?primera=1" : "/hoy");
   }
 
   return (
