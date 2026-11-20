@@ -100,17 +100,22 @@ class Siigo:
         return True
 
     def facturas(self, desde, hasta, avance=None):
-        """Todas las facturas de venta con fecha entre desde y hasta (AAAA-MM-DD)."""
+        """Todas las facturas de venta con fecha entre desde y hasta (AAAA-MM-DD), los dos incluidos.
+
+        En Siigo `date_end` no incluye ese día (probado con octubre de 2026: pedir del 1 al 7
+        devolvía solo hasta el 6). Por eso se pide hasta el día siguiente y se filtra aquí."""
+        import datetime as _dt
+        fin = (_dt.date.fromisoformat(hasta) + _dt.timedelta(days=1)).isoformat()
         salida, pagina = [], 1
         while True:
-            r = self.pedir("/v1/invoices", {"date_start": desde, "date_end": hasta, "page": pagina, "page_size": 100})
+            r = self.pedir("/v1/invoices", {"date_start": desde, "date_end": fin, "page": pagina, "page_size": 100})
             resultados = (r or {}).get("results", [])
             salida += resultados
             total = ((r or {}).get("pagination") or {}).get("total_results", len(salida))
             if avance:
                 avance(len(salida), total)
             if not resultados or len(salida) >= total:
-                return salida
+                return [f for f in salida if desde <= str(f.get("date", ""))[:10] <= hasta]
             pagina += 1
 
     def catalogo(self, campo):

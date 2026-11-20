@@ -48,6 +48,15 @@ class Conector(unittest.TestCase):
         self.assertEqual(len(s.facturas("2026-10-01", "2026-10-31")), 5)
         self.assertTrue(all(p == "Tino" for _, _, p in t.llamadas), "Cada petición lleva el Partner-Id")
 
+    def test_el_ultimo_dia_del_rango_si_entra(self):
+        # En Siigo date_end no incluye ese día: se pide hasta el siguiente y se filtra aquí.
+        facturas = [dict(factura(i), date=f"2026-10-{d:02d}") for i, d in enumerate([6, 7, 7, 8])]
+        t = Falso(facturas)
+        s = siigo.Siigo("u", "buena", "Tino", transporte=t)
+        leidas = s.facturas("2026-10-01", "2026-10-07")
+        self.assertEqual(sorted(f["date"] for f in leidas), ["2026-10-06", "2026-10-07", "2026-10-07"])
+        self.assertTrue(any("date_end=2026-10-08" in url for _, url, _ in t.llamadas))
+
     def test_clave_mala_dice_que_revisar(self):
         s = siigo.Siigo("u", "mala", "Tino", transporte=Falso([]))
         with self.assertRaisesRegex(siigo.ErrorSiigo, "credencial API"):
