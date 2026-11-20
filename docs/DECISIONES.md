@@ -357,12 +357,29 @@ perfil de la empresa, y la fuente propia es Tino: el cierre del día en Tino ree
 y los reportes de Tino reemplazan el "Sheet de control" del plan original, que no se construye. El
 lector de la plantilla de Milagros queda como adaptador de transición. Ver docs/PLAN.md §1.
 
-### D-062 · Con Siigo, Tino solo lee
+### D-062 · Con Siigo, Tino solo lee (reemplazada por D-063)
 20 nov 2026. Tomada por Claude, a confirmar por Jacobo. La API de Siigo permite crear, editar y anular
 facturas, notas crédito, recibos de caja y comprobantes, pero "Tino no factura" (VISION) y escribir
 toca la contabilidad legal del cliente. Tino lee facturas, notas crédito, recibos, centros de costo y
 productos. Escribir (por ejemplo, el recibo de caja de una consignación conciliada) se decide después,
 con cada cliente.
+
+### D-063 · Tino factura a través del programa de facturación del cliente
+20 nov 2026. Decisión de Jacobo (cambia lo de "Tino no factura" de la visión y D-062). La factura la
+emite Siigo con la cuenta, la numeración y los impuestos del cliente: Tino no calcula impuestos, manda
+los ids de impuesto de cada producto como están en Siigo. Cada venta lleva un id único y de ahí sale
+la Idempotency-Key de Siigo, así reintentar nunca duplica. Por seguridad, mandar a la DIAN
+(`stamp.send`) empieza apagado y lo enciende cada empresa. Las pruebas se hacen solo en una empresa
+de pruebas de Siigo, nunca en la cuenta de un cliente (cada factura ahí es real).
+
+### D-064 · Vender y facturar sin internet
+20 nov 2026. Idea de Jacobo, opinión de Claude. La venta se guarda en el celular (IndexedDB en la
+web, SQLite en la app) con su id único y se manda cuando vuelve la señal; si Siigo está caído, queda
+en la base de Tino y se reintenta sola. No se inventa un formato de archivo: la base del celular y
+la de Tino son el respaldo; Google Drive, si se quiere, como exportación opcional (lleva datos de
+clientes). Siigo no acepta facturas electrónicas con fecha anterior a hoy: la venta sin conexión se
+factura el día que se manda, con su fecha y hora reales en las observaciones. Qué se le entrega al
+cliente mientras tanto (contingencia de la DIAN) lo confirma un contador antes de prometerlo.
 
 ## Pendientes
 

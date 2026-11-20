@@ -95,6 +95,35 @@ class Siigo:
             return r
         raise ErrorSiigo("Siigo sigue pidiendo esperar. Intente en unos minutos.")
 
+    def crear(self, ruta, cuerpo, llave_idempotencia):
+        """POST que crea un documento (factura, nota crédito, recibo). Siempre con
+        Idempotency-Key: si se corta la conexión o Siigo pide esperar, se reintenta con la MISMA
+        llave y Siigo devuelve lo ya creado en vez de duplicarlo."""
+        if not self.token or time.time() > self.vence:
+            self._entrar()
+        cab = {"Authorization": f"Bearer {self.token}", "Partner-Id": self.partner,
+               "Content-Type": "application/json", "Idempotency-Key": llave_idempotencia}
+        ultimo = None
+        for intento in range(4):
+            try:
+                estado, r = self.transporte("POST", f"{self.url}{ruta}", cab, cuerpo)
+            except ErrorSiigo as e:  # sin conexión: se reintenta igual, la llave evita duplicar
+                ultimo = e
+                time.sleep(2 ** intento * 2)
+                continue
+            if estado == 429:
+                time.sleep(2 ** intento * 5)
+                continue
+            if estado == 401 and intento == 0:
+                self._entrar()
+                cab["Authorization"] = f"Bearer {self.token}"
+                continue
+            if estado >= 400:
+                detalle = (r or {}).get("Errors") or (r or {}).get("mensaje") or r
+                raise ErrorSiigo(f"Siigo no creó el documento ({estado}): {str(detalle)[:300]}")
+            return r
+        raise ultimo or ErrorSiigo("Siigo sigue pidiendo esperar. Intente en unos minutos.")
+
     def probar(self):
         self._entrar()
         return True

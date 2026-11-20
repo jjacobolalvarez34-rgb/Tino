@@ -57,9 +57,10 @@ adaptador de transición. Lo demás de este plan ya es general.
 Límite: 100 peticiones por minuto por empresa (10 en la de pruebas). `Partner-Id` es el nombre de la
 aplicación (3 a 100 letras o números), no hace falta registrarlo.
 
-**Lo que Tino hace con Siigo (D-062): solo leer.** "Tino no factura" (VISION). Escribir en Siigo
-(por ejemplo, crear el recibo de caja de una consignación conciliada) es una idea para después y la
-decide Jacobo con cada cliente, porque toca la contabilidad legal.
+**Lo que Tino hace con Siigo (D-063): leer y facturar a través de él.** La factura la emite Siigo con
+la cuenta, la numeración y los impuestos del cliente. Reintentar no duplica (Idempotency-Key). Mandar
+a la DIAN empieza apagado. Las pruebas, solo en una empresa de pruebas de Siigo. Siigo no acepta
+facturas electrónicas con fecha anterior a hoy (importa para vender sin internet, D-064).
 
 ## 3. Fases
 
@@ -89,6 +90,8 @@ decide Jacobo con cada cliente, porque toca la contabilidad legal.
 | 2.8 | **Avisos de transferencia del correo**: verificar en minutos (lector de correos, con autorización escrita del cliente) | ⏳ |
 | 2.9 | Comprobante de transferencia (foto) contra el aviso | ⏳ |
 | 2.10 | Auditoría visible: quién cambió qué y cuándo (dueño y soporte) | ⏳ |
+| 2.11 | **Facturar desde Tino a través de Siigo** (D-063): armar la factura, mandarla sin duplicar, pantalla de venta en el celular | 🟡 motor y 13 pruebas listos; falta la empresa de pruebas de Siigo |
+| 2.12 | **Vender sin internet** (D-064): venta guardada en el celular con id único, se manda al volver la señal; si Siigo está caído, espera en la base de Tino | ⏳ (después de 2.11; contingencia DIAN con el contador) |
 
 ### Fase 3 · Configurar un cliente sin depender de Claude
 | # | Qué | Estado |

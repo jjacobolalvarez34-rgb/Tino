@@ -32,7 +32,8 @@ También: la persona encargada de las finanzas y el contador del negocio.
 ## Qué no es
 
 - No es un ERP ni una IA general que gestiona toda la empresa.
-- No reemplaza a Siigo ni factura. La facturación legal sigue donde esté.
+- No reemplaza a Siigo: cuando factura, lo hace a través del programa de facturación del cliente,
+  que sigue siendo quien emite la factura legal (D-063).
 - No calcula impuestos oficiales. Muestra lo que dicen las liquidaciones.
 - No le quita el Excel al dueño. Se lo llena solo.
 
