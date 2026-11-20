@@ -232,3 +232,8 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 .m-celda-persona{display:flex;align-items:center;gap:var(--esp-3);min-width:200px}
 .m-celda-persona > span{display:flex;flex-direction:column;gap:6px;flex:1;min-width:120px}
 .m-encabezado .m-periodo{flex-wrap:wrap}
+
+/* Revisión UI UX Pro Max: foco visible con 3:1 (anillo ciruela + halo rosa de DESIGN.md)
+   y que la barra inferior no tape lo que recibe el foco. */
+.m-app :focus-visible,.m-hoja :focus-visible{outline:2px solid var(--color-marca);outline-offset:2px;box-shadow:0 0 0 5px var(--color-foco)}
+@media (max-width:899px){html{scroll-padding-bottom:calc(var(--barra) + 24px)}}
