@@ -98,6 +98,7 @@ function Cabecera() {
           <a href="#descuadres">Descuadres</a>
           <a href="#excel">Excel</a>
           <a href="#equipo">Equipo</a>
+          <a href="/precios">Precios</a>
         </nav>
         <BotonDemo variante="secundario" />
       </div>

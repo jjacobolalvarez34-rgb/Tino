@@ -1,0 +1,84 @@
+/* /precios con la dirección 2 (DESIGN.md §15): fondo cálido, ciruela en pocos lugares, cifras
+   grandes tabulares, pocas cajas. Usa los tokens de globals.css y marco.css. */
+.pagina{min-height:100vh;background:var(--color-fondo);color:var(--color-texto);display:flex;flex-direction:column}
+.oculto{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cabecera{display:flex;align-items:center;justify-content:space-between;gap:var(--esp-4);padding:var(--esp-4) var(--esp-6);
+  max-width:1232px;width:100%;margin:0 auto}
+.logo{display:inline-flex;min-height:44px;align-items:center}
+.nav{display:flex;align-items:center;gap:var(--esp-4)}
+.nav > a:first-child{color:var(--color-texto-medio);font-weight:600;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.nav > a:first-child:hover{color:var(--color-marca)}
+.contenido{max-width:1232px;width:100%;margin:0 auto;padding:0 var(--esp-6);display:flex;flex-direction:column;gap:72px}
+.portada{padding-top:48px;display:flex;flex-direction:column;gap:var(--esp-3);max-width:760px}
+.antetitulo{font-size:15px;font-weight:700;color:var(--color-marca)}
+.titulo{font-size:48px;font-weight:800;letter-spacing:-.02em;line-height:1.08}
+.principal{font-size:19px;color:var(--color-texto-medio);font-weight:600}
+.subtitulo{font-size:28px;font-weight:800;letter-spacing:-.01em}
+.num{font-variant-numeric:tabular-nums}
+
+.planes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--esp-6);align-items:stretch}
+.plan{position:relative;background:var(--color-superficie);border:1px solid var(--color-borde);border-radius:20px;padding:28px;
+  display:flex;flex-direction:column;gap:var(--esp-3);transition:transform .2s,box-shadow .2s}
+.plan:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(34,22,31,.08)}
+.destacado{border:2px solid var(--color-marca);box-shadow:0 14px 34px rgba(116,48,95,.12)}
+.cinta{position:absolute;top:-13px;left:28px;background:var(--color-marca);color:#fff;font-size:13px;font-weight:700;
+  padding:4px 12px;border-radius:999px}
+.planNombre{font-size:22px;font-weight:800}
+.precio{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px}
+.cifra{font-size:40px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cifraMedia{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums}
+.unidad{font-size:15px;font-weight:600;color:var(--color-texto-medio)}
+.resumen{color:var(--color-texto-medio);font-size:15px}
+.incluye{list-style:none;margin:var(--esp-2) 0 0;padding:0;display:flex;flex-direction:column;gap:var(--esp-2);font-size:15px}
+.incluye li{display:flex;gap:var(--esp-2);align-items:flex-start}
+.chulo{color:var(--color-marca);font-weight:800;flex:none}
+
+.calculadora{display:flex;flex-direction:column;gap:var(--esp-5);border-top:1px solid var(--color-borde);padding-top:48px}
+.controles{display:flex;flex-wrap:wrap;gap:var(--esp-6);align-items:center}
+.campo{display:flex;flex-direction:column;gap:var(--esp-2);min-width:260px;flex:1;max-width:420px;font-weight:600}
+.campo input[type=range]{width:100%;accent-color:var(--color-marca);min-height:44px}
+.opciones{display:flex;flex-direction:column;gap:var(--esp-2);font-weight:600}
+.opciones label{display:flex;align-items:center;gap:var(--esp-2);min-height:44px;cursor:pointer}
+.opciones input{width:20px;height:20px;accent-color:var(--color-marca)}
+.resultados{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--esp-6)}
+.resultado{display:flex;flex-direction:column;gap:4px;padding:var(--esp-4) 0;border-top:3px solid var(--color-divisor)}
+.resultadoPlan{font-weight:800;color:var(--color-marca)}
+.pequeno{font-size:14px;color:var(--color-texto-medio)}
+
+.condiciones{display:flex;flex-direction:column;gap:var(--esp-5)}
+.lista{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--esp-5) var(--esp-8);margin:0}
+.lista div{display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--color-borde);padding-top:var(--esp-3)}
+.lista dt{font-weight:800}
+.lista dd{margin:0;color:var(--color-texto-medio)}
+
+.preguntas{display:flex;flex-direction:column;gap:var(--esp-2);max-width:820px}
+.pregunta{border-bottom:1px solid var(--color-borde)}
+.pregunta summary{cursor:pointer;font-weight:700;font-size:17px;padding:var(--esp-4) 0;min-height:44px;list-style-position:outside}
+.pregunta p{margin:0 0 var(--esp-4);color:var(--color-texto-medio);max-width:65ch}
+.pronto{margin-top:var(--esp-5);display:flex;flex-direction:column;gap:var(--esp-2)}
+.pronto h3{font-size:17px;font-weight:800}
+.pronto ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--esp-2)}
+.pronto li{display:flex;align-items:center;gap:var(--esp-2);color:var(--color-texto-medio)}
+.chipPronto{font-size:12.5px;font-weight:700;background:var(--color-divisor);color:var(--color-texto);border-radius:999px;padding:3px 10px;white-space:nowrap}
+
+.cierre{display:flex;flex-direction:column;gap:var(--esp-3);align-items:flex-start;border-top:1px solid var(--color-borde);padding:48px 0}
+.acciones{display:flex;flex-wrap:wrap;gap:var(--esp-3)}
+.botonPrincipal,.botonSecundario{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;
+  font-weight:700;text-decoration:none;transition:background .15s,transform .15s}
+.botonPrincipal{background:var(--color-marca);color:#fff}
+.botonPrincipal:hover{background:var(--color-marca-hover)}
+.botonSecundario{border:1px solid var(--color-marca);color:var(--color-marca);background:var(--color-superficie)}
+.botonSecundario:hover{background:var(--color-marca-suave)}
+.botonPrincipal:active,.botonSecundario:active{transform:scale(.97)}
+.pagina :focus-visible{outline:2px solid var(--color-marca);outline-offset:2px;box-shadow:0 0 0 5px var(--color-foco)}
+
+.pie{margin-top:auto;display:flex;flex-wrap:wrap;gap:var(--esp-4);align-items:center;justify-content:space-between;
+  padding:var(--esp-6);max-width:1232px;width:100%;margin-left:auto;margin-right:auto;color:var(--color-texto-medio);font-size:14px}
+
+@media (max-width:900px){
+  .planes,.resultados{grid-template-columns:1fr}
+  .titulo{font-size:34px}
+  .contenido{gap:56px;padding:0 var(--esp-5)}
+  .cabecera{padding:var(--esp-3) var(--esp-5)}
+  .nav > a:first-child{display:none}
+}

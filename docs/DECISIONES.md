@@ -305,6 +305,28 @@ responsable de punto solo las de su punto; finanzas y la asesora, ninguna. Lo ha
 animaciones esté eso activo o no"). Las animaciones son sobrias (opacidad y posición, sin
 parpadeos). Dentro del programa se sigue respetando "reducir movimiento" (DESIGN.md §11).
 
+### D-053 · Precios por punto de venta (cierra P-003)
+19 nov 2026. Decisión de Jacobo. Equipo 30.000, Caja 45.000 y Completo 65.000 por punto al mes;
+mínimo 3 puntos; implementación desde 400.000; anual 12 por 10; fundador 30 % menos por 12
+meses para los primeros 5; piloto de 30 días a mitad de precio. Viven solo en
+`web/lib/precios.ts`. IVA sin mencionar hasta confirmarlo. Ver docs/NEGOCIO/precios.md.
+
+### D-054 · Primero se corrige en pruebas y después se pasa a producción
+19 nov 2026. Decisión de Jacobo. tino-pruebas sigue siendo el laboratorio; los datos de uso
+diario viven en tino-produccion (organización aparte en Supabase). Ninguno va a demos,
+capturas ni al repositorio: las capturas se hacen con la empresa inventada de las pruebas.
+
+### D-055 · Los Excel del cliente no se corrigen: Tino tolera sus variaciones
+19 nov 2026. Decisión de Jacobo. El perfil acepta varios nombres por columna y textos de día
+sin venta («No abrió»). Si en una hoja borraron un encabezado pero lo demás está donde en otra
+hoja del mismo libro, se usa ese diseño y se avisa. Si la hoja del día y el resumen no
+coinciden, es un problema del archivo: se avisa con su fila y no se cambia ningún valor.
+
+### D-056 · Crear un usuario no lo invita
+19 nov 2026. Pedido de Jacobo. La pantalla Usuarios (dueño y soporte) crea el acceso sin mandar
+correo; «Invitar» lo manda cuando el dueño decida. La llave de servicio solo vive en el
+servidor (/api/usuarios); lo que toca la tabla usuario va con la sesión de quien llama (RLS).
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?
@@ -313,6 +335,4 @@ sola. Si las entrevistas muestran que los contadores son importantes, se agrega
 una tabla `usuario_empresa`.
 
 ### P-003 · Modelo de precio
-Por punto de venta, plan fijo o mixto. Se decide con las entrevistas y los
-pilotos.
-
+Cerrada el 19 nov 2026 con D-053.
