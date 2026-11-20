@@ -1768,13 +1768,20 @@
 }
 
 @media (min-width: 960px) {
+  /* El texto arranca arriba, a la altura de la escena, y no centrado en ella: si no, queda un
+     hueco grande entre el menú y el título (revisión de Jacobo, 20 nov). */
   .portada {
-    padding-block: 64px 80px;
+    padding-block: 28px 72px;
   }
 
   .portadaRejilla {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     gap: 48px;
+    align-items: start;
+  }
+
+  .portadaTexto {
+    padding-top: 32px;
   }
 
   .capaAviso {
