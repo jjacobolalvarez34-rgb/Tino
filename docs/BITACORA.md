@@ -15,6 +15,39 @@ Dudas:
 -
 ```
 
+## 2026-11-19 · Equipo, nueva dirección visual y página pública
+Hecho:
+- Todo pasa a main (D-047). Vercel publica desde un fork que sigue arranque; cada subida va a las dos.
+- Web conectada a tino-pruebas en este computador (web/.env.local, fuera del repositorio) y
+  `D:\Repositorios\Tino-datosbrir_web.cmd` para abrirla en http://localhost:6001 con todo en D:.
+- 0011_equipo: roles lider y responsable_punto; persona en varios puntos con vigencia;
+  venta_asesora_dia aparte de venta (D-048) con reparto ⚑ en partes iguales (D-049); metas por
+  período, también desde el Excel (D-050); seguimiento, evaluaciones, sesiones y compromisos
+  privados (D-051); recorrido por usuario; plantilla de tipos de observación. 364 pruebas de
+  permisos en verde (73 nuevas, dos empresas y cada rol).
+- Lector genérico de venta por persona y meta del mes (ingesta/venta_personas.py, 10 pruebas).
+  Octubre cargado en la base local: 10 puntos, cuadra con los totales del DESC FACT.
+- Nueva dirección visual (DESIGN.md §15, D-046): Hoy, Equipo (lista y ficha), Ventas, Registrar
+  (observación, compromiso, evaluación, diagnóstico u objetivo, sesión, meta), Ajustes de
+  Equipo y recorrido guiado de 6 pasos (driver.js). Revisadas con UI UX Pro Max.
+- Página pública en "/" con el sello de Mamut Herd y animaciones siempre activas (D-052).
+- Siigo de Milagros conectado: la API aceptó las credenciales (D:\Repositorios\Tino-datos\siigo.json).
+Falta:
+- Que Jacobo aplique 0011 en Supabase; después: perfil de venta por persona de Milagros
+  (trabajo/scripts/perfil_venta_persona.py) y cargar octubre (cargar_octubre.py supabase).
+- Aprobación de Jacobo de la dirección visual antes de pasar a ella las pantallas de caja.
+- Salitre: su DESC FACT dice "v" en vez de "FECHA" en el encabezado; se carga cuando lo corrijan.
+- Plaza Imperial, hoja del día 1: el total suma la columna I en vez de la H (la revisión de
+  caja lee 0 ese día; el DESC FACT sí trae los 4.675.000).
+- Dos nombres sin reconocer en octubre (uno en Plaza Imperial, uno en Plaza Claro).
+- Prueba en Supabase con una segunda empresa inventada para las tablas de 0011.
+- Dirección web de Mamut Herd para el enlace del sello.
+- Etapa sin internet, al final.
+Dudas:
+- ¿La asesora debería ver sus propios compromisos? Hoy no ve ninguno (no estaba en la tarea).
+- Cumplimiento personal: en octubre solo hay metas por punto; "quién necesita apoyo" por
+  cumplimiento solo funciona con metas personales.
+
 ## 2026-11-13 · Consignaciones, y las migraciones 0008 a 0010 en Supabase
 Hecho:
 - Señal de las reglas (descuadres.md): consignación anotada que no aparece en el extracto
