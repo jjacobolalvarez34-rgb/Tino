@@ -229,3 +229,6 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
   transition:opacity var(--dur),transform var(--dur);max-width:90vw}
 .m-aviso.ver{opacity:1;transform:translate(-50%,0)}
 @media (max-width:899px){.m-aviso{bottom:calc(var(--barra) + 24px + env(safe-area-inset-bottom, 0px))}}
+.m-celda-persona{display:flex;align-items:center;gap:var(--esp-3);min-width:200px}
+.m-celda-persona > span{display:flex;flex-direction:column;gap:6px;flex:1;min-width:120px}
+.m-encabezado .m-periodo{flex-wrap:wrap}
