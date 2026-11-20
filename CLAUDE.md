@@ -134,4 +134,4 @@ quiere entender cada decisión, no solo recibir código.
   (aplica, y verifica permisos con `tests/produccion/verificar.sql`), y comparar totales con
   `python tests/produccion/comparar_totales.py ...`. Ver docs/OPERACION/produccion.md.
 - Respaldo, restauración en local y comparación de filas: `python tests/respaldo/respaldar.py ...`
-- Abrir la web en este PC: `D:\Repositorios\Tino-datosbrir_web.cmd` (http://localhost:6001).
+- Abrir la web en este PC: `D:\Repositorios\Tino-datos\abrir_web.cmd` (http://localhost:6001).

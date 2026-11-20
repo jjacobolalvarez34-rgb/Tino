@@ -41,7 +41,7 @@ Hecho:
   P-003.
 - GitHub: el repositorio queda fijo con la cuenta jjacobolalvarez34-rgb (había dos guardadas).
 Falta:
-- Jacobo: aplicar 0012 en tino-pruebas (D:\Repositorios\Tino-datosplicar_0012.sql). Después,
+- Jacobo: aplicar 0012 en tino-pruebas (D:\Repositorios\Tino-datos\aplicar_0012.sql). Después,
   Claude recarga en pruebas Salitre, Plaza Imperial, Kennedy, Suba y Portal Sur con el perfil nuevo
   (borrar sus cargas en octubre/cargas_supabase/ para que se lean otra vez) y descarta con nota los
   «No abrió» ya cargados.
@@ -59,7 +59,7 @@ Dudas:
 Hecho:
 - Todo pasa a main (D-047). Vercel publica desde un fork que sigue arranque; cada subida va a las dos.
 - Web conectada a tino-pruebas en este computador (web/.env.local, fuera del repositorio) y
-  `D:\Repositorios\Tino-datosbrir_web.cmd` para abrirla en http://localhost:6001 con todo en D:.
+  `D:\Repositorios\Tino-datos\abrir_web.cmd` para abrirla en http://localhost:6001 con todo en D:.
 - 0011_equipo: roles lider y responsable_punto; persona en varios puntos con vigencia;
   venta_asesora_dia aparte de venta (D-048) con reparto ⚑ en partes iguales (D-049); metas por
   período, también desde el Excel (D-050); seguimiento, evaluaciones, sesiones y compromisos
