@@ -59,6 +59,10 @@ class Empresa:
             # Formato del banco y reglas propias para leer su extracto (D-040).
             "banco": mapeo.get("banco", {}),
             "config": self._config(self.config_base),
+            # Venta por persona y día: qué hoja y qué columnas (perfil de la empresa) y cómo se
+            # reparte un día de varias personas (⚑ empresa_config.equipo_reparto).
+            "venta_persona": mapeo.get("excel_dia", {}).get("venta_persona"),
+            "reparto": self.config_base.get("equipo_reparto", "partes_iguales"),
         }
 
     @staticmethod

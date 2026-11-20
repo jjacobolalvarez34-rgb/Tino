@@ -130,7 +130,9 @@ insert into carga values (1, $j${
      "personas_dia": 2, "fila_origen": 5},
     {"punto_id": "aaaaaaaa-0000-0000-0000-0000000000f2", "fecha": "2026-10-03", "asesora_id": "aaaaaaaa-0000-0000-0000-0000000000c1",
      "texto_original": "Persona Nueva", "venta": 1000000, "facturas": null, "venta_dia": 1000000, "facturas_dia": null,
-     "personas_dia": 1, "fila_origen": 6}]
+     "personas_dia": 1, "fila_origen": 6}],
+  "metas": [{"punto_id": "aaaaaaaa-0000-0000-0000-0000000000f2", "asesora_id": null, "desde": "2026-11-01",
+             "hasta": "2026-11-30", "monto": 25000000, "fila_origen": 2}]
 }$j$), (2, $j${
   "fuente": "excel_dia", "nombre": "octubre corregido.xlsx", "hash": "f011f011f011f011f011f011f011f011f011f011f011f011f011f011f011f011",
   "desde": "2026-10-03", "hasta": "2026-10-03", "jornadas": [],
@@ -146,6 +148,12 @@ select pg_temp.como('a0000000-0000-0000-0000-00000000000f');
 create temp table arch as select n, public.importar_archivo(p) as id from carga where n = 1;
 select pg_temp.ok((select sum(venta) from public.v_venta_asesora) = 8554200,
                   'Finanzas sube el Excel y la venta por persona entra con su archivo');
+select pg_temp.ok((select monto = 25000000 and fila_origen = 2 from public.meta_periodo
+                   where archivo_id = (select id from arch)), 'La meta del mes entra con el Excel y su fila de origen');
+select pg_temp.falla($$insert into public.meta_periodo (empresa_id, punto_id, desde, hasta, monto) values
+                       ('aaaaaaaa-0000-0000-0000-000000000000', 'aaaaaaaa-0000-0000-0000-000000000011',
+                        '2027-01-01', '2027-01-31', 1)$$,
+                     '42501', 'Finanzas no escribe metas a mano');
 select pg_temp.ok((select filas from public.archivo_importado where id = (select id from arch)) = 3,
                   'El archivo cuenta sus filas de venta por persona');
 select pg_temp.ok((select sum(venta) from public.v_venta_asesora where fecha = '2026-10-03'

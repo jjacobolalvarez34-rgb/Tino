@@ -11,7 +11,7 @@ const Contexto = createContext<Yo | null>(null);
 export const useYo = () => useContext(Contexto);
 
 const MENU = [
-  { ruta: "/", texto: "Inicio", icono: "dia" },
+  { ruta: "/resumen", texto: "Inicio", icono: "dia" },
   { ruta: "/transferencias", texto: "Transferencias", icono: "transf" },
   { ruta: "/sin-origen", texto: "Sin origen", icono: "buscar" },
   { ruta: "/por-confirmar", texto: "Por confirmar", icono: "revisar" },

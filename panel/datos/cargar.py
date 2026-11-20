@@ -14,7 +14,7 @@ RAIZ = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(RAIZ), str(RAIZ / "motores"), str(RAIZ / "motores" / "conciliador")]
 
 from ingesta import banco as lector_banco  # noqa: E402
-from ingesta import excel_diario, tarjetas  # noqa: E402
+from ingesta import excel_diario, tarjetas, venta_personas  # noqa: E402
 
 FUENTES = {"excel_dia": "Excel del día", "banco": "Extracto del banco", "tarjetas": "Reporte de Bold o Redeban"}
 
@@ -104,9 +104,39 @@ def _excel(ruta, emp):
     if not jornadas:
         raise ArchivoNoValido("El Excel no trae ningún día que se pueda leer.")
     fechas = [j["fecha"] for j in jornadas]
+    ventas_persona, metas = _ventas_persona(ruta, emp, punto_id, fechas, errores, avisos)
     # Un producto sin reconocer se repite cada día: basta un error por nombre.
     unicos = {(e["tipo"], e["texto"].rsplit(" (", 1)[0]): e for e in errores}
-    return {"jornadas": jornadas, "errores": list(unicos.values()), "desde": min(fechas), "hasta": max(fechas)}, avisos
+    return {"jornadas": jornadas, "ventas_persona": ventas_persona, "metas": metas, "errores": list(unicos.values()),
+            "desde": min(fechas), "hasta": max(fechas)}, avisos
+
+
+def _ventas_persona(ruta, emp, punto_id, fechas, errores, avisos):
+    """La venta por persona y día, y la meta del mes, si la empresa tiene perfil para leerlas. Un nombre que no
+    se reconoce entra sin persona y queda como error por resolver."""
+    perfil = emp.lectores.get("venta_persona")
+    if not perfil:
+        return [], []
+    import openpyxl
+    libro = openpyxl.load_workbook(ruta, read_only=True, data_only=True)
+    try:
+        filas, avisos_vp = venta_personas.leer(libro, perfil, fechas, emp.lectores.get("reparto", "partes_iguales"))
+        meta, avisos_m = venta_personas.leer_meta(libro, perfil.get("meta_mes"), fechas)
+    finally:
+        libro.close()
+    avisos.extend(avisos_vp + avisos_m)
+    metas = [dict(meta, punto_id=punto_id, asesora_id=None)] if meta else []
+    salida = []
+    for f in filas:
+        asesora = emp.asesora(punto_id, f["texto"])
+        if asesora is None:
+            errores.append({"fila_origen": f["fila_origen"], "tipo": "nombre_sin_reconocer",
+                            "texto": f"{f['texto']} ({perfil.get('hoja')})"})
+        salida.append({"punto_id": punto_id, "fecha": f["fecha"], "asesora_id": asesora, "texto_original": f["texto"],
+                       "venta": f["venta"], "facturas": f["facturas"], "venta_dia": f["venta_dia"],
+                       "facturas_dia": f["facturas_dia"], "personas_dia": f["personas_dia"],
+                       "fila_origen": f["fila_origen"]})
+    return salida, metas
 
 
 def _banco(ruta, emp):
@@ -164,4 +194,5 @@ def resumen(carga):
     jornadas = carga.get("jornadas", [])
     pagos = sum(len(j["pagos"]) for j in jornadas)
     return {"dias": len(jornadas), "pagos": pagos, "movimientos": len(carga.get("movimientos", [])),
+            "ventas_persona": len(carga.get("ventas_persona", [])),
             "errores": len(carga.get("errores", [])), "desde": carga.get("desde"), "hasta": carga.get("hasta")}

@@ -245,11 +245,16 @@ create table public.meta_periodo (
   hasta       date not null,
   monto       bigint not null check (monto > 0),
   activo      boolean not null default true,
+  archivo_id  uuid,
+  fila_origen int check (fila_origen > 0),
   creado_por  uuid default auth.uid(),
   creado_en   timestamptz not null default now(),
   check (hasta >= desde),
+  -- Una meta que vino en un archivo dice de qué fila salió; una escrita a mano, no.
+  check ((archivo_id is null) = (fila_origen is null)),
   foreign key (empresa_id, punto_id) references public.punto_venta (empresa_id, id),
-  foreign key (empresa_id, asesora_id) references public.asesora (empresa_id, id)
+  foreign key (empresa_id, asesora_id) references public.asesora (empresa_id, id),
+  foreign key (empresa_id, archivo_id) references public.archivo_importado (empresa_id, id)
 );
 create index meta_periodo_empresa_idx on public.meta_periodo (empresa_id, desde);
 -- Una sola meta activa por punto (o persona en el punto) para cada día.
@@ -467,9 +472,12 @@ grant update (asesora_id, anulada) on public.venta_asesora_dia to authenticated;
 alter table public.meta_periodo enable row level security;
 create policy meta_periodo_ver on public.meta_periodo
   for select to authenticated using (empresa_id = app.empresa_actual() and app.ve_punto(punto_id));
+-- Finanzas sube archivos: puede dejar la meta que trae el Excel, no escribir una a mano.
 create policy meta_periodo_crear on public.meta_periodo
   for insert to authenticated
-  with check (empresa_id = app.empresa_actual() and app.tiene_rol(array['dueno', 'encargada', 'soporte', 'lider']));
+  with check (empresa_id = app.empresa_actual()
+              and (app.tiene_rol(array['dueno', 'encargada', 'soporte', 'lider'])
+                   or (app.rol_actual() = 'finanzas' and archivo_id is not null)));
 create policy meta_periodo_cambiar on public.meta_periodo
   for update to authenticated
   using (empresa_id = app.empresa_actual() and app.tiene_rol(array['dueno', 'encargada', 'soporte', 'lider']))
@@ -648,6 +656,15 @@ begin
   from jsonb_to_recordset(coalesce(p -> 'ventas_persona', '[]'::jsonb))
        as x(punto_id uuid, fecha date, asesora_id uuid, texto_original text, venta bigint, facturas numeric,
             venta_dia bigint, facturas_dia int, personas_dia int, fila_origen int);
+
+  -- La meta del mes que trae el Excel. Si ya hay una meta activa para ese punto y período
+  -- (escrita a mano o de otro archivo), se queda la que había.
+  insert into public.meta_periodo (empresa_id, punto_id, asesora_id, desde, hasta, monto, archivo_id, fila_origen)
+  select app.empresa_actual(), x.punto_id, x.asesora_id, x.desde, x.hasta, x.monto, v_archivo, x.fila_origen
+  from jsonb_to_recordset(coalesce(p -> 'metas', '[]'::jsonb))
+       as x(punto_id uuid, asesora_id uuid, desde date, hasta date, monto bigint, fila_origen int)
+  on conflict do nothing;
+
   if v_filas > 0 then
     update public.archivo_importado set filas = coalesce(filas, 0) + v_filas where id = v_archivo;
   end if;
