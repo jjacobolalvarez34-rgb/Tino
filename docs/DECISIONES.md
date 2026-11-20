@@ -381,6 +381,11 @@ clientes). Siigo no acepta facturas electrónicas con fecha anterior a hoy: la v
 factura el día que se manda, con su fecha y hora reales en las observaciones. Qué se le entrega al
 cliente mientras tanto (contingencia de la DIAN) lo confirma un contador antes de prometerlo.
 
+### D-065 · La ventisca entre pantallas corre siempre
+20 nov 2026. Decisión de Jacobo ("la idea es que se vea a pesar de eso"). Como en la página pública
+(D-052), la transición de cambiar de pantalla corre aunque el sistema pida reducir movimiento. Es
+corta (menos de un segundo) y solo mueve opacidad, posición y giro. El sonido se apaga en Más.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

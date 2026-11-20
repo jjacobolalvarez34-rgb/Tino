@@ -2,7 +2,7 @@
 // La "ventisca" al cambiar de pantalla (pedido de Jacobo, 20 nov): los elementos de la pantalla
 // actual se los lleva el viento uno por uno (se corren a la derecha, giran y se desvanecen) y
 // suena un soplido corto. Solo transform y opacity, con la Web Animations API: liviano en el
-// celular. Dentro del programa se respeta "reducir movimiento" (DESIGN.md §11).
+// celular. Corre siempre, aunque el sistema pida reducir movimiento (D-065, decisión de Jacobo).
 
 const ELEMENTOS = [
   "h1", ".m-contexto", ".m-cifra", ".m-frase", ".m-fila", ".m-ranking li", ".m-grupo > h2", ".m-linea li",
@@ -10,9 +10,6 @@ const ELEMENTOS = [
 ].join(",");
 const MAXIMO = 48;
 const DURACION = 700;
-
-export const sinMovimiento = () =>
-  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export function sonidoActivo() {
   try { return localStorage.getItem("tino-sonido") !== "no"; } catch { return true; }
@@ -58,7 +55,7 @@ export function soplar() {
 
 // Se lleva el viento lo que se ve de la pantalla. Termina cuando ya no queda nada a la vista.
 export function llevarseConElViento(contenedor: HTMLElement | null): Promise<void> {
-  if (!contenedor || sinMovimiento()) return Promise.resolve();
+  if (!contenedor) return Promise.resolve();
   const alto = window.innerHeight;
   const vistos = [...contenedor.querySelectorAll<HTMLElement>(ELEMENTOS)]
     .filter((e) => { const r = e.getBoundingClientRect(); return r.bottom > 0 && r.top < alto && r.width > 0; })
@@ -84,4 +81,11 @@ export function llevarseConElViento(contenedor: HTMLElement | null): Promise<voi
     Promise.all(animaciones.map((a) => a.finished)).then(() => undefined),
     new Promise<void>((r) => setTimeout(r, DURACION + 520)),
   ]);
+}
+
+// La pantalla a la que se llega aparece en fade. Con la Web Animations API, que no apaga la regla
+// global de "reducir movimiento" de globals.css (D-065).
+export function aparecer(contenedor: HTMLElement | null) {
+  contenedor?.animate([{ opacity: 0, transform: "translateX(-14px)" }, { opacity: 1, transform: "none" }],
+    { duration: 340, easing: "ease-out" });
 }

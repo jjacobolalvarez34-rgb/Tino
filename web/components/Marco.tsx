@@ -12,7 +12,7 @@ import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
 import { iniciarRecorrido, recorridoDe, type NombreRecorrido } from "./Recorrido";
 import { Registrar } from "./Registrar";
-import { guardarSonido, llevarseConElViento, soplar, sonidoActivo } from "@/lib/ventisca";
+import { aparecer, guardarSonido, llevarseConElViento, soplar, sonidoActivo } from "@/lib/ventisca";
 
 export type Yo = { id: string; nombre: string; rol: string; empresa_id: string; empresa: string; punto_id: string | null };
 type Contexto = {
@@ -59,6 +59,8 @@ export function Marco({ children }: { children: React.ReactNode }) {
   const [sonido, setSonido] = useState(true);
   const yendo = useRef(false);
   useEffect(() => { setSonido(sonidoActivo()); }, []);
+  const listo = !!yo && !!cfg;
+  useEffect(() => { if (listo) aparecer(document.getElementById("contenido")); }, [listo]);
 
   // Cambiar de pantalla con la ventisca: lo que se ve se lo lleva el viento y después aparece la
   // otra pantalla. Con Ctrl o clic del medio se abre normal, en otra pestaña.

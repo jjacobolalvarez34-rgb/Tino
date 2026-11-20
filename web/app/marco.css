@@ -287,6 +287,4 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 .m-periodo input[type=date]{height:44px;border:1px solid var(--color-borde);border-radius:10px;padding:0 var(--esp-3);background:var(--color-superficie)}
 /* Las pantallas de caja de antes, dentro del marco nuevo: sus tarjetas sin la caja blanca pesada. */
 .m-pagina > .tarjeta{border:0;background:none;padding:0}
-/* La pantalla a la que se llega aparece en fade, después de la ventisca (lib/ventisca.ts). */
-.m-app .m-pagina{animation:m-aparece .34s ease-out both}
-@keyframes m-aparece{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+/* La pantalla a la que se llega aparece en fade: lo hace lib/ventisca.ts (aparecer). */

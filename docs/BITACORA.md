@@ -30,6 +30,7 @@ Hecho:
 - Web: pantalla Caja (día por día, cerrar y desbloquear); las pantallas de caja de antes ya van en
   el marco nuevo; portada sin hueco bajo el menú y con el ícono de Tino; ventisca al cambiar de
   pantalla (los elementos se van con el viento, girando, y suena un soplido; se apaga en Más).
+- Jacobo no vio la ventisca: el programa respetaba "reducir movimiento". Ahora corre siempre (D-065).
 Falta (Claude):
 - Pantalla Conciliación completa (conciliado, por confirmar, sin pareja) con la dirección 2.
 - Pasar el contenido de Transferencias, Descuadres, Sin origen, Archivos y Puntos a la dirección 2.
