@@ -159,8 +159,9 @@ function Portada() {
             <span className={s.titularSuave}>Y si no, por qué.</span>
           </h1>
           <p className={`${s.entrada} ${s.entra}`} style={v({ "--d": "140ms" })}>
-            Tino junta el Excel de cada punto, Siigo, el extracto del banco, Bold, Redeban y los avisos de
-            transferencia. Concilia los pagos y le pone arriba lo que necesita atención.
+            Tino junta el Excel de cada punto, el programa de facturación, los extractos de sus bancos, las
+            liquidaciones de los datáfonos y los avisos de transferencia. Concilia los pagos y le pone arriba lo
+            que necesita atención.
           </p>
           <div className={`${s.acciones} ${s.entra}`} style={v({ "--d": "220ms" })}>
             <BotonDemo variante="grande" />
@@ -181,10 +182,10 @@ function Portada() {
 
 const FUENTES = [
   { nombre: "Excel diario de cada punto", dice: "Lo que se anotó en caja." },
-  { nombre: "Siigo", dice: "Lo que se facturó y con qué forma de pago." },
-  { nombre: "Extracto del banco", dice: "Lo que de verdad entró a la cuenta." },
-  { nombre: "Bold", dice: "Cada venta con tarjeta y lo que Bold liquidó." },
-  { nombre: "Redeban", dice: "Los lotes del datáfono y lo que Redeban liquidó." },
+  { nombre: "Programa de facturación", dice: "Lo que se facturó y con qué forma de pago." },
+  { nombre: "Extractos de sus bancos", dice: "Lo que de verdad entró a cada cuenta, en el banco que use." },
+  { nombre: "Datáfonos", dice: "Cada venta con tarjeta y lo que la red liquidó." },
+  { nombre: "Liquidaciones", dice: "Comisiones y retenciones tal como las cobró cada red." },
   { nombre: "Avisos de transferencia", dice: "Cada transferencia, minutos después de hecha." },
 ];
 
@@ -218,7 +219,7 @@ function Conciliacion() {
         <CabezaSeccion id="t-conciliar" antetitulo="Conciliación" titulo="¿La transferencia de las 3:40 sí llegó?">
           <p className={s.texto}>
             Tino cruza cada pago anotado con lo que de verdad entró: las transferencias con los avisos y el
-            extracto, las tarjetas con Bold y Redeban, las consignaciones con el extracto.
+            extracto, las tarjetas con lo que liquidó cada datáfono, las consignaciones con el extracto.
           </p>
           <p className={s.texto}>
             Lo que coincide queda verificado. Lo dudoso queda como propuesta, y una propuesta nunca se
@@ -506,8 +507,8 @@ function Equipo() {
 }
 
 const NO_HACE = [
-  { que: "No factura.", detalle: "Siigo sigue facturando. Tino lee lo que Siigo ya tiene." },
-  { que: "No calcula impuestos.", detalle: "Retenciones y comisiones salen de las liquidaciones de Bold, Redeban y el banco." },
+  { que: "No factura.", detalle: "Su programa de facturación sigue facturando. Tino lee lo que ya tiene." },
+  { que: "No calcula impuestos.", detalle: "Retenciones y comisiones salen de las liquidaciones de los datáfonos y del banco." },
   { que: "No confirma lo dudoso.", detalle: "Una propuesta espera a que una persona la revise." },
   { que: "No borra.", detalle: "Lo que se corrige se anula o se ajusta, y queda registrado quién lo hizo." },
 ];

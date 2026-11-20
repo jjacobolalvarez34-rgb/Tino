@@ -47,9 +47,9 @@ export function comoNumeros(): string {
 
 // Pagos que se concilian solos en la sección de conciliación (una muestra del sábado).
 export const PAGOS = [
-  { hora: "09:12", medio: "Tarjeta · Bold", monto: 64_000, estado: "ok" as Estado, chip: "Verificada", prueba: "Bold, mismo valor y hora" },
+  { hora: "09:12", medio: "Tarjeta", monto: 64_000, estado: "ok" as Estado, chip: "Verificada", prueba: "Datáfono, mismo valor y hora" },
   { hora: "11:30", medio: "Transferencia", monto: 120_000, estado: "ok" as Estado, chip: "Verificada", prueba: "Aviso del banco, 11:31" },
-  { hora: "13:05", medio: "Tarjeta · Redeban", monto: 210_000, estado: "ok" as Estado, chip: "Verificada", prueba: "Redeban, lote del día" },
+  { hora: "13:05", medio: "Tarjeta", monto: 210_000, estado: "ok" as Estado, chip: "Verificada", prueba: "Lote del datáfono del día" },
   { hora: "14:20", medio: "Consignación", monto: 900_000, estado: "ok" as Estado, chip: "Verificada", prueba: "Extracto del banco" },
   { hora: "15:40", medio: "Transferencia", monto: 85_000, estado: "mal" as Estado, chip: "Sospechosa", prueba: "El banco no la muestra ni hoy ni mañana" },
   { hora: "17:55", medio: "Transferencia", monto: 150_000, estado: "revisar" as Estado, chip: "Propuesta", prueba: "Llegó al día siguiente. La confirma usted" },
