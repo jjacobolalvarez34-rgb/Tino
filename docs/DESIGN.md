@@ -268,3 +268,68 @@ de Claude Code (no en la de Windows/Mac):
 - [ ] Funciona a 375 px de ancho sin desplazarse de lado.
 - [ ] Carga en menos de 2 segundos en un celular.
 - [ ] Solo usa tokens de este archivo.
+
+## 15. Dirección 2 (web, nov 2026)
+
+Pedida por Jacobo el 19 nov 2026 (D-046). Se aplicó primero a Hoy, Equipo y Ventas; el resto
+de pantallas pasa a esta dirección cuando él la apruebe. Los estilos están en
+`web/app/marco.css`, con prefijo `m-`. Los tokens de color, estados y espaciado de las
+secciones anteriores siguen valiendo.
+
+**Navegación**
+- Computador: riel angosto de 88 px a la izquierda, con íconos y su nombre debajo. Arriba el
+  logo y "+ Registrar" (botón ciruela de 52 px). Nada de barra lateral blanca ancha.
+- Celular: barra inferior de 64 px con Hoy, Equipo, **+ Registrar** (al centro, levantado),
+  Ventas y Más. "Más" abre una hoja con el resto de pantallas y Salir.
+
+**Hoy**: frases que se tocan, ordenadas por urgencia (■ vencido, ▲ apoyo, próximos, sesiones).
+Una columna en el celular; en el computador, frases a la izquierda y el resumen del período a la
+derecha. Nada de cuadrícula de tarjetas con números.
+
+**Lista y detalle**: en el computador, la lista a la izquierda (300–380 px) y la ficha a la
+derecha; en el celular la ficha abre a pantalla completa con "‹ Equipo" para volver.
+
+**Cifras**: número de 40 px (34 en el celular) o 32 px (28), peso 800, tabular, con **una línea
+de contexto** debajo en 15 px ("+8 % frente a septiembre"). Sin etiqueta gris pequeña encima.
+
+**Personas primero**
+- Avatar: iniciales en un círculo; el color sale del id de la persona (seis pares, todos AA):
+
+| Token | Fondo | Texto |
+|---|---|---|
+| `--av0` | `#F3E4EE` | `#5A2449` |
+| `--av1` | `#E1F0EE` | `#1F5C55` |
+| `--av2` | `#FBEBD9` | `#7A4210` |
+| `--av3` | `#E5ECF8` | `#2B4C86` |
+| `--av4` | `#EEE9F7` | `#4B3A82` |
+| `--av5` | `#F6E3E1` | `#8A2F28` |
+
+- Anillo de meta: trazo ciruela; verde de "Cuadrado" al llegar a 100 %. Sin meta dice "Sin meta".
+- Ranking: lista con posición, avatar, nombre, barra de 6 px y monto.
+- Ficha: cabeza (avatar 64, nombre 28/800, código), puntos como píldoras, cifras, compromisos
+  abiertos y **línea de tiempo** (lo más nuevo arriba).
+
+**Menos cajas**: filas separadas por `--color-divisor` en vez de tarjetas. La ciruela solo en
+"+ Registrar", la selección, los enlaces y las barras de datos.
+
+**Contraste**: texto secundario `--color-texto-medio` `#4A4350` (más oscuro que
+`--color-texto-suave`), títulos en 800.
+
+**Registrar**: hoja que sube desde abajo en el celular y panel de 460 px a la derecha en el
+computador (`HojaInferior`, con `<dialog>`: Esc cierra, el foco queda adentro). Observación,
+Compromiso, Sesión y Meta; cada formulario cabe en una pantalla y lo que se puede adivinar ya
+viene puesto.
+
+**Tablas**: componente `Tabla` con total al final, orden por columna (`aria-sort`) y "Copiar
+como números". Por debajo de 700 px se vuelve lista.
+
+**Estados y movimiento**: esqueletos mientras carga, aviso corto al guardar ("Compromiso
+guardado"), transiciones de 150–200 ms (`--dur`), toques de 44 px, Tab/Enter/Esc. Se sigue
+respetando "reducir movimiento" (§11). La página pública es la única excepción (D-052).
+
+**Textos que cambian por empresa**: "asesora", "punto" y similares salen de `web/lib/textos.ts`
+y se pueden cambiar por empresa en `empresa_config.textos`.
+
+**Íconos nuevos (Lucide)**: sun (Hoy), users (Equipo), plus (Registrar), ellipsis (Más),
+store (punto), eye (observación), flag (compromiso), graduation-cap (sesión), target (meta),
+life-buoy (apoyo), clock (próximo), trending-up / trending-down (comparación).

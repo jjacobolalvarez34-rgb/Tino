@@ -257,6 +257,54 @@ de servidor.
 13 nov 2026. Pedido de Jacobo. Con nueve pantallas, las pestañas arriba ya no caben bien.
 En pantallas angostas el menú pasa arriba.
 
+### D-044 · La web es la interfaz principal; el .exe solo sube archivos
+19 nov 2026. Decisión de Jacobo. Todo lo nuevo se hace en la web, para celular y
+computador. El programa de escritorio queda para subir archivos y no recibe pantallas nuevas.
+
+### D-045 · Equipo va antes que la tarea 004
+19 nov 2026. Decisión de Jacobo. Él cierra la 004 en paralelo.
+
+### D-046 · Nueva dirección visual para la web (DESIGN.md §15)
+19 nov 2026. Pedido de Jacobo. Riel angosto de íconos en el computador y barra inferior en el
+celular, con "+ Registrar" siempre a la vista; "Hoy" en frases que se tocan, ordenadas por
+urgencia; cifras grandes con una línea de contexto; personas primero (avatar, anillo de meta,
+ranking con barras, ficha como línea de tiempo); menos cajas. Se aplica primero a Hoy y la
+ficha (punto de control) y al resto solo cuando Jacobo lo apruebe. Reemplaza a D-043 cuando
+se apruebe.
+
+### D-047 · Todo en main; arranque queda igual a main
+19 nov 2026. Pedido de Jacobo. Se trabaja en main, sin ramas por tarea. Vercel publica desde
+un fork en otra cuenta que sigue la rama arranque; por eso cada subida va a main y a arranque.
+
+### D-048 · La venta por persona va en su propia tabla, no en venta
+19 nov 2026. Tomada por Claude. La tarea pedía `venta.asesora_id`, pero `venta` ya guarda la
+venta del día que trae el Excel: poner ahí la venta por persona la contaría dos veces y
+descuadraría la revisión de caja. `venta_asesora_dia` guarda una fila por persona y día con su
+archivo y su fila de origen, y la vista `v_venta_asesora` aplica "cuenta el último archivo"
+(D-038). Se lee con el perfil de la empresa (hoja y columnas), no con código de un cliente.
+
+### D-049 · Un día de varias personas se reparte en partes iguales
+19 nov 2026. Decisión de Jacobo. El reporte de Milagros trae una sola venta por día y punto,
+a veces con dos nombres. Se reparte en partes iguales (lo que sobra de dividir va de a un
+peso a las primeras) para que el ranking sume lo mismo que el punto. Es un valor de la
+empresa (`empresa_config.equipo_reparto`), por si otra empresa lo quiere distinto.
+
+### D-050 · La meta del mes puede venir en el Excel, pero se pone en Tino
+19 nov 2026. Tomada por Claude, confirmada por Jacobo ("se debe poder hacer en el programa").
+Las metas se escriben en la pantalla Metas (`meta_periodo`). Si el Excel trae la meta del mes
+(Milagros: hoja METAS, celda K2), entra con su archivo y su fila, y no pisa una meta escrita a
+mano para el mismo punto y período.
+
+### D-051 · Observaciones y evaluaciones son privadas
+19 nov 2026. Regla de la tarea de Equipo. Las ven dueño, encargada, lider y soporte; el
+responsable de punto solo las de su punto; finanzas y la asesora, ninguna. Lo hace la base
+(`app.ve_equipo`), con pruebas de dos empresas y cada rol (tests/rls/0011_pruebas.sql).
+
+### D-052 · La página pública anima siempre, aunque el sistema pida reducir movimiento
+19 nov 2026. Decisión de Jacobo, solo para la página de presentación ("que tenga las
+animaciones esté eso activo o no"). Las animaciones son sobrias (opacidad y posición, sin
+parpadeos). Dentro del programa se sigue respetando "reducir movimiento" (DESIGN.md §11).
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?
