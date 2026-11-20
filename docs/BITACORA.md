@@ -15,6 +15,39 @@ Dudas:
 -
 ```
 
+## 2026-11-20 (mañana, 2) · Siigo real, facturar por Siigo, cerrar el día, Caja y ventisca
+Hecho:
+- docs/PLAN.md: el plan maestro, con el principio de D-061 (Tino reemplaza las herramientas del
+  cliente; el Sheet de control no se construye; el Excel de Milagros es un adaptador de transición).
+- Siigo con datos reales (solo lectura): 5.495 facturas de octubre en tino-pruebas, todas con punto
+  (centro de costo; MAY → punto P12 "Ventas al por mayor"). Error corregido: en Siigo date_end no
+  incluye ese día. Hallazgos: venta sin facturar (el Excel dice más que Siigo) y el vendedor de
+  Siigo es el usuario de la caja, no la asesora.
+- Facturar a través de Siigo (D-063): motor con Idempotency-Key y 13 pruebas sin red; script de
+  prueba real solo para la empresa de pruebas de Siigo. Vender sin internet (D-064), en el plan.
+- 0014 cerrar el día: cerrar_dias / desbloquear_dia, trigger que exige rol y nota para abrir, candado
+  sobre caja, pagos, ventas y deshacer; historial en jornada_cierre. 414 pruebas de permisos.
+- Web: pantalla Caja (día por día, cerrar y desbloquear); las pantallas de caja de antes ya van en
+  el marco nuevo; portada sin hueco bajo el menú y con el ícono de Tino; ventisca al cambiar de
+  pantalla (los elementos se van con el viento, girando, y suena un soplido; se apaga en Más).
+Falta (Claude):
+- Pantalla Conciliación completa (conciliado, por confirmar, sin pareja) con la dirección 2.
+- Pasar el contenido de Transferencias, Descuadres, Sin origen, Archivos y Puntos a la dirección 2.
+- Caja con la empresa demo (sembrarle días) para las capturas.
+Falta (Jacobo), recordatorio:
+1. Aplicar D:\Repositorios\Tino-datos\aplicar_0012_y_0013.sql en tino-pruebas, y luego la 0014
+   (db/migrations/0014_cerrar_el_dia.sql).
+2. llave_servicio y conexion en D:\Repositorios\Tino-datos\produccion.json.
+3. Vercel: SUPABASE_SERVICE_ROLE_KEY y variables por ambiente; Sync fork en tino-techh/Tino.
+4. Supabase Auth: Site URL y /clave en Redirect URLs.
+5. Pedir a Siigo una empresa de pruebas (para probar facturar de verdad).
+6. Con la dueña: prefijo MAY y por qué el punto 04 figura como mayorista.
+7. Dónde guardar la copia propia de respaldos (no en GitHub: los repositorios son públicos).
+8. Con un contador: contingencia DIAN para vender sin internet.
+Dudas:
+- Estados "conciliada" y "bloqueada" de la jornada: las reglas no los definen; no se usan aún.
+- Cerrar el día también lo puede hacer la responsable de punto (su punto): supuesto de Claude.
+
 ## 2026-11-20 (mañana) · E por cola, Redil y decisiones de Jacobo
 Hecho:
 - Decisiones de Jacobo: E por cola (D-057), dos respaldos: Supabase Pro y uno propio (D-058),

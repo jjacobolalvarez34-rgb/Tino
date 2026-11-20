@@ -12,6 +12,7 @@ import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
 import { iniciarRecorrido, recorridoDe, type NombreRecorrido } from "./Recorrido";
 import { Registrar } from "./Registrar";
+import { guardarSonido, llevarseConElViento, soplar, sonidoActivo } from "@/lib/ventisca";
 
 export type Yo = { id: string; nombre: string; rol: string; empresa_id: string; empresa: string; punto_id: string | null };
 type Contexto = {
@@ -55,6 +56,23 @@ export function Marco({ children }: { children: React.ReactNode }) {
   const reloj = useRef<ReturnType<typeof setTimeout>>();
   const ruta = usePathname();
   const router = useRouter();
+  const [sonido, setSonido] = useState(true);
+  const yendo = useRef(false);
+  useEffect(() => { setSonido(sonidoActivo()); }, []);
+
+  // Cambiar de pantalla con la ventisca: lo que se ve se lo lleva el viento y después aparece la
+  // otra pantalla. Con Ctrl o clic del medio se abre normal, en otra pestaña.
+  const irA = useCallback(async (e: React.MouseEvent, destino: string) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    setMas(false);
+    if (destino === ruta || yendo.current) return;
+    yendo.current = true;
+    soplar();
+    await llevarseConElViento(document.getElementById("contenido"));
+    router.push(destino);
+    yendo.current = false;
+  }, [ruta, router]);
 
   useEffect(() => {
     (async () => {
@@ -102,7 +120,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
       <a className="m-saltar" href="#contenido">Saltar al contenido</a>
       <div className="m-app">
         <nav className="m-riel" aria-label="Pantallas">
-          <Link href="/hoy" className="m-riel-logo" aria-label="Tino, ir a Hoy">
+          <Link href="/hoy" className="m-riel-logo" aria-label="Tino, ir a Hoy" onClick={(e) => irA(e, "/hoy")}>
             <svg aria-hidden="true"><use href="#logo" /></svg>
           </Link>
           <button className="m-registrar" data-recorrido="registrar" onClick={() => registrar()}>
@@ -110,7 +128,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
           </button>
           {PRINCIPAL.map((m) => (
             <Link key={m.ruta} href={m.ruta} className="m-destino" aria-current={activa(m.ruta) ? "page" : undefined}
-              data-recorrido={m.ruta === "/equipo" ? "equipo" : undefined}>
+              data-recorrido={m.ruta === "/equipo" ? "equipo" : undefined} onClick={(e) => irA(e, m.ruta)}>
               <span className="m-destino-icono"><Icono id={m.icono} /></span>{m.texto}
             </Link>
           ))}
@@ -123,14 +141,14 @@ export function Marco({ children }: { children: React.ReactNode }) {
         <nav className="m-barra" aria-label="Pantallas">
           {PRINCIPAL.slice(0, 2).map((m) => (
             <Link key={m.ruta} href={m.ruta} className="m-destino" aria-current={activa(m.ruta) ? "page" : undefined}
-              data-recorrido={m.ruta === "/equipo" ? "equipo" : undefined}>
+              data-recorrido={m.ruta === "/equipo" ? "equipo" : undefined} onClick={(e) => irA(e, m.ruta)}>
               <span className="m-destino-icono"><Icono id={m.icono} /></span>{m.texto}
             </Link>
           ))}
           <button className="m-registrar" data-recorrido="registrar" onClick={() => registrar()}>
             <span className="m-registrar-boton"><Icono id="mas" /></span>Registrar
           </button>
-          <Link href="/ventas" className="m-destino" aria-current={activa("/ventas") ? "page" : undefined}>
+          <Link href="/ventas" className="m-destino" aria-current={activa("/ventas") ? "page" : undefined} onClick={(e) => irA(e, "/ventas")}>
             <span className="m-destino-icono"><Icono id="ventas" /></span>Ventas
           </Link>
           <button className="m-destino" onClick={() => setMas(true)} aria-haspopup="dialog">
@@ -144,7 +162,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
         <ul className="m-lista">
           {MAS.filter((m) => !("roles" in m) || (m.roles as string[]).includes(yo.rol)).map((m) => (
             <li key={m.ruta}>
-              <Link href={m.ruta} className="m-fila" onClick={() => setMas(false)}>
+              <Link href={m.ruta} className="m-fila" onClick={(e) => irA(e, m.ruta)}>
                 <span className="m-fila-icono"><Icono id={m.icono} /></span>
                 <span className="m-fila-texto"><b>{m.texto}</b></span>
                 <Icono id="derecha" />
@@ -156,6 +174,14 @@ export function Marco({ children }: { children: React.ReactNode }) {
               <span className="m-fila-icono"><Icono id="sol" /></span>
               <span className="m-fila-texto"><b>Ver el recorrido de esta pantalla</b>
                 <span>{recorridoDe(ruta) ? "Unos pasos por lo importante de aquí" : "El de Hoy: lo importante en seis pasos"}</span></span>
+            </button>
+          </li>
+          <li>
+            <button className="m-fila" role="switch" aria-checked={sonido}
+              onClick={() => { const nuevo = !sonido; setSonido(nuevo); guardarSonido(nuevo); if (nuevo) soplar(); }}>
+              <span className="m-fila-icono"><Icono id="sol" /></span>
+              <span className="m-fila-texto"><b>Sonido al cambiar de pantalla</b><span>{sonido ? "Encendido" : "Apagado"}</span></span>
+              <span className={"chip " + (sonido ? "c-ok" : "c-neu")}>{sonido ? "Sí" : "No"}</span>
             </button>
           </li>
           <li>

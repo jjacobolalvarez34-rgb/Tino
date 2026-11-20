@@ -90,6 +90,12 @@ function Cabecera() {
     <header className={s.cabecera}>
       <div className={`${s.ancho} ${s.cabeceraFila}`}>
         <a href="#inicio" className={s.logoEnlace} aria-label="Tino, volver al inicio">
+          {/* El ícono de Tino (docs/marca/tino-icono.svg) al lado de la palabra. */}
+          <svg className={s.iconoMarca} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <rect width="100" height="100" rx="24" fill="#74305F" />
+            <path d="M50 48 V78" fill="none" stroke="#FFFFFF" strokeWidth="12" strokeLinecap="round" />
+            <path d="M37 27 L46 36 L64 15" fill="none" stroke="#E9C6DC" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           <LogoTino alto={44} claseChulito={s.chulitoLogo} decorativo />
         </a>
         <span className={s.espacio} />

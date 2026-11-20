@@ -407,8 +407,20 @@
 .logoEnlace {
   display: inline-flex;
   align-items: center;
+  gap: 12px;
   min-height: 44px;
   border-radius: 10px;
+}
+
+.iconoMarca {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  transition: transform 0.2s;
+}
+
+.logoEnlace:hover .iconoMarca {
+  transform: rotate(-6deg) scale(1.05);
 }
 
 .espacio {
