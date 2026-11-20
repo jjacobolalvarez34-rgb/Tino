@@ -121,5 +121,17 @@ quiere entender cada decisión, no solo recibir código.
 - Empacar Tino.exe, todo en D: (con TEMP y TMP en D:, y el Python de
   `D:/Repositorios/Tino-datos/construir/venv`, que tiene PyInstaller y pywebview):
   `python panel/construir_exe.py --construir D:/Repositorios/Tino-datos/construir --destino D:/Repositorios/Tino-datos/app`
-- [POR COMPLETAR en la tarea 001: aplicar migraciones en Supabase y levantar el
-  programa.]
+- Probar el lector del Excel del día con encabezados borrados, desde `motores/conciliador/`:
+  `python -m unittest test_lector_tolerante`
+- Probar el lector de venta por persona y meta del mes: `python -m unittest ingesta.test_venta_personas`
+- Probar Equipo en Supabase con dos empresas inventadas:
+  `python tests/rls/probar_equipo_supabase.py <archivo de contraseñas fuera del repositorio>`
+- Probar la API de Usuarios con la web corriendo:
+  `python tests/web/probar_usuarios_api.py http://localhost:6001 <contraseñas>`
+- Empresa de demostración (datos inventados) y capturas a 390 y 1440 px:
+  `python tests/demo/sembrar_demo.py <contraseñas>` y `node tests/demo/capturas.mjs ...`
+- Producción: `python tests/produccion/aplicar_migraciones.py <produccion.json fuera del repo>`
+  (aplica, y verifica permisos con `tests/produccion/verificar.sql`), y comparar totales con
+  `python tests/produccion/comparar_totales.py ...`. Ver docs/OPERACION/produccion.md.
+- Respaldo, restauración en local y comparación de filas: `python tests/respaldo/respaldar.py ...`
+- Abrir la web en este PC: `D:\Repositorios\Tino-datosbrir_web.cmd` (http://localhost:6001).

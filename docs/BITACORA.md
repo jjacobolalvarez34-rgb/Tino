@@ -50,9 +50,10 @@ Falta:
 - Decidir respaldos (A, B o C) y Vercel Pro.
 - E · Subir archivos desde la web: dos caminos en docs/OPERACION/subir-desde-la-web.md.
 - Pasar la dirección visual a las pantallas de caja (aprobado, próxima sesión).
+- Prueba automática del lector tolerante con un libro inventado: 3 de 3
+  (motores/conciliador/test_lector_tolerante.py). MODELO_DATOS.md al día; tareas 009 y 010.
 Dudas:
-- El lector de días tolerante está probado con el archivo real de Salitre, pero falta una prueba
-  automática con un libro anonimizado en tests/casos/.
+- Ninguna nueva: lo pendiente depende de Jacobo (0012 en pruebas, llaves de producción, E).
 
 ## 2026-11-19 · Equipo, nueva dirección visual y página pública
 Hecho:
