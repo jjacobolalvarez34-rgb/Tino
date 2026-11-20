@@ -15,6 +15,25 @@ Dudas:
 -
 ```
 
+## 2026-11-20 (mañana) · E por cola, Redil y decisiones de Jacobo
+Hecho:
+- Decisiones de Jacobo: E por cola (D-057), dos respaldos: Supabase Pro y uno propio (D-058),
+  Vercel Pro con la primera venta (D-059), más bancos con lo aprendido en el conciliador de Redil
+  (D-060). Lo del nombre del cliente en el repositorio público no le preocupa a la dueña.
+- Revisión de Redil (D:\Redil proyecto): conciliador contable (auxiliar contra extracto) de Banco
+  de Bogotá y Coopcentral, con reglas por banco en JSON. Se toma la lógica, no los datos.
+- E · 0013 (archivo_en_cola + carpeta «archivos» en Storage por empresa), Archivos → Subir
+  archivos en la web, y el programa de escritorio procesa la cola al abrir y cada 3 minutos.
+  394 pruebas de permisos, 2 del procesador. Tino.exe reconstruido.
+- MODELO_DATOS.md al día, tareas 009 y 010, prueba del lector tolerante (3 de 3).
+Falta:
+- Jacobo: aplicar D:\Repositorios\Tino-datosplicar_0012_y_0013.sql en tino-pruebas (una sola
+  transacción). Después Claude corre tests/web/probar_cola.py y recarga los puntos de octubre.
+- Jacobo: llave_servicio y conexion en produccion.json; variables de Vercel; Site URL y /clave.
+- La copia propia de respaldo: dónde guardarla (no en GitHub mientras el repositorio sea público).
+- Más bancos (D-060): leer Bogotá y Coopcentral como perfiles de banco por empresa.
+- Pantallas de caja con la dirección 2.
+
 ## 2026-11-20 · Revisión de la dueña: bloques A, B, C (preparado), D y F
 Hecho:
 - A · punto 02: el perfil acepta varios nombres por columna (su DESC FACT dice «v» en vez de
