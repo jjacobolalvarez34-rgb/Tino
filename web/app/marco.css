@@ -283,3 +283,7 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 .m-subir-boton:focus-within{outline:2px solid var(--color-marca);outline-offset:2px;box-shadow:0 0 0 5px var(--color-foco)}
 .m-subir .m-fila{min-height:52px}
 .m-subir .m-fila .chip{margin-left:auto}
+.m-dia-cerrado{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
+.m-periodo input[type=date]{height:44px;border:1px solid var(--color-borde);border-radius:10px;padding:0 var(--esp-3);background:var(--color-superficie)}
+/* Las pantallas de caja de antes, dentro del marco nuevo: sus tarjetas sin la caja blanca pesada. */
+.m-pagina > .tarjeta{border:0;background:none;padding:0}

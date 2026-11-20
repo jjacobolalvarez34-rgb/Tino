@@ -29,9 +29,11 @@ const PRINCIPAL = [
   { ruta: "/hoy", texto: "Hoy", icono: "sol" },
   { ruta: "/equipo", texto: "Equipo", icono: "gente" },
   { ruta: "/ventas", texto: "Ventas", icono: "ventas" },
+  { ruta: "/caja", texto: "Caja", icono: "caja" },
 ];
 const MAS = [
-  { ruta: "/resumen", texto: "Cuadre de caja", icono: "caja" },
+  { ruta: "/caja", texto: "Caja del día", icono: "caja" },
+  { ruta: "/resumen", texto: "Lo que necesita atención", icono: "revisar" },
   { ruta: "/transferencias", texto: "Transferencias", icono: "transf" },
   { ruta: "/sin-origen", texto: "Sin origen", icono: "buscar" },
   { ruta: "/por-confirmar", texto: "Por confirmar", icono: "revisar" },
