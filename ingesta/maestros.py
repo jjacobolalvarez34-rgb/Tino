@@ -4,7 +4,7 @@
 Por defecto solo simula: dice qué crearía, sin escribir nada. Para escribir de verdad
 hay que pasar --aplicar. Se puede correr varias veces: lo que ya existe no se repite.
 
-Uso: python ingesta/maestros.py datos.json [--aplicar]
+Uso: python ingesta/maestros.py datos.json [--aplicar] [--produccion produccion.json]
 
 Usa la llave de servicio, que se salta RLS: por eso cada fila lleva su empresa_id y el
 programa se niega a correr si .env no dice SUPABASE_PROYECTO=pruebas. El archivo trae
@@ -106,7 +106,15 @@ CLAVES = {"empresa": ("id",), "punto_venta": ("codigo",), "medio_pago": ("codigo
 
 
 class Supabase:
-    def __init__(self):
+    def __init__(self, produccion=None):
+        # Producción solo con el archivo de producción explícito (fuera del repo): nunca por
+        # accidente desde .env, que siempre es el de pruebas.
+        if produccion:
+            datos = json.loads(Path(produccion).read_text(encoding="utf-8"))
+            if not datos.get("llave_servicio"):
+                raise SystemExit(f"{produccion} no tiene llave_servicio.")
+            self.url, self.llave = datos["url"].rstrip("/"), datos["llave_servicio"]
+            return
         env = dict(l.split("=", 1) for l in (RAIZ / ".env").read_text(encoding="utf-8").splitlines() if "=" in l)
         if env.get("SUPABASE_PROYECTO") != "pruebas":
             raise SystemExit("Este programa solo corre si .env dice SUPABASE_PROYECTO=pruebas.")
@@ -137,7 +145,9 @@ class Supabase:
 def main():
     datos = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
     aplicar = "--aplicar" in sys.argv
-    base = Supabase()
+    produccion = sys.argv[sys.argv.index("--produccion") + 1] if "--produccion" in sys.argv else None
+    base = Supabase(produccion)
+    print("Destino:", "PRODUCCIÓN" if produccion else "pruebas")
     faltan, avisos = plan(datos, base.existentes(datos["empresa"]["id"]))
     for tabla, filas in faltan.items():
         print(f"{tabla:20} {len(filas):4} por crear")
