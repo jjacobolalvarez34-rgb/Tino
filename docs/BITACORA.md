@@ -27,7 +27,7 @@ Hecho:
   394 pruebas de permisos, 2 del procesador. Tino.exe reconstruido.
 - MODELO_DATOS.md al día, tareas 009 y 010, prueba del lector tolerante (3 de 3).
 Falta:
-- Jacobo: aplicar D:\Repositorios\Tino-datosplicar_0012_y_0013.sql en tino-pruebas (una sola
+- Jacobo: aplicar D:\Repositorios\Tino-datos\aplicar_0012_y_0013.sql en tino-pruebas (una sola
   transacción). Después Claude corre tests/web/probar_cola.py y recarga los puntos de octubre.
 - Jacobo: llave_servicio y conexion en produccion.json; variables de Vercel; Site URL y /clave.
 - La copia propia de respaldo: dónde guardarla (no en GitHub mientras el repositorio sea público).
