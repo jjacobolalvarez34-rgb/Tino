@@ -100,6 +100,7 @@ function Cabecera() {
         </a>
         <span className={s.espacio} />
         <nav aria-label="Secciones" className={s.nav}>
+          <a href="#inicio">Inicio</a>
           <a href="#conciliar">Conciliación</a>
           <a href="#descuadres">Descuadres</a>
           <a href="#excel">Excel</a>
