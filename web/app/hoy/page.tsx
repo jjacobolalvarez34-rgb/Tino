@@ -169,7 +169,7 @@ function Frases({ d, hoyF }: { d: Datos; hoyF: string }) {
         const dias = diasEntre(hoyF, c.fecha_limite);
         return {
           clave: c.id, tono: "neu", icono: "reloj", ir: `/equipo?p=${c.asesora_id}`,
-          texto: <><b>{primerNombre(nombre(c.asesora_id))}</b>: «{c.que}»</>,
+          texto: <><b>{primerNombre(nombre(c.asesora_id))}</b> tiene que «{c.que}»</>,
           detalle: `${dias === 0 ? "Vence hoy" : dias === 1 ? "Vence mañana" : `Vence el ${fecha(c.fecha_limite)}`} · avance ${c.avance} %`,
         };
       }),
@@ -258,7 +258,7 @@ function Resumen({ d, textos: t }: { d: Datos; textos: { persona: string; puntos
           </div>
           <div className="m-cifra m-cifra-anillo">
             <AnilloMeta valor={tot.venta} meta={meta || null} tamano={64} etiqueta="Cumplimiento" />
-            <span className="m-cifra-contexto">{meta ? <>de una meta de <b className="num">{pesos(meta)}</b></> : "Sin meta para este período"}</span>
+            <span className="m-cifra-contexto">{meta ? <>{enCurso ? "de la meta a la fecha:" : "de una meta de"} <b className="num">{pesos(meta)}</b></> : "Sin meta para este período"}</span>
           </div>
         </div>
         <div className="m-grupo">

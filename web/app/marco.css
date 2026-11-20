@@ -85,11 +85,11 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 
 /* Cifras: número grande y una línea de contexto, sin etiqueta gris encima */
 .m-cifra{display:flex;flex-direction:column;gap:4px}
-.m-cifra-valor{font-size:var(--cifra-grande);font-weight:800;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.m-cifra-valor{font-size:var(--cifra-grande);font-weight:800;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .m-cifra-media{font-size:var(--cifra-media)}
 .m-cifra-contexto{font-size:15px;color:var(--color-texto-medio)}
-.m-cifra-contexto b{color:var(--color-texto)}
-.m-par,.m-cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--esp-6)}
+.m-cifra-contexto b{color:var(--color-texto);white-space:nowrap}
+.m-par,.m-cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--esp-6)}
 .m-cifra-anillo{flex-direction:row;align-items:center;gap:var(--esp-3)}
 @media (max-width:560px){:root{--cifra-grande:34px;--cifra-media:28px}}
 
@@ -230,7 +230,7 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 .m-aviso.ver{opacity:1;transform:translate(-50%,0)}
 @media (max-width:899px){.m-aviso{bottom:calc(var(--barra) + 24px + env(safe-area-inset-bottom, 0px))}}
 .m-celda-persona{display:flex;align-items:center;gap:var(--esp-3);min-width:200px}
-.m-celda-persona > span{display:flex;flex-direction:column;gap:6px;flex:1;min-width:120px}
+.m-celda-persona > span:not(.m-avatar){display:flex;flex-direction:column;gap:6px;flex:1;min-width:120px}
 .m-encabezado .m-periodo{flex-wrap:wrap}
 
 /* Revisión UI UX Pro Max: foco visible con 3:1 (anillo ciruela + halo rosa de DESIGN.md)

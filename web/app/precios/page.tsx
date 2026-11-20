@@ -47,7 +47,7 @@ export default function Precios() {
       <main className={s.contenido}>
         <section className={s.portada} aria-labelledby="t-precios">
           <p className={s.antetitulo}>Precios</p>
-          <h1 id="t-precios" className={s.titulo}>Paga por punto de venta. Nada más.</h1>
+          <h1 id="t-precios" className={s.titulo}>Pague por punto de venta. Nada más.</h1>
           <p className={s.principal}>{TEXTO_PRINCIPAL}</p>
         </section>
 
