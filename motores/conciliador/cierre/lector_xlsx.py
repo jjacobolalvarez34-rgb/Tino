@@ -147,11 +147,24 @@ class LibroMensual:
         self.anio, self.mes = self._detectar_mes()
         self.punto_texto = self._detectar_punto()
         self.dias = {}           # fecha (según nombre de hoja) -> DiaPunto
+        # Columnas de la plantilla, aprendidas de las hojas que se leen bien. Si en una hoja
+        # alguien borró o escribió encima de un encabezado, pero las demás columnas están donde
+        # siempre, se usan las del libro y se avisa (los Excel del cliente no se corrigen).
+        self._disenos = []      # (fila de encabezados, columnas) de cada hoja que se leyó bien
+        fallidas = []
         for nombre in self.hojas_dia:
             try:
                 dia = self._leer_dia(nombre)
             except ErrorLectura as e:
-                self.avisos.append(f"Hoja {nombre}: {e}")
+                fallidas.append((nombre, e))
+                continue
+            if dia.fecha_hoja:
+                self.dias[dia.fecha_hoja] = dia
+        for nombre, e in fallidas:
+            try:
+                dia = self._leer_dia(nombre, tolerar=True)
+            except ErrorLectura as e2:
+                self.avisos.append(f"Hoja {nombre}: {e2}")
                 continue
             if dia.fecha_hoja:
                 self.dias[dia.fecha_hoja] = dia
@@ -195,7 +208,7 @@ class LibroMensual:
         return self.hojas_dia[i - 1] if i > 0 else None
 
     # ------------------------------------------------------------------
-    def _leer_dia(self, nombre):
+    def _leer_dia(self, nombre, tolerar=False):
         g, gf = self._v[nombre], self._f[nombre]
         dia = DiaPunto(fecha=None, fecha_hoja=self.fecha_de_hoja(nombre),
                        punto=self.punto_texto, hoja=nombre)
@@ -220,8 +233,24 @@ class LibroMensual:
                 cols[rol] = c
         faltan = [r for r in ("precio", "inv_inicial", "inv_final", "salidas_siigo",
                               "salidas_tot", "valor") if r not in cols]
+        # Un diseño del mismo libro en el que todo lo que sí se leyó está en la misma columna.
+        # Se prefiere el que más hojas comparten.
+        libro = None
+        if faltan and tolerar:
+            candidatos = [d for d in self._disenos if d[0] == fila_enc and all(r in d[1] for r in faltan)
+                          and all(d[1].get(r) == c for r, c in cols.items() if r in d[1])]
+            if candidatos:
+                libro = max(candidatos, key=lambda d: sum(1 for x in self._disenos if x == d))
+        if libro:
+            for r in faltan:
+                cols[r] = libro[1][r]
+            self.avisos.append(f"Hoja {nombre}: el encabezado de {', '.join(faltan)} está borrado o cambiado; "
+                               "se usaron las mismas columnas de las demás hojas del libro.")
+            faltan = []
         if faltan:
             raise ErrorLectura(f"faltan columnas: {', '.join(faltan)}.")
+        if not tolerar:
+            self._disenos.append((fila_enc, dict(cols)))
         for rol, c in cols.items():
             dia.celdas[f"col.{rol}"] = col_letra(c)
 
