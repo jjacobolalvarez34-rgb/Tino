@@ -249,3 +249,11 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 .tino-recorrido .driver-popover-footer .driver-popover-next-btn{background:var(--color-marca);color:#fff}
 .tino-recorrido .driver-popover-close-btn{width:44px;height:44px;color:var(--color-texto-medio)}
 .tino-recorrido button:focus-visible{outline:2px solid var(--color-marca);outline-offset:2px}
+.m-puntaje .m-segmento{min-width:48px;justify-content:center;padding:0}
+.m-ajustes{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--esp-8) var(--esp-8);align-items:start}
+.m-agregar{display:flex;gap:var(--esp-2)}
+.m-agregar input{flex:1;min-width:0;height:44px;padding:0 var(--esp-3);border:1px solid var(--color-borde);border-radius:10px;background:var(--color-superficie)}
+.m-agregar .boton{height:44px}
+.m-con-unidad{display:flex;align-items:center;gap:var(--esp-2)}
+.m-con-unidad input{width:120px;height:44px;padding:0 var(--esp-3);border:1px solid var(--color-borde);border-radius:10px;background:var(--color-superficie)}
+.m-con-unidad span{color:var(--color-texto-medio);font-weight:600}

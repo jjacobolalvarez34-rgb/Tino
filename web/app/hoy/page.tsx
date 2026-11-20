@@ -159,7 +159,7 @@ function Frases({ d, hoyF }: { d: Datos; hoyF: string }) {
         detalle: a.razones.slice(1).join(" · ") || "Toque para ver su ficha",
       })),
       vacio: hayUmbrales ? undefined : (
-        <p className="m-frase-nota">Cuando la empresa ponga sus umbrales (cumplimiento, días sin seguimiento), aquí sale quién necesita apoyo.</p>
+        <p className="m-frase-nota">Cuando la empresa ponga sus umbrales (cumplimiento, días sin seguimiento), aquí sale quién necesita apoyo. <Link className="m-enlace" href="/equipo/ajustes">Poner umbrales</Link></p>
       ),
     },
     {

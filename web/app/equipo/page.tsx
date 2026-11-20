@@ -64,7 +64,10 @@ function Equipo() {
           </div>
         </div>
         {puedeEditar && (
-          <button className="boton secundario m-ancho" onClick={() => setNueva(true)}><Icono id="mas" />Nueva {t.persona}</button>
+          <div className="m-pie-acciones">
+            <button className="boton secundario" onClick={() => setNueva(true)}><Icono id="mas" />Nueva {t.persona}</button>
+            <Link href="/equipo/ajustes" className="boton texto"><Icono id="ajustes" />Ajustes</Link>
+          </div>
         )}
         {nueva && <NuevaPersona alCerrar={() => setNueva(false)} alCrear={(id) => { setNueva(false); setRecarga((r) => r + 1); router.push(`/equipo?p=${id}`); }} />}
         {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
@@ -135,6 +138,7 @@ const ESTADO: Record<string, [string, string]> = {
   no_cumplido: ["■ No cumplido", "c-mal"], anulado: ["Anulado", "c-neu"],
 };
 const TIPO_SEG: Record<string, [string, string]> = {
+  // [nombre, ícono]
   observacion: ["Observación", "ojo"], objetivo: ["Objetivo", "diana"], diagnostico: ["Diagnóstico", "lapiz"], evaluacion: ["Evaluación", "chulo"],
 };
 
@@ -230,6 +234,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
         </div>
         <button className="boton" onClick={() => registrar(persona.id)}><Icono id="mas" />Registrar</button>
       </header>
+      {puedeEditar && <EditarPersona persona={persona} alCambiar={alCambiar} />}
 
       <Puntos persona={persona} puntos={puntos} puedeEditar={puedeEditar} alCambiar={alCambiar} />
 
@@ -366,6 +371,54 @@ function Puntos({ persona, puntos, puedeEditar, alCambiar }: {
           </select>
           {agregar && <button className="boton compacto" onClick={asignar}>Asignar</button>}
         </span>
+      )}
+    </div>
+  );
+}
+
+function EditarPersona({ persona, alCambiar }: { persona: Persona; alCambiar: () => void }) {
+  const { avisar, config } = useMarco();
+  const [abierto, setAbierto] = useState(false);
+  const [nombre, setNombre] = useState(persona.nombre);
+  const [confirmar, setConfirmar] = useState(false);
+
+  async function cambiar(valores: Record<string, unknown>, texto: string) {
+    const { data, error } = await base().from("asesora").update(valores).eq("id", persona.id).select("id");
+    if (error || !data?.length) { avisar(error ? mensaje(error) : "Su usuario no puede cambiarla."); return; }
+    avisar(texto); setAbierto(false); setConfirmar(false); alCambiar();
+  }
+
+  return (
+    <div className="m-editar">
+      {!abierto && !confirmar && (
+        <div className="m-compromiso-acciones">
+          <button className="boton texto compacto" onClick={() => setAbierto(true)}><Icono id="lapiz" />Editar nombre</button>
+          {persona.activa
+            ? <button className="boton texto compacto" onClick={() => setConfirmar(true)}>Desactivar</button>
+            : <button className="boton texto compacto" onClick={() => cambiar({ activa: true, fecha_retiro: null }, "Activa otra vez")}>Activar</button>}
+        </div>
+      )}
+      {confirmar && (
+        <div className="nota aviso" role="alert">
+          <span className="cuerpo">
+            <b>¿Desactivar a {persona.nombre}?</b>
+            <span>Deja de salir en las listas y para registrar. Su historial se queda; puede activarla otra vez.</span>
+            <span className="m-compromiso-acciones">
+              <button className="boton compacto" onClick={() => cambiar({ activa: false, fecha_retiro: hoy() }, "Desactivada")}>Sí, desactivar</button>
+              <button className="boton secundario compacto" onClick={() => setConfirmar(false)}>Cancelar</button>
+            </span>
+          </span>
+        </div>
+      )}
+      {abierto && (
+        <form className="m-agregar" onSubmit={(e) => { e.preventDefault();
+          if (nombre.trim().split(/\s+/).length < 2) { avisar("Escriba nombre y apellido."); return; }
+          cambiar({ nombre_completo: nombre.trim() }, "Nombre cambiado"); }}>
+          <input type="text" aria-label={`Nombre de la ${config.textos.persona}`} value={nombre} autoFocus maxLength={120}
+            onChange={(e) => setNombre(e.target.value)} />
+          <button className="boton compacto" type="submit">Guardar</button>
+          <button className="boton secundario compacto" type="button" onClick={() => { setAbierto(false); setNombre(persona.nombre); }}>Cancelar</button>
+        </form>
       )}
     </div>
   );

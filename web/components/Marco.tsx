@@ -38,6 +38,7 @@ const MAS = [
   { ruta: "/descuadres", texto: "Descuadres", icono: "caja" },
   { ruta: "/archivos", texto: "Archivos", icono: "subir" },
   { ruta: "/puntos", texto: "Puntos de venta", icono: "tienda" },
+  { ruta: "/equipo/ajustes", texto: "Ajustes de Equipo", icono: "ajustes" },
 ];
 
 export function Marco({ children }: { children: React.ReactNode }) {

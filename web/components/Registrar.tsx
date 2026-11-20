@@ -10,10 +10,12 @@ import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
 import { useMarco } from "./Marco";
 
-type Tipo = "observacion" | "compromiso" | "sesion" | "meta";
+type Tipo = "observacion" | "compromiso" | "evaluacion" | "objetivo" | "sesion" | "meta";
 const TIPOS: { id: Tipo; titulo: string; detalle: string; icono: string }[] = [
   { id: "observacion", titulo: "Observación", detalle: "Lo que vio hoy: coaching, cliente incógnito…", icono: "ojo" },
   { id: "compromiso", titulo: "Compromiso", detalle: "Qué va a hacer, quién y para cuándo", icono: "bandera" },
+  { id: "evaluacion", titulo: "Evaluación", detalle: "Un puntaje de 1 a 5 por cada criterio", icono: "chulo" },
+  { id: "objetivo", titulo: "Diagnóstico u objetivo", detalle: "Cómo está y hacia dónde va", icono: "lapiz" },
   { id: "sesion", titulo: "Sesión", detalle: "Una formación con fecha y tema", icono: "birrete" },
   { id: "meta", titulo: "Meta", detalle: "Cuánto vender en un período", icono: "diana" },
 ];
@@ -43,11 +45,13 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
   const [desde, setDesde] = useState(mesDe(hoy())[0]);
   const [hasta, setHasta] = useState(mesDe(hoy())[1]);
   const [monto, setMonto] = useState("");
+  const [puntajes, setPuntajes] = useState<Record<string, number>>({});
+  const [clase, setClase] = useState<"diagnostico" | "objetivo">("diagnostico");
 
   useEffect(() => {
     if (!abierta) return;
     setPaso((tipo as Tipo) || null); setError(""); setQuien(persona ?? ""); setTexto(""); setTipoObs("");
-    setValor("bien"); setFecha(hoy()); setLimite(correrDiasHoy(7)); setPrioridad("media"); setHora(""); setMonto("");
+    setValor("bien"); setFecha(hoy()); setLimite(correrDiasHoy(7)); setPrioridad("media"); setHora(""); setMonto(""); setPuntajes({}); setClase("diagnostico");
     const [d, h] = mesDe(hoy()); setDesde(d); setHasta(h);
     if (!gente) {
       Promise.all([leerPersonas(), leerPuntos(), catalogo()])
@@ -64,11 +68,14 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
   }, [elegida, puntos, yo]);
   useEffect(() => { if (!puntosDe.includes(punto)) setPunto(puntosDe.length === 1 ? puntosDe[0] : ""); }, [puntosDe]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const criterios = cat.filter((c) => c.clase === "criterio");
+
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     const falta = (m: string) => { setError(m); return true; };
     if (paso !== "sesion" && paso !== "meta" && !quien && falta(`Elija a la ${t.persona}.`)) return;
+    if (paso === "evaluacion" && !criterios.length && falta("Primero agregue los criterios de evaluación.")) return;
     if (paso !== "sesion" && !punto && falta(`Elija el ${t.punto}.`)) return;
     setOcupado(true);
     try {
@@ -83,6 +90,22 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
         await registrarCompromiso({ empresa_id: yo.empresa_id, asesora_id: quien, punto_id: punto,
           que: texto.trim(), fecha_limite: limite, prioridad });
         alGuardar("Compromiso guardado");
+      } else if (paso === "evaluacion") {
+        const dados = Object.entries(puntajes);
+        if (!dados.length) throw new Error("Califique al menos un criterio.");
+        const { data, error: er } = await base().from("seguimiento").insert({ empresa_id: yo.empresa_id, asesora_id: quien,
+          punto_id: punto, tipo: "evaluacion", texto: texto.trim(), fecha }).select("id");
+        if (er) throw new Error(mensaje(er));
+        const { error: er2 } = await base().from("seguimiento_criterio").insert(dados.map(([criterio_id, puntaje]) =>
+          ({ empresa_id: yo.empresa_id, seguimiento_id: data![0].id, criterio_id, puntaje })));
+        if (er2) throw new Error(mensaje(er2));
+        alGuardar("Evaluación guardada");
+      } else if (paso === "objetivo") {
+        if (texto.trim().length < 3) throw new Error("Escriba el diagnóstico o el objetivo.");
+        const { error: er } = await base().from("seguimiento").insert({ empresa_id: yo.empresa_id, asesora_id: quien,
+          punto_id: punto, tipo: clase, texto: texto.trim(), fecha });
+        if (er) throw new Error(mensaje(er));
+        alGuardar(clase === "objetivo" ? "Objetivo guardado" : "Diagnóstico guardado");
       } else if (paso === "sesion") {
         if (texto.trim().length < 3) throw new Error("Escriba el tema o el título de la sesión.");
         const { error: er } = await base().from("sesion_formacion").insert({ empresa_id: yo.empresa_id,
@@ -210,6 +233,46 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
                 </label>
               ))}
             </fieldset>
+          </>}
+
+          {paso === "evaluacion" && <>
+            {listaPersonas()}
+            {listaPuntos()}
+            {!criterios.length ? (
+              <p className="nota aviso"><span>La empresa todavía no tiene criterios de evaluación. Agréguelos en Más → Ajustes de {t.equipo}.</span></p>
+            ) : criterios.map((c) => (
+              <fieldset key={c.id} className="m-segmentos m-puntaje">
+                <legend>{c.nombre}</legend>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <label key={n} className="m-segmento">
+                    <input type="radio" name={"c-" + c.id} checked={puntajes[c.id] === n}
+                      onChange={() => setPuntajes((x) => ({ ...x, [c.id]: n }))} />{n}
+                  </label>
+                ))}
+              </fieldset>
+            ))}
+            <div className="campo">
+              <label htmlFor="r-ecom">Comentario (opcional)</label>
+              <textarea id="r-ecom" rows={2} value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={600} />
+            </div>
+          </>}
+
+          {paso === "objetivo" && <>
+            {listaPersonas()}
+            {listaPuntos()}
+            <fieldset className="m-segmentos">
+              <legend>Qué es</legend>
+              {([["diagnostico", "Diagnóstico"], ["objetivo", "Objetivo"]] as const).map(([v, n]) => (
+                <label key={v} className="m-segmento">
+                  <input type="radio" name="clase" checked={clase === v} onChange={() => setClase(v)} />{n}
+                </label>
+              ))}
+            </fieldset>
+            <div className="campo">
+              <label htmlFor="r-obj">{clase === "objetivo" ? "Hacia dónde va" : "Cómo está hoy"}</label>
+              <textarea id="r-obj" rows={3} value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={600}
+                placeholder={clase === "objetivo" ? "Ej.: subir el ticket promedio a $ 120.000 este mes" : "Ej.: atiende bien pero no ofrece productos adicionales"} />
+            </div>
           </>}
 
           {paso === "sesion" && <>
