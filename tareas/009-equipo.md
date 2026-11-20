@@ -22,7 +22,7 @@ internet va al final, aparte.
 ## Hecho cuando
 1. ✅ Se ven los 11 puntos y las personas (tino-pruebas; producción pendiente, ver 010).
 2. ✅ Una persona queda en 2 puntos (pantalla Equipo; pruebas 0011 y probar_equipo_supabase.py).
-3. ✅ Ranking de octubre con ticket promedio y cumplimiento (Ventas). Salitre se recarga cuando
+3. ✅ Ranking de octubre con ticket promedio y cumplimiento (Ventas). punto 02 se recarga cuando
    esté 0012 en pruebas.
 4. ✅ Observación de coaching y compromiso vencido que sale en Pendientes (probado en Supabase y
    en la empresa demo).

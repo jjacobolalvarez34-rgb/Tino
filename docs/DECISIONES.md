@@ -327,6 +327,30 @@ coinciden, es un problema del archivo: se avisa con su fila y no se cambia ning�
 correo; «Invitar» lo manda cuando el dueño decida. La llave de servicio solo vive en el
 servidor (/api/usuarios); lo que toca la tabla usuario va con la sesión de quien llama (RLS).
 
+### D-057 · Subir desde la web: el archivo queda en cola y lo procesa el programa de escritorio
+20 nov 2026. Decisión de Jacobo (camino B de docs/OPERACION/subir-desde-la-web.md). Desde el
+celular o el computador, la web guarda el archivo en Supabase Storage (carpeta de la empresa)
+y lo deja "en cola". El programa de escritorio lo procesa con los mismos lectores de Python y
+la pantalla Archivos muestra "en cola", "cargado" o el error. Los archivos originales quedan
+guardados. Se mantienen el aviso de archivo repetido y "Deshacer".
+
+### D-058 · Dos respaldos: el de Supabase y uno nuestro
+20 nov 2026. Decisión de Jacobo (opción C de docs/OPERACION/produccion.md). Supabase Pro en la
+organización de producción (respaldo diario, 7 días) y una copia propia fuera de Supabase, cifrada.
+La copia propia NO va a GitHub mientras el repositorio sea público.
+
+### D-059 · Vercel Pro se paga con la primera venta
+20 nov 2026. Decisión de Jacobo. Mientras tanto se sigue en Hobby, que no es para uso comercial:
+no se le cobra a nadie sobre ese plan.
+
+### D-060 · Más bancos, con lo aprendido en el conciliador de Redil
+20 nov 2026. Decisión de Jacobo: no todos los clientes usan el mismo banco. Del conciliador de
+Redil (D:\Redil proyecto) se toma la lógica, no los datos: la lectura de los extractos de Banco de
+Bogotá y Coopcentral y las reglas por banco (desfase de días, fines de semana y festivos, débito y
+crédito invertidos, neto del día, transacción o totales del día, conceptos excluidos, alias de
+traslados, tolerancia). Entran a Tino como perfiles de banco por empresa (D-040), nada amarrado a
+un cliente. Los archivos de Redil traen cédulas y nombres reales: nunca entran al repositorio.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

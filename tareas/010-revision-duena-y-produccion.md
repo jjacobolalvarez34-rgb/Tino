@@ -8,7 +8,7 @@ Corregir lo que encontró la revisión en tino-pruebas y después pasar a produc
 dueña de Milagros pueda entrar a Tino con sus datos de verdad.
 
 ## Alcance
-- A · Correcciones (Salitre, día 1, nombres, hora de Bogotá, comparación, ticket, meses, capturas).
+- A · Correcciones (punto 02, día 1, nombres, hora de Bogotá, comparación, ticket, meses, capturas).
 - B · Resolver nombres y productos en la web.
 - C · tino-produccion, respaldos, Vercel por ambiente.
 - D · Pantalla de Usuarios (sin invitar a nadie).

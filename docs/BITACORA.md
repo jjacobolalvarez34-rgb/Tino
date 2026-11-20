@@ -17,10 +17,10 @@ Dudas:
 
 ## 2026-11-20 · Revisión de la dueña: bloques A, B, C (preparado), D y F
 Hecho:
-- A · Salitre: el perfil acepta varios nombres por columna (su DESC FACT dice «v» en vez de
+- A · punto 02: el perfil acepta varios nombres por columna (su DESC FACT dice «v» en vez de
   FECHA) y el lector usa el diseño del libro cuando en una hoja borraron un encabezado (días 5 y
-  30). Salitre se lee completo: hojas 56.380.107 y resumen 57.963.607; la diferencia es el día 1.
-- A · Día 1 de Plaza Imperial y de Salitre: la hoja dice $0 y el resumen no. Ahora es «problema
+  30). punto 02 se lee completo: hojas 56.380.107 y resumen 57.963.607; la diferencia es el día 1.
+- A · Día 1 de punto 01 y de punto 02: la hoja dice $0 y el resumen no. Ahora es «problema
   del archivo» (tipo archivo_inconsistente, 0012), con su fila; no se cambia ningún valor (D-055).
 - A · «No abrió» es día sin venta, no persona. «BOLSAS KIT PROFESIONAL» no era un nombre: es un
   producto sin reconocer (fila de la hoja 31); se resuelve como producto. «tatiana» queda por
@@ -42,7 +42,7 @@ Hecho:
 - GitHub: el repositorio queda fijo con la cuenta jjacobolalvarez34-rgb (había dos guardadas).
 Falta:
 - Jacobo: aplicar 0012 en tino-pruebas (D:\Repositorios\Tino-datos\aplicar_0012.sql). Después,
-  Claude recarga en pruebas Salitre, Plaza Imperial, Kennedy, Suba y Portal Sur con el perfil nuevo
+  Claude recarga en pruebas punto 02, punto 01, punto 04, punto 08 y punto 10 con el perfil nuevo
   (borrar sus cargas en octubre/cargas_supabase/ para que se lean otra vez) y descarta con nota los
   «No abrió» ya cargados.
 - Jacobo: poner llave_servicio y conexion en produccion.json; variables de Vercel por ambiente;
@@ -76,10 +76,10 @@ Falta:
 - Que Jacobo aplique 0011 en Supabase; después: perfil de venta por persona de Milagros
   (trabajo/scripts/perfil_venta_persona.py) y cargar octubre (cargar_octubre.py supabase).
 - Aprobación de Jacobo de la dirección visual antes de pasar a ella las pantallas de caja.
-- Salitre: su DESC FACT dice "v" en vez de "FECHA" en el encabezado; se carga cuando lo corrijan.
-- Plaza Imperial, hoja del día 1: el total suma la columna I en vez de la H (la revisión de
+- punto 02: su DESC FACT dice "v" en vez de "FECHA" en el encabezado; se carga cuando lo corrijan.
+- punto 01, hoja del día 1: el total suma la columna I en vez de la H (la revisión de
   caja lee 0 ese día; el DESC FACT sí trae los 4.675.000).
-- Dos nombres sin reconocer en octubre (uno en Plaza Imperial, uno en Plaza Claro).
+- Dos nombres sin reconocer en octubre (uno en punto 01, uno en punto 06).
 - Prueba en Supabase con una segunda empresa inventada para las tablas de 0011.
 - Dirección web de Mamut Herd para el enlace del sello.
 - Etapa sin internet, al final.
@@ -93,13 +93,13 @@ Hecho:
 - Señal de las reglas (descuadres.md): consignación anotada que no aparece en el extracto
   ese día ni el siguiente. Se cruza por monto entre todos los puntos (las consignaciones
   llegan sin código). Es señal: no explica plata. Python y TypeScript dan lo mismo en los
-  30 días de septiembre. Plaza Imperial anotó 6 y las 6 llegaron el mismo día.
+  30 días de septiembre. punto 01 anotó 6 y las 6 llegaron el mismo día.
 - 0010: la caja del Excel (consignaciones, gastos, base) entra con su fila. 289 pruebas.
 - Jacobo reactivó tino-pruebas (estaba pausado) y aplicó 0008, 0009 y 0010. En Supabase
   pasan 57 + 12 pruebas, y el usuario de Milagros entra y ve sus 11 puntos configurados.
 - Clave del usuario de Milagros cambiada a pedido de Jacobo.
 Falta:
-- Que Jacobo suba los archivos de un mes en el `.exe` y lo revise con los datos reales.
+- Que Jacobo punto 08 los archivos de un mes en el `.exe` y lo revise con los datos reales.
 - Credenciales de Siigo (tarea 007) y publicar la web (tarea 008).
 Dudas:
 - Ninguna nueva.
@@ -152,7 +152,7 @@ Hecho:
   datáfono que se ignora. puntos.json ya no hace falta para el programa conectado.
 - Base local `tino_local` en D: con los maestros de Milagros, y `tests/local/cliente_psql.py`
   para probar sin PostgREST (el ejecutable descargado fue bloqueado y se borró).
-- Septiembre de Plaza Imperial, de punta a punta: los 4 archivos suben, se rechazan
+- Septiembre de punto 01, de punta a punta: los 4 archivos suben, se rechazan
   repetidos, y desde la base sale lo mismo que desde los archivos en los 30 días. Deshacer
   y volver a subir deja todo igual (D-039).
 - Decisiones D-036 a D-039.
@@ -170,7 +170,7 @@ Falta:
 - Tarea 006: subir el `.zip` de Bancolombia, copiar el PDF con nombre claro y exportar
   `TRANSFERENCIAS {fecha}.xlsx` como el conciliador (7). Hoy Tino no lo hace.
 - `SUPABASE_DB_URL` está vacía en `.env`: Jacobo aplica las migraciones a mano.
-- "Angie" en la hoja del 27 de Plaza Imperial no está en los alias de ese punto.
+- "Angie" en la hoja del 27 de punto 01 no está en los alias de ese punto.
 Dudas:
 - Ninguna nueva.
 
@@ -182,7 +182,7 @@ Hecho:
   `reglas_sin_peso`). Sin configuración, la causa no se revisa y se avisa.
 - Valores tomados del conciliador (`cierre_config.json`), como dicen las reglas. Quedan
   como supuestos D5 y D6 en `docs/REGLAS/descuadres.md`.
-- Septiembre de Plaza Imperial: 18 días sin causa clara (antes 19). El 29 ahora se
+- Septiembre de punto 01: 18 días sin causa clara (antes 19). El 29 ahora se
   explica por compensación con el 28. Ningún descuadre del mes es un número justo de
   billetes. Los demás siguen sin causa clara: es lo correcto, no hay una que los explique.
 Falta:
