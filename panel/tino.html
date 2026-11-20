@@ -423,6 +423,24 @@ dialog .dentro{padding:var(--esp-6);display:flex;flex-direction:column;gap:var(-
     $('vista-entrar').hidden = true; $('vista-programa').hidden = false;
     $('quien').textContent = `${yo.empresa} · ${yo.nombre}`;
     contarErrores();
+    procesarCola();
+    setInterval(procesarCola, 3 * 60 * 1000);
+  }
+  // Lo que suben desde la web o el celular queda en cola: el programa lo procesa al abrir y
+  // cada tres minutos mientras está abierto (D-057).
+  let procesando = false;
+  async function procesarCola() {
+    if (procesando) return;
+    procesando = true;
+    try {
+      const r = await llamar('procesar_cola');
+      const n = r.cargados + r.repetidos + r.errores;
+      if (n) {
+        $('quien').title = `Cola de la web: ${r.cargados} cargado(s), ${r.repetidos} repetido(s), ${r.errores} con error.`;
+        contarErrores();
+      }
+    } catch (err) { /* sin conexión: se intenta en la próxima vuelta */ }
+    finally { procesando = false; }
   }
   $('form-entrar').addEventListener('submit', async (e) => {
     e.preventDefault(); $('error-entrar').textContent = '';

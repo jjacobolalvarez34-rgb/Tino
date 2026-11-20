@@ -51,4 +51,4 @@ tino-pruebas puede seguir en el plan gratis de Supabase: es el laboratorio.
 ## Lo que no se promete todavía
 
 En la página sale como "Próximamente": funcionar sin internet, leer solos los avisos de
-transferencia del correo, más bancos y datáfonos, y subir los archivos desde el celular.
+transferencia del correo, y más bancos y datáfonos.

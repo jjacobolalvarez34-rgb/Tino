@@ -78,6 +78,20 @@ class Cliente:
         q = urllib.parse.urlencode([(col, f"{op}.{valor}") for col, op, valor in filtros])
         return self._pedir("PATCH", f"{self.rest}/{tabla}?{q}", valores, prefer="return=representation")
 
+    def bajar(self, carpeta, ruta):
+        """Un archivo de Supabase Storage, con la sesión de quien entra (RLS de Storage)."""
+        self._renovar_si_vence()
+        url = f"{self.url}/storage/v1/object/{carpeta}/{urllib.parse.quote(ruta)}"
+        pedido = urllib.request.Request(url, headers={"apikey": self.llave, "Authorization": f"Bearer {self.token}"})
+        try:
+            with urllib.request.urlopen(pedido, timeout=300) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            raise ErrorBase(f"No se pudo bajar el archivo de la cola (error {e.code}).", str(e.code),
+                            e.read().decode("utf-8", "replace")) from None
+        except urllib.error.URLError as e:
+            raise ErrorBase("No hay conexión con la base. Revise el internet.", None, str(e.reason)) from None
+
     # Red ---------------------------------------------------------------------
     def _pedir(self, metodo, url, cuerpo=None, con_token=True, prefer=None):
         if con_token:

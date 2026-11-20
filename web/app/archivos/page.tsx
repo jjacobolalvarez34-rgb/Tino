@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Programa } from "@/components/Programa";
+import { Programa, useYo } from "@/components/Programa";
+import { SubirArchivos } from "@/components/SubirArchivos";
 import { Cargando, Decidir, Nota, type Pedido } from "@/components/Decidir";
 import { archivos, deshacer } from "@/lib/datos";
 import { PorResolver } from "@/components/PorResolver";
@@ -26,7 +27,8 @@ export default function Archivos() {
   return (
     <Programa>
       <section className="tarjeta">
-        <div><h2>Archivos</h2><p className="pequeno">Lo que se ha subido. Por ahora los archivos se suben desde el programa de escritorio; aquí se ven y se pueden deshacer.</p></div>
+        <div><h2>Archivos</h2><p className="pequeno">Lo que se ha subido. Desde aquí se suben (quedan en cola para el programa de escritorio), se ven y se pueden deshacer.</p></div>
+        <SubirDesdeAqui alCambiar={ver} />
         <PorResolver key={recarga} alCambiar={() => undefined} avisar={(t) => { setAviso(t); setTimeout(() => setAviso(""), 3000); }} />
         {aviso && <p className="nota ok" role="status"><span>{aviso}</span></p>}
         {error && <Nota clase="mal" titulo="No se pudo cargar el historial.">{error}</Nota>}
@@ -50,4 +52,10 @@ export default function Archivos() {
       <Decidir pedido={pedido} cerrar={(hecho) => { setPedido(null); if (hecho) ver(); }} />
     </Programa>
   );
+}
+
+function SubirDesdeAqui({ alCambiar }: { alCambiar: () => void }) {
+  const yo = useYo();
+  if (!yo || !["dueno", "encargada", "finanzas", "soporte"].includes(yo.rol)) return null;
+  return <SubirArchivos empresaId={yo.empresa_id} alCambiar={alCambiar} />;
 }

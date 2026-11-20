@@ -82,6 +82,10 @@ class ApiConectada:
     def archivos(self):
         return self._envolver(self._s.archivos)
 
+    def procesar_cola(self):
+        """Lo que subieron desde la web o el celular (D-057)."""
+        return self._envolver(self._s.procesar_cola)
+
     def errores(self):
         return self._envolver(self._s.errores)
 

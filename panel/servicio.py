@@ -5,6 +5,7 @@ Cada método recibe y devuelve datos simples (texto, números, listas), listos p
 pantalla. Toda consulta va con la sesión del usuario: RLS decide qué ve y qué cambia.
 """
 import datetime as dt
+import os
 import sys
 from pathlib import Path
 
@@ -79,6 +80,47 @@ class Servicio:
                                                archivos.nombre_extracto(carga.get("banco", "Banco"), fechas)))
         dias = self.revisar_rango(carga["desde"], carga["hasta"]) if carga.get("desde") else 0
         return {"archivo": archivo, "dias_revisados": dias, "copia": copia}
+
+    def procesar_cola(self):
+        """Los archivos que subieron desde la web (D-057): se bajan, se leen y se suben con los
+        mismos lectores. Cada uno queda cargado, repetido o con su error. Devuelve el resumen."""
+        import tempfile
+        pendientes = self.c.leer("archivo_en_cola", [("estado", "eq", "en_cola")], "id,ruta,nombre", "creado_en")
+        hechos = {"cargados": 0, "repetidos": 0, "errores": 0}
+        for f in pendientes:
+            # Se toma solo si sigue en cola: si otro programa ya lo tomó, no se procesa dos veces.
+            if not self.c.cambiar("archivo_en_cola", [("id", "eq", f["id"]), ("estado", "eq", "en_cola")],
+                                  {"estado": "procesando"}):
+                continue
+            estado, mensaje, archivo_id = "error", None, None
+            try:
+                datos = self.c.bajar("archivos", f["ruta"])
+                carpeta = Path(tempfile.mkdtemp(prefix="cola_", dir=os.environ.get("TEMP")))
+                local = carpeta / Path(f["nombre"]).name
+                local.write_bytes(datos)
+                leidos = self.preparar([str(local)])
+                cargados, problemas = [], []
+                for x in leidos:
+                    if not x.get("clave"):
+                        problemas.append(f"{x.get('nombre') or f['nombre']}: {x.get('error')}")
+                        continue
+                    try:
+                        cargados.append(self.subir(x["clave"])["archivo"])
+                    except ErrorBase as e:
+                        problemas.append(("ya estaba cargado" if e.codigo == "23505" else str(e)) + f" ({x['nombre']})")
+                if cargados:
+                    estado, archivo_id = "cargado", cargados[0]
+                    mensaje = (f"{len(cargados)} archivos cargados del .zip. " if len(cargados) > 1 else "") + " · ".join(problemas)
+                elif problemas and all("ya estaba cargado" in p for p in problemas):
+                    estado, mensaje = "repetido", "Ya estaba cargado: no se repite."
+                else:
+                    mensaje = " · ".join(problemas) or "El archivo no trae nada que Tino sepa leer."
+            except Exception as e:  # noqa: BLE001 - el error queda en la cola, a la vista
+                mensaje = str(e) or e.__class__.__name__
+            self.c.cambiar("archivo_en_cola", [("id", "eq", f["id"])],
+                           {"estado": estado, "mensaje": (mensaje or "")[:500] or None, "archivo_id": archivo_id})
+            hechos[{"cargado": "cargados", "repetido": "repetidos"}.get(estado, "errores")] += 1
+        return hechos
 
     def archivos(self):
         filas = self.c.leer("archivo_importado", columnas="id,fuente,nombre,desde,hasta,filas,estado,creado_en,deshecho_en",

@@ -27,11 +27,11 @@ const PREGUNTAS = [
   },
   {
     p: "¿En qué aparatos funciona?",
-    r: "En el navegador del celular y del computador. Los archivos del día (Excel, extracto del banco y datáfonos) hoy se suben desde el programa de escritorio de Tino.",
+    r: "En el navegador del celular y del computador. Los archivos del día (Excel, extracto del banco y datáfonos) se suben desde cualquiera de los dos: quedan en cola y los carga el programa de escritorio de Tino.",
   },
 ];
 
-const PRONTO = ["Funcionar sin internet", "Leer solos los avisos de transferencia del correo", "Más bancos y datáfonos", "Subir los archivos desde el celular"];
+const PRONTO = ["Funcionar sin internet", "Leer solos los avisos de transferencia del correo", "Más bancos y datáfonos"];
 
 export default function Precios() {
   return (
