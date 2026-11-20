@@ -4,7 +4,7 @@
 // producto, y lo que no es ninguno se descarta con nota. Al asignar, la base crea el alias y
 // reprocesa las filas (0012): la venta sin persona baja en esa cantidad.
 import { useEffect, useMemo, useState } from "react";
-import { base, leer, mensaje } from "@/lib/supabase";
+import { base, leer, mensaje, textoDeError } from "@/lib/supabase";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { pesos } from "@/lib/formato";
 import { Icono } from "./Iconos";
@@ -71,7 +71,7 @@ export function PorResolver({ alCambiar, avisar }: { alCambiar: () => void; avis
         setGente(ases.filter((a) => a.activa).map((a) => ({ id: a.id, nombre: a.nombre_completo, puntos: asig.filter((x) => x.asesora_id === a.id).map((x) => x.punto_id) })));
         setProductos(prods);
       } catch (e) {
-        setError((e as Error).message);
+        setError(textoDeError(e));
       }
     })();
   }, [recarga]);

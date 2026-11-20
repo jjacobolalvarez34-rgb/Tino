@@ -3,7 +3,7 @@
 // Storage y queda en cola; el programa de escritorio lo procesa con los lectores de siempre.
 // Antes de subirlo se calcula su huella (sha256): si ya estaba cargado o en cola, se avisa.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { base, mensaje } from "@/lib/supabase";
+import { base, mensaje, textoDeError } from "@/lib/supabase";
 import { fechaHora } from "@/lib/formato";
 import { Icono } from "./Iconos";
 
@@ -67,7 +67,7 @@ export function SubirArchivos({ empresaId, alCambiar }: { empresaId: string; alC
         poner(i, { estado: "subiendo" });
         const ruta = `${empresaId}/${h}/${limpio(archivo.name)}`;
         const { error: e1 } = await base().storage.from("archivos").upload(ruta, archivo, { upsert: false, contentType: archivo.type || undefined });
-        if (e1 && !/exist|duplicate/i.test(e1.message)) throw new Error("No se pudo subir: " + e1.message);
+        if (e1 && !/exist|duplicate/i.test(e1.message)) { console.error("[Tino] subir", e1); throw new Error("No se pudo subir el archivo. Revise el internet e intente de nuevo."); }
         const { error: e2 } = await base().from("archivo_en_cola").insert({ empresa_id: empresaId, ruta, nombre: archivo.name, tamano: archivo.size, hash: h });
         if (e2) {
           if (e2.code === "23505") { poner(i, { estado: "repetido", texto: "Ese archivo ya está en cola." }); continue; }
@@ -75,7 +75,7 @@ export function SubirArchivos({ empresaId, alCambiar }: { empresaId: string; alC
         }
         poner(i, { estado: "listo", texto: "En cola. Se carga cuando el programa de escritorio lo procese." });
       } catch (e) {
-        poner(i, { estado: "error", texto: (e as Error).message });
+        poner(i, { estado: "error", texto: textoDeError(e) });
       }
     }
     if (entrada.current) entrada.current.value = "";

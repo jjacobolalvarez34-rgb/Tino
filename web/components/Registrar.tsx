@@ -2,7 +2,7 @@
 // "+ Registrar": observación, compromiso, sesión o meta, cada uno en una sola pantalla y en
 // menos de 30 segundos. Lo que se puede adivinar ya viene puesto (la persona, su punto, hoy).
 import { useEffect, useMemo, useState } from "react";
-import { base, mensaje } from "@/lib/supabase";
+import { base, mensaje, textoDeError } from "@/lib/supabase";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { catalogo, correrDiasHoy, hoy, mesDe, personas as leerPersonas, registrarCompromiso, registrarObservacion,
   type ItemCatalogo, type Persona } from "@/lib/equipo";
@@ -56,7 +56,7 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
     if (!gente) {
       Promise.all([leerPersonas(), leerPuntos(), catalogo()])
         .then(([g, p, c]) => { setGente(g.filter((x) => x.activa)); setPuntos(p); setCat(c); })
-        .catch((e) => setError((e as Error).message));
+        .catch((e) => setError(textoDeError(e)));
     }
   }, [abierta, persona, tipo]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -122,7 +122,7 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
         alGuardar("Meta guardada");
       }
     } catch (er) {
-      setError((er as Error).message);
+      setError(textoDeError(er));
     } finally {
       setOcupado(false);
     }

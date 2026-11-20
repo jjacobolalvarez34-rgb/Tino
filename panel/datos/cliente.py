@@ -7,6 +7,7 @@ decide qué ve y qué puede cambiar, igual que en la web. En Supabase la API est
 PostgREST local con un token ya firmado (ver tests/local/).
 """
 import json
+import re
 import time
 import urllib.error
 import urllib.parse
@@ -21,7 +22,22 @@ MENSAJES = {
     "23514": "Hay un dato que no cumple las reglas.",
     "42501": "Su usuario no tiene permiso para esto.",
     "P0002": "No se encontró, o ya se había hecho.",
+    "PGRST205": "Esta parte de Tino todavía no está lista en la base de datos. Avísele a soporte.",
+    "PGRST202": "Esta parte de Tino todavía no está lista en la base de datos. Avísele a soporte.",
+    "42P01": "Esta parte de Tino todavía no está lista en la base de datos. Avísele a soporte.",
+    "42883": "Esta parte de Tino todavía no está lista en la base de datos. Avísele a soporte.",
+    "23P01": "Se cruza con otro registro de las mismas fechas.",
 }
+
+GENERICO = "Algo salió mal. Intente de nuevo; si sigue pasando, avísele a soporte."
+# Los mensajes que escribe Tino están en español y se muestran tal cual; los que vienen en inglés
+# (Postgres, Supabase, la red) se cambian por uno sencillo y el detalle queda en el registro.
+INGLES = re.compile(r"\b(the|could not|violates|permission denied|not found|schema cache|relation|column|function|"
+                    r"invalid|unexpected|does not exist|duplicate|unauthorized|forbidden|timeout|error)\b", re.I)
+
+
+def en_espanol(texto):
+    return bool(texto) and not INGLES.search(texto)
 
 
 class ErrorBase(Exception):
@@ -118,7 +134,8 @@ class Cliente:
             codigo = info.get("code") or info.get("error_code")
             if e.code in (400, 401) and "auth/v1" in url:
                 raise ErrorBase("Correo o clave incorrectos.", codigo, texto) from None
-            mensaje = MENSAJES.get(codigo) or info.get("message") or info.get("msg") or f"Error {e.code}"
+            propio = info.get("message") or info.get("msg") or ""
+            mensaje = MENSAJES.get(codigo) or (propio if en_espanol(propio) else GENERICO)
             raise ErrorBase(mensaje, codigo, info.get("message") or texto) from None
         except urllib.error.URLError as e:
             raise ErrorBase("No hay conexión con la base. Revise el internet.", None, str(e.reason)) from None

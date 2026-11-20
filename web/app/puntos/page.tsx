@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Programa } from "@/components/Programa";
 import { Cargando, Nota } from "@/components/Decidir";
@@ -15,18 +16,18 @@ export default function Puntos() {
 
   async function ver() {
     setLista(null); setError("");
-    try { setLista(await listaPuntos()); } catch (e) { setError((e as Error).message); }
+    try { setLista(await listaPuntos()); } catch (e) { setError(textoDeError(e)); }
   }
   useEffect(() => { ver(); }, []);
 
   async function crear(e: React.FormEvent) {
     e.preventDefault(); setAviso("");
     try { await guardarPunto({ ...nuevo, activo: true }); setNuevo({ codigo: "", nombre: "", tipo: "detal" }); setAviso("Punto creado."); ver(); }
-    catch (err) { setAviso((err as Error).message); }
+    catch (err) { setAviso(textoDeError(err)); }
   }
   async function activar(p: Punto) {
     try { await guardarPunto({ id: p.id, nombre: p.nombre, tipo: p.tipo, activo: !p.activo }); ver(); }
-    catch (err) { setAviso((err as Error).message); }
+    catch (err) { setAviso(textoDeError(err)); }
   }
 
   return (

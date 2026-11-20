@@ -60,10 +60,28 @@ class ApiConectada:
         self._ventana, self._sesion = None, None
 
     def _envolver(self, trabajo):
+        """Lo que se muestra es siempre español sencillo; el detalle técnico va al registro
+        (registro/tino.log en la carpeta de la empresa, en D:)."""
         try:
             return {"datos": trabajo()}
         except Exception as e:  # noqa: BLE001 - se muestra en la pantalla
-            return {"error": str(e) or e.__class__.__name__}
+            from panel.datos.cliente import GENERICO, ErrorBase, en_espanol
+            self._registrar(e)
+            texto = str(e)
+            if isinstance(e, ErrorBase) or en_espanol(texto):
+                return {"error": texto or GENERICO}
+            return {"error": GENERICO}
+
+    def _registrar(self, e):
+        import traceback
+        try:
+            carpeta = Path(self._carpeta) / "registro"
+            carpeta.mkdir(parents=True, exist_ok=True)
+            with open(carpeta / "tino.log", "a", encoding="utf-8") as f:
+                f.write(f"{dt.datetime.now():%Y-%m-%d %H:%M:%S} {e.__class__.__name__}: {e}\n"
+                        f"{getattr(e, 'detalle', '') or ''}\n{traceback.format_exc()}\n")
+        except OSError:
+            pass
 
     def estado(self):
         ayer = (dt.date.today() - dt.timedelta(days=1)).isoformat()

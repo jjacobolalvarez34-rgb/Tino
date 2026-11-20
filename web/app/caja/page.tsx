@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 // Caja: un día, todos los puntos. Cuánto se vendió, si cuadró (con su causa o «sin causa
 // clara»), cómo van las transferencias y si el día está abierto o cerrado. Cerrar el día y
 // desbloquearlo (0014): un día cerrado ya no se edita sin permiso del dueño o la encargada.
@@ -34,7 +35,7 @@ function Caja() {
 
   const ver = useCallback(() => {
     setFilas(null); setError("");
-    dia(dia_).then(setFilas).catch((e) => setError((e as Error).message));
+    dia(dia_).then(setFilas).catch((e) => setError(textoDeError(e)));
   }, [dia_]);
   useEffect(() => { ver(); }, [ver, version]);
 
@@ -46,13 +47,13 @@ function Caja() {
   async function cerrarDias(ids: string[]) {
     setOcupado(true);
     try { const n = await cerrar(ids); avisar(n === 1 ? "Día cerrado" : `${n} días cerrados`); ver(); }
-    catch (e) { avisar((e as Error).message); }
+    catch (e) { avisar(textoDeError(e)); }
     finally { setOcupado(false); }
   }
   async function abrir(f: DiaPunto) {
     setOcupado(true);
     try { await desbloquear(f.jornada_id!, nota); avisar("Día desbloqueado"); setAbriendo(null); setNota(""); ver(); }
-    catch (e) { avisar((e as Error).message); }
+    catch (e) { avisar(textoDeError(e)); }
     finally { setOcupado(false); }
   }
 

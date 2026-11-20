@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 // Hoy: frases que se tocan, ordenadas por urgencia (compromisos vencidos, quién necesita
 // apoyo, lo que viene, las sesiones de la semana). Al lado, el resumen del período.
 import Link from "next/link";
@@ -67,7 +68,7 @@ function Hoy() {
         ]);
         setD({ gente, puntos: pts, desde, hasta, ultima, venta, ventaAntes, metas: ms, abiertos, segs, sesiones: ses });
       } catch (e) {
-        setError((e as Error).message);
+        setError(textoDeError(e));
       }
     })();
   }, [version]);

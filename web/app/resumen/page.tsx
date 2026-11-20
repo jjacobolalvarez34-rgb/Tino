@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 // Inicio: lo que necesita atención primero (DESIGN.md, principio 1).
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -18,12 +19,12 @@ export default function Inicio() {
 
   async function ver() {
     setR(null); setError("");
-    try { setR(await resumen(desde, hasta)); } catch (e) { setError((e as Error).message); }
+    try { setR(await resumen(desde, hasta)); } catch (e) { setError(textoDeError(e)); }
   }
   async function revisarDeNuevo() {
     setAviso("Revisando…");
     try { const n = await revisarRango(desde, hasta); setAviso(`Listo: se revisaron ${n} día(s) con Excel.`); ver(); }
-    catch (e) { setAviso((e as Error).message); }
+    catch (e) { setAviso(textoDeError(e)); }
   }
   useEffect(() => { ver(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

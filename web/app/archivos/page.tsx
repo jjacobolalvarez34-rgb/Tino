@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Programa, useYo } from "@/components/Programa";
 import { SubirArchivos } from "@/components/SubirArchivos";
@@ -20,7 +21,7 @@ export default function Archivos() {
   async function ver() {
     setLista(null); setError("");
     try { setLista((await archivos()).slice(0, 200)); setRecarga((r) => r + 1); }
-    catch (e) { setError((e as Error).message); }
+    catch (e) { setError(textoDeError(e)); }
   }
   useEffect(() => { ver(); }, []);
 

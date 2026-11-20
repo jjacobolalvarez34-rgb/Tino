@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
   const adm = admin();
   if (!adm) return error("Falta SUPABASE_SERVICE_ROLE_KEY en el servidor.", 500);
   const { data, error: er } = await q.yo.from("usuario").select("id,nombre,rol,punto_id,activo,creado_en").order("nombre");
-  if (er) return error(er.message, 500);
+  if (er) { console.error("[Tino] usuarios", er); return error("No se pudo leer la lista de usuarios. Intente de nuevo.", 500); }
   const filas = await Promise.all((data ?? []).map(async (u) => {
     const { data: a } = await adm.auth.admin.getUserById(u.id);
     const meta = (a.user?.user_metadata ?? {}) as { invitado_en?: string };

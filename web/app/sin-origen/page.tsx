@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Programa } from "@/components/Programa";
 import { Cargando, Decidir, Nota, Rango, type Pedido } from "@/components/Decidir";
@@ -16,7 +17,7 @@ export default function SinOrigen() {
 
   async function ver() {
     setD(null); setError("");
-    try { setD(await sinOrigen(desde, hasta)); } catch (e) { setError((e as Error).message); }
+    try { setD(await sinOrigen(desde, hasta)); } catch (e) { setError(textoDeError(e)); }
   }
   useEffect(() => { ver(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

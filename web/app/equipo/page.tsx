@@ -12,7 +12,7 @@ import { Tabla } from "@/components/Tabla";
 import { yaLoVio } from "@/components/Recorrido";
 import { Ayuda, AYUDA_TICKET } from "@/components/Ayuda";
 import { puntos as leerPuntos } from "@/lib/datos";
-import { base, mensaje } from "@/lib/supabase";
+import { base, mensaje, textoDeError } from "@/lib/supabase";
 import { anterior, avanzarCompromiso, catalogo, compromisos, hoy, mesDe, metaDelPeriodo, metas, personas, seguimientos,
   ticket, totales, ultimaFecha, ventas, type Compromiso, type ItemCatalogo, type Meta, type Persona, type Seguimiento,
   type VentaDia } from "@/lib/equipo";
@@ -38,7 +38,7 @@ function Equipo() {
 
   useEffect(() => {
     Promise.all([personas(), leerPuntos()]).then(([g, p]) => { setGente(g); setPuntos(p); })
-      .catch((e) => setError((e as Error).message));
+      .catch((e) => setError(textoDeError(e)));
   }, [version, recarga]);
 
   const visibles = useMemo(() => {
@@ -177,7 +177,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
     Promise.all([ventas(desde, hasta, persona.id), ventas(ad, ah, persona.id), metas(desde, hasta), compromisos(persona.id),
       seguimientos(correrDias(hoy(), -365), persona.id), catalogo()])
       .then(([venta, antes, ms, comps, segs, cat]) => setD({ desde, hasta, venta, antes, metas: ms, comps, segs, cat }))
-      .catch((e) => setError((e as Error).message));
+      .catch((e) => setError(textoDeError(e)));
   }, [mes, persona.id, version, recarga]);
 
   // La primera vez, el recorrido de Equipo sale cuando la ficha ya tiene datos.
@@ -196,11 +196,11 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
 
   async function cerrar(c: Compromiso, estado: "cumplido" | "no_cumplido") {
     try { await avanzarCompromiso(c.id, { estado }); avisar(estado === "cumplido" ? "Marcado como cumplido" : "Marcado como no cumplido"); setRecarga((r) => r + 1); }
-    catch (e) { avisar((e as Error).message); }
+    catch (e) { avisar(textoDeError(e)); }
   }
   async function avance(c: Compromiso, valor: number) {
     try { await avanzarCompromiso(c.id, { avance: valor, estado: valor > 0 ? "en_curso" : c.estado }); setRecarga((r) => r + 1); }
-    catch (e) { avisar((e as Error).message); }
+    catch (e) { avisar(textoDeError(e)); }
   }
 
   const tot = d ? totales(d.venta) : null;

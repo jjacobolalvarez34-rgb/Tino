@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Marco, useMarco } from "@/components/Marco";
 import { Icono } from "@/components/Iconos";
-import { base, leer, mensaje } from "@/lib/supabase";
+import { base, leer, mensaje, textoDeError } from "@/lib/supabase";
 import { TEXTOS_BASE } from "@/lib/textos";
 
 export default function PaginaAjustesEquipo() {
@@ -45,7 +45,7 @@ function Ajustes() {
       setItems(cat);
       setUmbral(Object.fromEntries(UMBRALES.map((u) => [u.clave, c?.[u.clave] == null ? "" : String(c[u.clave])])));
       setPalabras((c?.textos as Record<string, string>) ?? {});
-    }).catch((e) => setError((e as Error).message));
+    }).catch((e) => setError(textoDeError(e)));
   }, [recarga]);
 
   async function agregar(clase: string) {

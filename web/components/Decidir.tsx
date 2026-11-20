@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 // Toda decisión lleva nota: confirmar, "no es", asignar un punto o cerrar un descuadre.
 import { useEffect, useRef, useState } from "react";
 
@@ -33,7 +34,7 @@ export function Decidir({ pedido, cerrar }: { pedido: Pedido | null; cerrar: (he
     if (!nota.trim()) { setError("Escriba una nota: queda en el historial con su nombre."); return; }
     setOcupado(true);
     try { await pedido.hacer(nota.trim(), opcion); cerrar(true); }
-    catch (err) { setError((err as Error).message); }
+    catch (err) { setError(textoDeError(err)); }
     finally { setOcupado(false); }
   }
 

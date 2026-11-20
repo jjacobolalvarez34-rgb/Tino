@@ -7,7 +7,7 @@ import { Avatar } from "@/components/Avatar";
 import { Icono } from "@/components/Iconos";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { fechaHora } from "@/lib/formato";
-import { base } from "@/lib/supabase";
+import { base, textoDeError } from "@/lib/supabase";
 
 export default function PaginaUsuarios() {
   return <Marco><Usuarios /></Marco>;
@@ -48,12 +48,12 @@ function Usuarios() {
   useEffect(() => {
     if (!puede) return;
     Promise.all([api("GET"), leerPuntos()]).then(([r, p]) => { setLista(r.usuarios); setPuntos(p); })
-      .catch((e) => setError((e as Error).message));
+      .catch((e) => setError(textoDeError(e)));
   }, [recarga, puede]);
 
   async function hacer(cuerpo: Record<string, unknown>, ok: string) {
     try { await api("POST", cuerpo); avisar(ok); setConfirmar(null); setEditando(null); setRecarga((r) => r + 1); }
-    catch (e) { avisar((e as Error).message); }
+    catch (e) { avisar(textoDeError(e)); }
   }
 
   function estado(u: Usuario) {

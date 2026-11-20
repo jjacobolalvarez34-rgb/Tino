@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Programa } from "@/components/Programa";
 import { Cargando, Decidir, Nota, Rango, type Pedido } from "@/components/Decidir";
@@ -21,7 +22,7 @@ export default function Transferencias() {
 
   async function ver() {
     setFilas(null); setError("");
-    try { setFilas(await transferencias(desde, hasta)); } catch (e) { setError((e as Error).message); }
+    try { setFilas(await transferencias(desde, hasta)); } catch (e) { setError(textoDeError(e)); }
   }
   useEffect(() => { ver(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

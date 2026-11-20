@@ -1,4 +1,5 @@
 "use client";
+import { textoDeError } from "@/lib/supabase";
 // Ventas: ranking por persona y por punto, con ticket promedio, facturas, cumplimiento de
 // la meta y la comparación con el período anterior del mismo largo.
 import Link from "next/link";
@@ -46,7 +47,7 @@ function Ventas() {
       setGente(g); setPuntos(p);
       const [desde, fin] = mesDe(u && u < mesDe(hoy())[0] ? u : hoy());
       setRango([desde, fin < hoy() ? fin : hoy()]);
-    }).catch((e) => setError((e as Error).message));
+    }).catch((e) => setError(textoDeError(e)));
   }, []);
 
   useEffect(() => {
@@ -54,7 +55,7 @@ function Ventas() {
     const [ad, ah] = anterior(...rango);
     setD(null);
     Promise.all([ventas(...rango), ventas(ad, ah), metas(...rango)])
-      .then(([venta, antes, ms]) => setD({ venta, antes, metas: ms })).catch((e) => setError((e as Error).message));
+      .then(([venta, antes, ms]) => setD({ venta, antes, metas: ms })).catch((e) => setError(textoDeError(e)));
   }, [rango, version]);
 
   // La primera vez, el recorrido de Ventas sale cuando ya hay datos en pantalla.
