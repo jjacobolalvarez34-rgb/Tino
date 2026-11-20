@@ -15,6 +15,45 @@ Dudas:
 -
 ```
 
+## 2026-11-20 · Revisión de la dueña: bloques A, B, C (preparado), D y F
+Hecho:
+- A · Salitre: el perfil acepta varios nombres por columna (su DESC FACT dice «v» en vez de
+  FECHA) y el lector usa el diseño del libro cuando en una hoja borraron un encabezado (días 5 y
+  30). Salitre se lee completo: hojas 56.380.107 y resumen 57.963.607; la diferencia es el día 1.
+- A · Día 1 de Plaza Imperial y de Salitre: la hoja dice $0 y el resumen no. Ahora es «problema
+  del archivo» (tipo archivo_inconsistente, 0012), con su fila; no se cambia ningún valor (D-055).
+- A · «No abrió» es día sin venta, no persona. «BOLSAS KIT PROFESIONAL» no era un nombre: es un
+  producto sin reconocer (fila de la hoja 31); se resuelve como producto. «tatiana» queda por
+  resolver. La lista agrupa los repetidos. 14 pruebas del lector.
+- A · Hora de Bogotá en toda la web; «Sin datos de septiembre para comparar»; una sola forma de
+  calcular el ticket, con su «?» que lo explica, y la venta sin persona como fila del ranking para
+  que cuadre con Hoy; meses en minúscula.
+- A8 · Empresa de demostración inventada (tests/demo/sembrar_demo.py) y 11 capturas a 390 y 1440 px
+  con Chrome sin ventana (tests/demo/capturas.mjs, perfil en D:). Enviadas a Jacobo.
+- B · Archivos → Por resolver: nombre o producto en un toque (resolver_nombre, resolver_producto,
+  descartar_error, 0012). 381 pruebas de permisos.
+- C · Preparado: aplicar_migraciones.py + verificar.sql (probado en una base nueva: 6 de 6),
+  respaldo y restauración probados (44 tablas, 103.825 filas iguales), comparar_totales.py, guía en
+  docs/OPERACION/produccion.md con respaldos y costos.
+- D · Pantalla Usuarios (dueño y soporte): crear sin invitar, invitar, recuperar clave, rol y
+  punto, desactivar y activar; /clave para poner la clave. 12 de 12 con las empresas inventadas.
+- F · /precios pública y precios solo en web/lib/precios.ts; docs/NEGOCIO/precios.md; D-053 cierra
+  P-003.
+- GitHub: el repositorio queda fijo con la cuenta jjacobolalvarez34-rgb (había dos guardadas).
+Falta:
+- Jacobo: aplicar 0012 en tino-pruebas (D:\Repositorios\Tino-datosplicar_0012.sql). Después,
+  Claude recarga en pruebas Salitre, Plaza Imperial, Kennedy, Suba y Portal Sur con el perfil nuevo
+  (borrar sus cargas en octubre/cargas_supabase/ para que se lean otra vez) y descarta con nota los
+  «No abrió» ya cargados.
+- Jacobo: poner llave_servicio y conexion en produccion.json; variables de Vercel por ambiente;
+  Site URL y /clave en Auth; SMTP propio para invitar. Después Claude hace todo el bloque C.
+- Decidir respaldos (A, B o C) y Vercel Pro.
+- E · Subir archivos desde la web: dos caminos en docs/OPERACION/subir-desde-la-web.md.
+- Pasar la dirección visual a las pantallas de caja (aprobado, próxima sesión).
+Dudas:
+- El lector de días tolerante está probado con el archivo real de Salitre, pero falta una prueba
+  automática con un libro anonimizado en tests/casos/.
+
 ## 2026-11-19 · Equipo, nueva dirección visual y página pública
 Hecho:
 - Todo pasa a main (D-047). Vercel publica desde un fork que sigue arranque; cada subida va a las dos.

@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
+  // Una compilación de prueba puede ir a otra carpeta para no chocar con `next dev`.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   // La revisión usa el núcleo de motores/nucleo_ts, que vive fuera de web/.
   experimental: { externalDir: true },
