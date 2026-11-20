@@ -237,3 +237,15 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
    y que la barra inferior no tape lo que recibe el foco. */
 .m-app :focus-visible,.m-hoja :focus-visible{outline:2px solid var(--color-marca);outline-offset:2px;box-shadow:0 0 0 5px var(--color-foco)}
 @media (max-width:899px){html{scroll-padding-bottom:calc(var(--barra) + 24px)}}
+
+/* Recorrido guiado (driver.js) con los tokens de Tino */
+.driver-popover.tino-recorrido{font-family:Figtree,system-ui,sans-serif;border-radius:16px;padding:20px;max-width:340px;color:var(--color-texto);box-shadow:0 16px 40px rgba(34,22,31,.22)}
+.tino-recorrido .driver-popover-title{font-size:18px;font-weight:800;line-height:1.25}
+.tino-recorrido .driver-popover-description{font-size:15px;line-height:1.45;color:var(--color-texto-medio);margin-top:6px}
+.tino-recorrido .driver-popover-progress-text{font-size:13px;font-weight:600;color:var(--color-texto-medio)}
+.tino-recorrido .driver-popover-footer{margin-top:16px;gap:8px}
+.tino-recorrido .driver-popover-footer button{font-family:inherit;font-size:14px;font-weight:700;text-shadow:none;border-radius:10px;min-height:44px;padding:0 14px;
+  border:1px solid var(--color-marca);background:var(--color-superficie);color:var(--color-marca)}
+.tino-recorrido .driver-popover-footer .driver-popover-next-btn{background:var(--color-marca);color:#fff}
+.tino-recorrido .driver-popover-close-btn{width:44px;height:44px;color:var(--color-texto-medio)}
+.tino-recorrido button:focus-visible{outline:2px solid var(--color-marca);outline-offset:2px}

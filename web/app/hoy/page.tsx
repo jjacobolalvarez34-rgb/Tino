@@ -7,6 +7,7 @@ import { Marco, useMarco } from "@/components/Marco";
 import { Avatar } from "@/components/Avatar";
 import { AnilloMeta } from "@/components/AnilloMeta";
 import { Icono } from "@/components/Iconos";
+import { yaLoVio } from "@/components/Recorrido";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { anterior, compromisos, correrDiasHoy, diasEntre, hoy, mesDe, metaDelPeriodo, metas, personas, porPersona,
   seguimientos, sesiones, ticket, totales, ultimaFecha, ventas,
@@ -34,9 +35,17 @@ function lunes(f: string) {
 }
 
 function Hoy() {
-  const { yo, config, version } = useMarco();
+  const { yo, config, version, verRecorrido } = useMarco();
   const t = config.textos;
   const [d, setD] = useState<Datos | null>(null);
+  const [revisado, setRevisado] = useState(false);
+
+  // La primera vez que alguien entra, el recorrido sale solo cuando Hoy ya tiene datos.
+  useEffect(() => {
+    if (!d || revisado) return;
+    setRevisado(true);
+    yaLoVio().then((visto) => { if (!visto) verRecorrido(); });
+  }, [d, revisado, verRecorrido]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -176,7 +185,7 @@ function Frases({ d, hoyF }: { d: Datos; hoyF: string }) {
 
   const nada = frases.every((f) => !f.filas.length);
   return (
-    <section className="m-columna" aria-label="Pendientes">
+    <section className="m-columna" aria-label="Pendientes" data-recorrido="pendientes">
       {nada && (
         <div className="m-frase m-frase-ok">
           <span className="m-frase-marca t-ok" aria-hidden="true">●</span>
@@ -227,7 +236,7 @@ function Resumen({ d, textos: t }: { d: Datos; textos: { persona: string; puntos
   const enCurso = d.hasta >= hoy();  // hasta llega a hoy solo en el mes en curso
 
   return (
-    <section className="m-columna m-resumen" aria-labelledby="t-resumen">
+    <section className="m-columna m-resumen" aria-labelledby="t-resumen" data-recorrido="resumen">
       <h2 id="t-resumen">{enCurso ? `Lo que va de ${mes}` : `Así cerró ${mes}`}</h2>
       {!d.venta.length ? (
         <p className="m-vacio">Todavía no hay ventas por {t.persona} de {mes}. Suba los Excel del mes en Archivos.</p>

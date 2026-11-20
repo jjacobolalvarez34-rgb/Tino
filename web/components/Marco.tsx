@@ -10,12 +10,13 @@ import { config as leerConfig, type Config } from "@/lib/equipo";
 import { TEXTOS_BASE } from "@/lib/textos";
 import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
+import { iniciarRecorrido } from "./Recorrido";
 import { Registrar } from "./Registrar";
 
 export type Yo = { id: string; nombre: string; rol: string; empresa_id: string; empresa: string; punto_id: string | null };
 type Contexto = {
   yo: Yo; config: Config; avisar: (texto: string) => void;
-  registrar: (persona?: string, tipo?: string) => void; version: number;
+  registrar: (persona?: string, tipo?: string) => void; version: number; verRecorrido: () => void;
 };
 const Ctx = createContext<Contexto | null>(null);
 export const useMarco = () => {
@@ -74,6 +75,13 @@ export function Marco({ children }: { children: React.ReactNode }) {
     reloj.current = setTimeout(() => setAviso(""), 2600);
   }, []);
   const registrar = useCallback((persona?: string, tipo?: string) => setReg({ persona, tipo }), []);
+  const verRecorrido = useCallback(() => {
+    if (!yo || !cfg) return;
+    setMas(false);
+    // Espera a que se cierre la hoja de "Más" antes de resaltar.
+    setTimeout(() => iniciarRecorrido({ empresa_id: yo.empresa_id, textos: cfg.textos,
+      alTerminar: () => setReg({ tipo: "compromiso" }) }), 200);
+  }, [yo, cfg]);
 
   async function salir() {
     await base().auth.signOut();
@@ -85,18 +93,19 @@ export function Marco({ children }: { children: React.ReactNode }) {
 
   const activa = (r: string) => ruta === r || ruta.startsWith(r + "/");
   return (
-    <Ctx.Provider value={{ yo, config: cfg, avisar, registrar, version }}>
+    <Ctx.Provider value={{ yo, config: cfg, avisar, registrar, version, verRecorrido }}>
       <a className="m-saltar" href="#contenido">Saltar al contenido</a>
       <div className="m-app">
         <nav className="m-riel" aria-label="Pantallas">
           <Link href="/hoy" className="m-riel-logo" aria-label="Tino, ir a Hoy">
             <svg aria-hidden="true"><use href="#logo" /></svg>
           </Link>
-          <button className="m-registrar" onClick={() => registrar()}>
+          <button className="m-registrar" data-recorrido="registrar" onClick={() => registrar()}>
             <span className="m-registrar-boton"><Icono id="mas" /></span>Registrar
           </button>
           {PRINCIPAL.map((m) => (
-            <Link key={m.ruta} href={m.ruta} className="m-destino" aria-current={activa(m.ruta) ? "page" : undefined}>
+            <Link key={m.ruta} href={m.ruta} className="m-destino" aria-current={activa(m.ruta) ? "page" : undefined}
+              data-recorrido={m.ruta === "/equipo" ? "equipo" : undefined}>
               <span className="m-destino-icono"><Icono id={m.icono} /></span>{m.texto}
             </Link>
           ))}
@@ -108,11 +117,12 @@ export function Marco({ children }: { children: React.ReactNode }) {
         <main id="contenido" className="m-pagina">{children}</main>
         <nav className="m-barra" aria-label="Pantallas">
           {PRINCIPAL.slice(0, 2).map((m) => (
-            <Link key={m.ruta} href={m.ruta} className="m-destino" aria-current={activa(m.ruta) ? "page" : undefined}>
+            <Link key={m.ruta} href={m.ruta} className="m-destino" aria-current={activa(m.ruta) ? "page" : undefined}
+              data-recorrido={m.ruta === "/equipo" ? "equipo" : undefined}>
               <span className="m-destino-icono"><Icono id={m.icono} /></span>{m.texto}
             </Link>
           ))}
-          <button className="m-registrar" onClick={() => registrar()}>
+          <button className="m-registrar" data-recorrido="registrar" onClick={() => registrar()}>
             <span className="m-registrar-boton"><Icono id="mas" /></span>Registrar
           </button>
           <Link href="/ventas" className="m-destino" aria-current={activa("/ventas") ? "page" : undefined}>
@@ -136,6 +146,12 @@ export function Marco({ children }: { children: React.ReactNode }) {
               </Link>
             </li>
           ))}
+          <li>
+            <button className="m-fila" onClick={verRecorrido}>
+              <span className="m-fila-icono"><Icono id="sol" /></span>
+              <span className="m-fila-texto"><b>Ver el recorrido otra vez</b><span>Seis pasos por lo importante</span></span>
+            </button>
+          </li>
           <li>
             <button className="m-fila" onClick={salir}>
               <span className="m-fila-icono"><Icono id="salir" /></span>
