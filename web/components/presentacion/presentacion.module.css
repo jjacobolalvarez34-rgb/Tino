@@ -1,0 +1,1455 @@
+/* Página de presentación de Tino. Tokens copiados de docs/DESIGN.md (propuesta D · Ciruela)
+   para no depender de globals.css. La ciruela va en pocos lugares: logo, botones, enlaces,
+   antetítulos y las marcas de "visto bueno".
+
+   Movimiento: todas las animaciones corren siempre, también con "reducir movimiento"
+   activo (decisión de Jacobo). Por eso aquí no hay @media (prefers-reduced-motion). Son
+   cortas (150 a 600 ms), solo mueven opacidad y transform, no se repiten y no hay parallax.
+   Sin JavaScript todo queda en su estado final: lo que se oculta antes de entrar va siempre
+   bajo .raiz[data-animar], que pone Escenario.tsx. */
+
+.raiz {
+  --marca: #74305f;
+  --marca-hover: #5a2449;
+  --marca-suave: #f3e4ee;
+  --foco: #c99bbb;
+  --fondo: #f7f5f7;
+  --superficie: #ffffff;
+  --texto: #22161f;
+  --suave: #5e5862;
+  --borde: #e2dde3;
+  --divisor: #f0ecf0;
+  --ok: #1c7638;
+  --ok-fondo: #e1f2e5;
+  --revisar: #7a5a00;
+  --revisar-fondo: #fbf1cc;
+  --mal: #9a2a0a;
+  --mal-fondo: #fde5da;
+  --espera: #2557a7;
+  --espera-fondo: #e3ecfa;
+  --neutro: #4f4853;
+  --curva: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  position: relative;
+  overflow-x: clip;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: Figtree, system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.raiz :where(h1, h2, h3, p, ul, ol, dl, dd, figure) {
+  margin: 0;
+}
+
+.raiz :where(ul, ol) {
+  list-style: none;
+  padding: 0;
+}
+
+/* Foco de DESIGN.md (anillo --foco de 3 px, separado 2 px) más un anillo ciruela de 2 px
+   pegado al elemento: el rosa solo da 2,2:1 contra el fondo y el ciruela da 8,3:1, así el
+   foco pasa el 3:1 que pide WCAG para lo que no es texto. */
+.raiz a:focus-visible,
+.raiz button:focus-visible,
+.raiz [tabindex]:focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--marca);
+}
+
+/* Que la cabecera fija no tape lo que recibe el foco con el teclado. */
+.raiz a,
+.raiz button,
+.raiz [tabindex] {
+  scroll-margin-top: 88px;
+  scroll-margin-bottom: 24px;
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.saltar {
+  position: absolute;
+  left: 16px;
+  top: -80px;
+  z-index: 20;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--marca);
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid var(--borde);
+}
+
+.saltar:focus {
+  top: 12px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.ancho {
+  width: 100%;
+  max-width: 1328px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+/* ───────── Botones ───────── */
+
+.boton {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid var(--marca);
+  background: var(--marca);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.boton:hover {
+  background: var(--marca-hover);
+  border-color: var(--marca-hover);
+}
+
+.boton:active {
+  transform: translateY(1px);
+}
+
+.grande {
+  height: 52px;
+  padding: 0 22px;
+  border-radius: 12px;
+  font-size: 17px;
+}
+
+.secundario {
+  background: var(--superficie);
+  color: var(--marca);
+  border-color: var(--marca);
+}
+
+.secundario:hover {
+  background: var(--marca-suave);
+  border-color: var(--marca);
+}
+
+.botonTexto {
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--marca);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: background-color 0.15s ease;
+}
+
+.botonTexto:hover {
+  background: var(--marca-suave);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ───────── Textos ───────── */
+
+.antetitulo {
+  color: var(--marca);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tituloSeccion {
+  font-size: clamp(30px, 1rem + 2.4vw, 46px);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.texto {
+  color: var(--suave);
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 34em;
+}
+
+.fuerte {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+.pequeno {
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.subtitulo {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.etiqueta {
+  color: var(--suave);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.colorMal {
+  color: var(--mal);
+}
+
+.colorRevisar {
+  color: var(--revisar);
+}
+
+/* ───────── Chips de estado: símbolo + palabra + color ───────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.chipOk {
+  color: var(--ok);
+  background: var(--ok-fondo);
+}
+
+.chipRevisar {
+  color: var(--revisar);
+  background: var(--revisar-fondo);
+}
+
+.chipMal {
+  color: var(--mal);
+  background: var(--mal-fondo);
+}
+
+.chipEspera {
+  color: var(--espera);
+  background: var(--espera-fondo);
+}
+
+.chipNeutro {
+  color: var(--neutro);
+  background: var(--divisor);
+}
+
+/* ───────── Tarjetas ───────── */
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.tarjetaCabeza {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ───────── Cabecera ───────── */
+
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--fondo);
+  border-bottom: 1px solid var(--divisor);
+}
+
+.cabeceraFila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 72px;
+}
+
+.logoEnlace {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 10px;
+}
+
+.espacio {
+  flex: 1;
+}
+
+.nav {
+  display: none;
+  gap: 4px;
+  margin-right: 12px;
+}
+
+.nav a {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--suave);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.nav a:hover {
+  color: var(--marca);
+  background: var(--marca-suave);
+}
+
+/* El chulito del logo se dibuja al cargar la página. */
+.chulitoLogo {
+  stroke-dasharray: 1 2;
+  animation: trazar 0.6s var(--curva) 0.3s both;
+}
+
+/* ───────── Portada ───────── */
+
+.portada {
+  padding-block: 48px 64px;
+}
+
+.portadaRejilla {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+}
+
+.portadaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.titular {
+  font-size: clamp(38px, 1.2rem + 3.6vw, 64px);
+  line-height: 1.04;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  max-width: 15ch;
+}
+
+.titularSuave {
+  color: var(--suave);
+}
+
+.entrada {
+  color: var(--suave);
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 32em;
+}
+
+/* Entradas de la portada: al cargar, sin esperar a JavaScript. */
+.entra {
+  animation: subir 0.5s var(--curva) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.cierre {
+  max-width: 520px;
+  width: 100%;
+  justify-self: center;
+}
+
+.puntos {
+  display: flex;
+  flex-direction: column;
+}
+
+.punto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--divisor);
+  animation: subir 0.4s var(--curva) both;
+  animation-delay: calc(400ms + var(--i) * 110ms);
+}
+
+.puntoNombre {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.puntoNombre strong {
+  font-size: 16px;
+}
+
+.puntoValor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.puntoChip {
+  display: inline-flex;
+  animation: asomar 0.3s var(--curva) both;
+  animation-delay: calc(850ms + var(--i) * 150ms);
+}
+
+.totalDia {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  animation: aparecer 0.4s ease both 1.35s;
+}
+
+.totalDia .pequeno {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cifraGrande {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.revisado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--divisor);
+  font-size: 15px;
+  animation: aparecer 0.3s ease both 1.5s;
+}
+
+.revisado > span:last-child,
+.listaPendientes li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.revisadoMarca {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--marca-suave);
+  color: var(--marca);
+  display: grid;
+  place-items: center;
+}
+
+.revisadoMarca svg {
+  width: 32px;
+  height: 32px;
+}
+
+.trazoRevisado,
+.trazoPrueba,
+.trazoGrande {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 0;
+}
+
+.trazoRevisado {
+  animation: trazar 0.5s var(--curva) 1.65s both;
+}
+
+/* ───────── Secciones ───────── */
+
+.seccion {
+  padding-block: 64px;
+  scroll-margin-top: 72px;
+}
+
+.banda {
+  background: var(--superficie);
+  border-block: 1px solid var(--divisor);
+}
+
+.dosColumnas {
+  display: grid;
+  gap: 32px;
+  align-items: start;
+}
+
+.columna {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.cabezaSeccion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 40em;
+}
+
+/* Entrada al hacer scroll: sube 16 px y aparece. */
+.raiz[data-animar] [data-revelar] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--curva), transform 0.6s var(--curva);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+
+.raiz[data-animar] [data-revelar][data-visto] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ───────── Fuentes ───────── */
+
+.fuentes {
+  display: flex;
+  flex-direction: column;
+}
+
+.fuente {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding-block: 16px;
+}
+
+.fuente::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--borde);
+  transform-origin: left center;
+}
+
+/* La línea de cada fuente se dibuja de izquierda a derecha, como una fila que se llena. */
+.raiz[data-animar] .fuente:not([data-visto])::after {
+  transform: scaleX(0);
+}
+
+.raiz[data-animar] .fuente[data-visto]::after {
+  animation: linea 0.6s var(--curva) both;
+  animation-delay: calc(var(--i) * 80ms + 150ms);
+}
+
+.fuente dt {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.fuente dd {
+  color: var(--suave);
+}
+
+/* ───────── Conciliación ───────── */
+
+.cifras {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid var(--divisor);
+}
+
+.cifras dt {
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cifras dd {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.pagos {
+  display: flex;
+  flex-direction: column;
+}
+
+.pago {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "hora medio monto"
+    "hora prueba estado";
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--divisor);
+}
+
+.pago:last-child {
+  border-bottom: 0;
+}
+
+.pagoHora {
+  grid-area: hora;
+  align-self: start;
+  padding-top: 2px;
+  color: var(--suave);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pagoMedio {
+  grid-area: medio;
+  font-size: 16px;
+}
+
+.pagoPrueba {
+  grid-area: prueba;
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.pagoMonto {
+  grid-area: monto;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pagoEstado {
+  grid-area: estado;
+  display: grid;
+  justify-items: end;
+  align-self: start;
+}
+
+/* El chip "Buscando" y el resultado ocupan la misma celda: nada se corre al cambiar. */
+.pagoEstado > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+}
+
+.chipBuscando {
+  visibility: hidden;
+}
+
+.raiz[data-animar] .chipBuscando {
+  visibility: visible;
+}
+
+.raiz[data-animar] .escenaPagos:not([data-visto]) .chipFinal,
+.raiz[data-animar] .escenaPagos:not([data-visto]) .pagoPrueba {
+  opacity: 0;
+}
+
+/* Cada pago se resuelve 420 ms después del anterior: sale "Buscando", entra el resultado. */
+.raiz[data-animar] .escenaPagos[data-visto] .chipBuscando {
+  animation: irse 0.2s ease forwards;
+  animation-delay: calc(450ms + var(--i) * 420ms);
+}
+
+.raiz[data-animar] .escenaPagos[data-visto] .chipFinal {
+  animation: asomar 0.3s var(--curva) both;
+  animation-delay: calc(500ms + var(--i) * 420ms);
+}
+
+.raiz[data-animar] .escenaPagos[data-visto] .pagoPrueba {
+  animation: aparecer 0.3s ease both;
+  animation-delay: calc(560ms + var(--i) * 420ms);
+}
+
+/* ───────── Descuadres ───────── */
+
+.escenaDescuadres {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.descuadre {
+  gap: 16px;
+}
+
+.descuadreMonto {
+  color: var(--mal);
+  font-size: clamp(36px, 1.2rem + 2vw, 44px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.causa {
+  display: grid;
+}
+
+.causa > * {
+  grid-area: 1 / 1;
+}
+
+.buscando {
+  align-self: start;
+  color: var(--suave);
+  font-size: 15px;
+  font-weight: 600;
+  visibility: hidden;
+}
+
+.raiz[data-animar] .buscando {
+  visibility: visible;
+}
+
+.causaFinal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.causaNombre {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.pruebas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pruebas li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.pruebaMarca {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--marca);
+}
+
+.pruebaMarca svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.descuadrePie {
+  padding-top: 12px;
+  border-top: 1px solid var(--divisor);
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sinCausaMonto {
+  color: var(--mal);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* La causa aparece después de "Buscando la causa…", y cada prueba con su chulito. */
+.raiz[data-animar] .escenaDescuadres:not([data-visto]) .buscando,
+.raiz[data-animar] .escenaDescuadres:not([data-visto]) .causaParte,
+.raiz[data-animar] .escenaDescuadres:not([data-visto]) .pruebas li,
+.raiz[data-animar] .escenaDescuadres:not([data-visto]) .descuadrePie,
+.raiz[data-animar] .escenaDescuadres:not([data-visto]) .sinCausa {
+  opacity: 0;
+}
+
+.raiz[data-animar] .escenaDescuadres:not([data-visto]) .trazoPrueba {
+  stroke-dashoffset: 1.2;
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .buscando {
+  animation: aparecer 0.3s ease 0.5s both, irse 0.25s ease 1.3s forwards;
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .causaParte {
+  animation: subir 0.4s var(--curva) 1.5s both;
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .causaNombre {
+  animation-delay: 1.6s;
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .pruebas li {
+  animation: subir 0.4s var(--curva) both;
+  animation-delay: calc(1.85s + var(--i) * 300ms);
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .trazoPrueba {
+  animation: trazar 0.4s var(--curva) both;
+  animation-delay: calc(1.95s + var(--i) * 300ms);
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .descuadrePie {
+  animation: aparecer 0.4s ease 2.75s both;
+}
+
+.raiz[data-animar] .escenaDescuadres[data-visto] .sinCausa {
+  animation: subir 0.5s var(--curva) 2.2s both;
+}
+
+/* ───────── Excel ───────── */
+
+.tablaTarjeta {
+  gap: 24px;
+}
+
+.caja {
+  overflow-x: auto;
+  border-radius: 10px;
+}
+
+.tabla {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tablaTitulo {
+  text-align: left;
+  font-size: 17px;
+  font-weight: 600;
+  padding-bottom: 12px;
+}
+
+.tabla th,
+.tabla td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--divisor);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabla thead th {
+  color: var(--suave);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom-color: var(--borde);
+}
+
+.tabla tbody th {
+  font-weight: 600;
+}
+
+.tabla tfoot th,
+.tabla tfoot td {
+  font-weight: 800;
+  border-bottom: 0;
+}
+
+.tabla .d {
+  text-align: right;
+}
+
+.copiar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.copiarFila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.copiarIcono {
+  display: inline-flex;
+  animation: asomar 0.2s var(--curva) both;
+}
+
+.copiarEstado {
+  color: var(--ok);
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 1.45em;
+}
+
+.vistaNumeros {
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--fondo);
+  border: 1px solid var(--divisor);
+  border-radius: 10px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  tab-size: 16;
+  white-space: pre;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* ───────── Equipo ───────── */
+
+.equipoRejilla {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+.ranking {
+  container-type: inline-size;
+}
+
+.personas {
+  display: flex;
+  flex-direction: column;
+}
+
+.persona {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "puesto nombre ventas"
+    "puesto meta meta";
+  column-gap: 12px;
+  row-gap: 10px;
+  align-items: center;
+  padding-block: 14px;
+  border-bottom: 1px solid var(--divisor);
+}
+
+.persona:last-child {
+  border-bottom: 0;
+}
+
+.puesto {
+  grid-area: puesto;
+  align-self: start;
+  color: var(--suave);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.persona:first-child .puesto {
+  color: var(--marca);
+}
+
+.personaNombre {
+  grid-area: nombre;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.personaVentas {
+  grid-area: ventas;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 16px;
+  text-align: right;
+}
+
+.meta {
+  grid-area: meta;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.metaBarra {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--divisor);
+  overflow: hidden;
+}
+
+.metaRelleno {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--marca);
+  transform-origin: left center;
+  transform: scaleX(var(--p, 1));
+}
+
+.metaTexto {
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@container (min-width: 600px) {
+  .persona {
+    grid-template-columns: 28px minmax(0, 1fr) auto minmax(0, 220px);
+    grid-template-areas: "puesto nombre ventas meta";
+    column-gap: 20px;
+  }
+
+  .puesto {
+    align-self: center;
+  }
+}
+
+/* Las barras se llenan hasta el cumplimiento de cada persona. */
+.raiz[data-animar] .ranking:not([data-visto]) .metaRelleno {
+  transform: scaleX(0);
+}
+
+.raiz[data-animar] .ranking[data-visto] .metaRelleno {
+  animation: llenar 0.6s var(--curva) both;
+  animation-delay: calc(350ms + var(--i) * 120ms);
+}
+
+.raiz[data-animar] .ranking[data-visto] .persona {
+  animation: subir 0.4s var(--curva) both;
+  animation-delay: calc(120ms + var(--i) * 90ms);
+}
+
+.listaPendientes {
+  display: flex;
+  flex-direction: column;
+}
+
+.listaPendientes li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--divisor);
+  font-size: 15px;
+}
+
+.listaPendientes li:last-child {
+  border-bottom: 0;
+}
+
+.pendienteIcono {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--marca-suave);
+  color: var(--marca);
+}
+
+.raiz[data-animar] .pendientes[data-visto] li {
+  animation: subir 0.4s var(--curva) both;
+  animation-delay: 300ms;
+}
+
+.raiz[data-animar] .pendientes[data-visto] li:nth-child(2) {
+  animation-delay: 420ms;
+}
+
+.raiz[data-animar] .pendientes[data-visto] li:nth-child(3) {
+  animation-delay: 540ms;
+}
+
+/* ───────── Lo que no hace ───────── */
+
+.noHace {
+  display: grid;
+  column-gap: 48px;
+}
+
+.noHaceFila {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block: 20px;
+  border-top: 1px solid var(--borde);
+}
+
+.noHaceFila dt {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.noHaceFila dd {
+  color: var(--suave);
+}
+
+.garantias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+}
+
+.garantias li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.garantias svg {
+  color: var(--marca);
+}
+
+/* ───────── Cierre ───────── */
+
+.cierreFinal {
+  padding-block: 80px;
+}
+
+.cierreRejilla {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+
+.cierreTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.granChulito {
+  width: 72px;
+  height: 72px;
+  color: var(--marca);
+}
+
+.granChulito svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.raiz[data-animar] .cierreFinal:not([data-visto]) .trazoGrande {
+  stroke-dashoffset: 1.2;
+}
+
+.raiz[data-animar] .cierreFinal[data-visto] .trazoGrande {
+  animation: trazar 0.6s var(--curva) 0.35s both;
+}
+
+/* ───────── Pie ───────── */
+
+.pie {
+  border-top: 1px solid var(--divisor);
+  background: var(--fondo);
+  padding-block: 48px;
+}
+
+.pieRejilla {
+  display: grid;
+  gap: 32px;
+}
+
+.pieMarca {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 26em;
+}
+
+.pieContacto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pieContacto a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  color: var(--texto);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.pieContacto a:hover {
+  color: var(--marca);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pieContacto svg {
+  color: var(--suave);
+}
+
+.pieFirma {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* El sello necesita aire alrededor (la mitad del alto del mamut, según el kit). */
+.sello {
+  display: inline-flex;
+  padding-block: 12px;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.selloImagen {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+
+/* ───────── Contador ───────── */
+
+.contador {
+  display: inline-grid;
+  justify-items: start;
+}
+
+.contadorFin {
+  justify-items: end;
+}
+
+.contador > [aria-hidden] {
+  grid-area: 1 / 1;
+}
+
+.contadorFantasma {
+  visibility: hidden;
+}
+
+/* ───────── Tamaños ───────── */
+
+@media (min-width: 640px) {
+  .fuente {
+    grid-template-columns: minmax(0, 15em) minmax(0, 1fr);
+    gap: 24px;
+    align-items: baseline;
+  }
+
+  .tarjeta {
+    padding: 20px;
+  }
+
+  .cifras {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 760px) {
+  .nav {
+    display: flex;
+  }
+
+  .noHace {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pieRejilla {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .cierreRejilla {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .granChulito {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+@media (min-width: 960px) {
+  .portada {
+    padding-block: 80px 96px;
+  }
+
+  .portadaRejilla {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 48px;
+  }
+
+  .seccion {
+    padding-block: 96px;
+  }
+
+  .cierreFinal {
+    padding-block: 112px;
+  }
+
+  .dosColumnas {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 48px;
+  }
+
+  /* En dos columnas el título acompaña mientras se recorre el ejemplo de la derecha. */
+  .dosColumnas > .cabezaSeccion {
+    position: sticky;
+    top: 112px;
+  }
+
+  .cifras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .equipoRejilla {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 24px;
+  }
+
+  .tarjeta {
+    border-radius: 12px;
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ancho {
+    padding-inline: 48px;
+  }
+}
+
+/* ───────── Movimientos ───────── */
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes asomar {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes irse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* El chulito se dibuja: el trazo usa pathLength=1 y un hueco de 2, así que 1,2 lo deja
+   del todo afuera (sin el puntito de la punta redonda) y 0 lo muestra completo. */
+@keyframes trazar {
+  from {
+    stroke-dashoffset: 1.2;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes llenar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(var(--p, 1));
+  }
+}
+
+@keyframes linea {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
