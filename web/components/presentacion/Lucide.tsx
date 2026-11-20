@@ -63,6 +63,29 @@ const TRAZOS: Record<string, ReactNode> = {
       <path d="M16 18h.01" />
     </>
   ),
+  landmark: (
+    <>
+      <line x1="3" x2="21" y1="22" y2="22" />
+      <line x1="6" x2="6" y1="18" y2="11" />
+      <line x1="10" x2="10" y1="18" y2="11" />
+      <line x1="14" x2="14" y1="18" y2="11" />
+      <line x1="18" x2="18" y1="18" y2="11" />
+      <polygon points="12 2 20 7 4 7" />
+    </>
+  ),
+  "credit-card": (
+    <>
+      <rect width="20" height="14" x="2" y="5" rx="2" />
+      <line x1="2" x2="22" y1="10" y2="10" />
+    </>
+  ),
+  pause: (
+    <>
+      <rect x="14" y="4" width="4" height="16" rx="1" />
+      <rect x="6" y="4" width="4" height="16" rx="1" />
+    </>
+  ),
+  play: <polygon points="6 3 20 12 6 21 6 3" />,
   "clipboard-list": (
     <>
       <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />

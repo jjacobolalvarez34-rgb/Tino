@@ -131,16 +131,34 @@
   text-decoration: none;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .boton:hover {
   background: var(--marca-hover);
   border-color: var(--marca-hover);
+  box-shadow: 0 10px 22px -14px rgba(116, 48, 95, 0.7);
 }
 
 .boton:active {
-  transform: translateY(1px);
+  transform: scale(0.97);
+}
+
+.boton svg,
+.botonTexto svg {
+  transition: transform 0.2s var(--curva);
+}
+
+.boton:hover svg {
+  transform: translate(2px, -2px);
+}
+
+.botonTexto:hover svg {
+  transform: translateY(3px);
+}
+
+.botonTexto:active {
+  transform: scale(0.97);
 }
 
 .grande {
@@ -159,6 +177,7 @@
 .secundario:hover {
   background: var(--marca-suave);
   border-color: var(--marca);
+  box-shadow: none;
 }
 
 .botonTexto {
@@ -173,7 +192,7 @@
   font-weight: 700;
   text-decoration: none;
   touch-action: manipulation;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .botonTexto:hover {
@@ -190,9 +209,74 @@
 /* ───────── Textos ───────── */
 
 .antetitulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--marca);
   font-size: 15px;
   font-weight: 700;
+}
+
+.antetitulo::before {
+  content: "";
+  flex: none;
+  width: 24px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: left center;
+}
+
+.portada .antetitulo::before {
+  animation: linea 0.5s var(--curva) 0.1s both;
+}
+
+.raiz[data-animar] [data-revelar]:not([data-visto]) .antetitulo::before {
+  transform: scaleX(0);
+}
+
+.raiz[data-animar] [data-revelar][data-visto] .antetitulo::before {
+  animation: linea 0.5s var(--curva) 0.15s both;
+}
+
+/* Máscara de los títulos de sección: el texto sube desde abajo de su propia caja. */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.12em;
+  margin-block: -0.12em;
+}
+
+.mascaraTexto {
+  display: block;
+}
+
+.raiz[data-animar] [data-revelar]:not([data-visto]) .mascaraTexto {
+  transform: translateY(110%);
+}
+
+.raiz[data-animar] [data-revelar][data-visto] .mascaraTexto {
+  animation: subirMascara 0.6s var(--curva) 0.08s both;
+}
+
+.simbolo_ok {
+  color: var(--ok);
+}
+
+.simbolo_revisar {
+  color: var(--revisar);
+}
+
+.simbolo_mal {
+  color: var(--mal);
+}
+
+.simbolo_espera {
+  color: var(--espera);
+}
+
+.simbolo_neutro {
+  color: var(--neutro);
 }
 
 .tituloSeccion {
@@ -364,12 +448,78 @@
 /* ───────── Portada ───────── */
 
 .portada {
-  padding-block: 48px 64px;
+  position: relative;
+  isolation: isolate;
+  padding-block: 40px 56px;
+}
+
+/* Fondo de la portada: renglones de libro contable, el margen del cuaderno en rosa y dos
+   luces cálidas (ciruela suave y el rosa del chulito) que se corren muy despacio. Todo se
+   desvanece hacia los bordes para no ensuciar el texto. */
+.portadaFondo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.renglones {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 35px, rgba(116, 48, 95, 0.07) 35px, rgba(116, 48, 95, 0.07) 36px);
+  -webkit-mask-image: radial-gradient(120% 90% at 70% 35%, #000 25%, transparent 78%);
+  mask-image: radial-gradient(120% 90% at 70% 35%, #000 25%, transparent 78%);
+  animation: aparecer 0.6s ease both;
+}
+
+/* El margen del cuaderno: una línea rosa en el espacio libre a la izquierda del texto. En
+   pantallas angostas no hay ese espacio y no se pinta, para no cruzar las letras. */
+.margenCuaderno {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: max(24px, calc(50% - 640px));
+  width: 1px;
+  background: linear-gradient(180deg, rgba(201, 155, 187, 0), rgba(201, 155, 187, 0.6) 20%, rgba(201, 155, 187, 0.6) 70%, rgba(201, 155, 187, 0));
+  transform-origin: top center;
+  animation: bajar 0.6s var(--curva) 0.1s both;
+}
+
+@media (min-width: 1024px) {
+  .margenCuaderno {
+    display: block;
+  }
+}
+
+.luz {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.luzUna {
+  width: 720px;
+  height: 720px;
+  right: -200px;
+  top: -160px;
+  background: radial-gradient(closest-side, rgba(243, 228, 238, 0.95), rgba(243, 228, 238, 0));
+  animation: deriva 22s ease-in-out infinite alternate;
+}
+
+.luzOtra {
+  width: 520px;
+  height: 520px;
+  left: -180px;
+  bottom: -220px;
+  background: radial-gradient(closest-side, rgba(233, 198, 220, 0.4), rgba(233, 198, 220, 0));
+  animation: deriva 26s ease-in-out -9s infinite alternate-reverse;
 }
 
 .portadaRejilla {
   display: grid;
-  gap: 48px;
+  gap: 32px;
   align-items: center;
 }
 
@@ -386,6 +536,21 @@
   letter-spacing: -0.03em;
   text-wrap: balance;
   max-width: 15ch;
+}
+
+/* Cada palabra del titular sube desde detrás de su máscara, 45 ms después de la anterior. */
+.palabra {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-block: 0.1em 0.14em;
+  margin-block: -0.1em -0.14em;
+}
+
+.palabra > span {
+  display: inline-block;
+  animation: subirMascara 0.6s var(--curva) both;
+  animation-delay: calc(120ms + var(--w) * 45ms);
 }
 
 .titularSuave {
@@ -405,18 +570,250 @@
   animation-delay: var(--d, 0ms);
 }
 
-.cierre {
-  max-width: 520px;
+/* ───────── Escena de la portada ─────────
+   Capas: la pila (cierre de hoy y, detrás, el de ayer), el aviso que llega arriba y el
+   anillo de meta abajo. Cada capa se corre según su profundidad --k con el cursor (--px,
+   --py) y con el scroll (--sy); las variables las pone EscenaPortada.tsx. */
+
+.escena {
+  --px: 0;
+  --py: 0;
+  --sy: 0;
+  position: relative;
   width: 100%;
+  max-width: 540px;
   justify-self: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.capa {
+  transform: translate3d(
+    calc(var(--px) * var(--k, 0) * 10px),
+    calc((var(--py) * 10px - var(--sy) * 70px) * var(--k, 0)),
+    0
+  );
+  will-change: transform;
+}
+
+.capaPila {
+  position: relative;
+  z-index: 1;
+}
+
+.pila {
+  position: relative;
+}
+
+.capaFantasma {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.fantasma {
+  height: 100%;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  background: var(--superficie);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  translate: -10px 14px;
+  rotate: -2deg;
+  opacity: 0.75;
+}
+
+.rayaFantasma {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--divisor);
+}
+
+.cierre {
+  width: 100%;
+  box-shadow: 0 30px 60px -40px rgba(34, 22, 31, 0.35);
+}
+
+/* Lo que flota (aviso y anillo) sube y baja 6 px en 7 s, cada uno a su ritmo. */
+.flota {
+  animation: flotar 7s ease-in-out infinite alternate;
+  animation-delay: var(--f, 0s);
+}
+
+.capaAviso {
+  order: -1;
+  position: relative;
+  z-index: 3;
+  align-self: flex-end;
+  width: min(310px, 90%);
+  margin-bottom: -14px;
+}
+
+.capaMeta {
+  position: relative;
+  z-index: 3;
+  align-self: flex-end;
+  width: min(270px, 84%);
+  margin-top: -14px;
+  margin-right: 12px;
+}
+
+.avisos {
+  display: grid;
+}
+
+.aviso,
+.metaTarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 18px 40px -22px rgba(34, 22, 31, 0.35), 0 2px 6px rgba(34, 22, 31, 0.05);
+}
+
+/* Los avisos ocupan la misma celda y se turnan: el que llega sube, el que se va sale hacia
+   arriba. */
+.aviso {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  transition: opacity 0.45s var(--curva), transform 0.45s var(--curva);
+}
+
+.avisoActivo {
+  opacity: 1;
+  transform: none;
+}
+
+.avisoSale {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.98);
+  transition-duration: 0.3s;
+}
+
+.avisoIcono {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--marca-suave);
+  color: var(--marca);
+}
+
+.avisoCuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.avisoCuerpo strong {
+  font-size: 16px;
+}
+
+.avisoPie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.avisoEstado {
+  display: grid;
+  justify-items: end;
+}
+
+.avisoChip {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.3s var(--curva), transform 0.3s var(--curva);
+}
+
+.avisoDetalle {
+  color: var(--suave);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease 0.1s, transform 0.3s var(--curva) 0.1s;
+}
+
+.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.metaTarjeta {
+  align-items: center;
+}
+
+.anillo {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.anillo svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.anilloFondo {
+  fill: none;
+  stroke: var(--divisor);
+  stroke-width: 5;
+}
+
+/* El anillo se llena hasta el cumplimiento (pathLength=1). */
+.anilloTrazo {
+  fill: none;
+  stroke: var(--marca);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: calc(1 - var(--meta, 1));
+  animation: anilloLlenar 0.6s var(--curva) 1.5s both;
+}
+
+.anilloCifra {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.metaCuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 15px;
 }
 
 .puntos {
+  position: relative;
+  z-index: 0;
   display: flex;
   flex-direction: column;
 }
 
 .punto {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -426,6 +823,39 @@
   border-bottom: 1px solid var(--divisor);
   animation: subir 0.4s var(--curva) both;
   animation-delay: calc(400ms + var(--i) * 110ms);
+}
+
+/* Cuando un aviso se concilia, la fila de su punto se ilumina con ciruela suave. */
+.punto::before {
+  content: "";
+  position: absolute;
+  inset: 2px -10px;
+  z-index: -1;
+  border-radius: 10px;
+  background: var(--marca-suave);
+  opacity: 0;
+  transform: scaleX(0.96);
+  transition: opacity 0.45s ease, transform 0.45s var(--curva);
+}
+
+.puntoDestacado::before {
+  opacity: 1;
+  transform: none;
+}
+
+/* La causa del descuadre aparece sola, después de los chips. */
+.puntoCausa {
+  display: block;
+  overflow: hidden;
+  color: var(--mal);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.puntoCausa > span {
+  display: block;
+  animation: subirMascara 0.5s var(--curva) 2.1s both;
 }
 
 .puntoNombre {
@@ -854,7 +1284,7 @@
 }
 
 .raiz[data-animar] .escenaDescuadres[data-visto] .sinCausa {
-  animation: subir 0.5s var(--curva) 2.2s both;
+  animation: aparecer 0.5s ease 2.2s both;
 }
 
 /* ───────── Excel ───────── */
@@ -1293,6 +1723,10 @@
 /* ───────── Tamaños ───────── */
 
 @media (min-width: 640px) {
+  .pausaTexto {
+    display: inline;
+  }
+
   .fuente {
     grid-template-columns: minmax(0, 15em) minmax(0, 1fr);
     gap: 24px;
@@ -1335,12 +1769,22 @@
 
 @media (min-width: 960px) {
   .portada {
-    padding-block: 80px 96px;
+    padding-block: 64px 80px;
   }
 
   .portadaRejilla {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     gap: 48px;
+  }
+
+  .capaAviso {
+    margin-bottom: -36px;
+    margin-right: -16px;
+  }
+
+  .capaMeta {
+    margin-top: -24px;
+    margin-right: 32px;
   }
 
   .seccion {
@@ -1380,6 +1824,129 @@
 @media (min-width: 1024px) {
   .ancho {
     padding-inline: 48px;
+  }
+}
+
+/* ───────── Línea de avance, franja y pausa ───────── */
+
+/* Línea ciruela bajo la cabecera que crece con lo recorrido (Movimiento.tsx). */
+.avance {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--marca);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+/* Franja que pasa despacio bajo la portada. Se detiene con el cursor encima, con el foco
+   dentro o con el botón de pausa. */
+.franja {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 20px 6px 0;
+  border-block: 1px solid var(--divisor);
+  background: var(--superficie);
+}
+
+.franjaVentana {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+}
+
+.franjaPista {
+  display: flex;
+  width: max-content;
+  animation: desplazar 80s linear infinite;
+}
+
+.franja:hover .franjaPista,
+.franja:focus-within .franjaPista {
+  animation-play-state: paused;
+}
+
+.franjaLista {
+  display: flex;
+  gap: 48px;
+  padding-right: 48px;
+  min-height: 44px;
+  align-items: center;
+}
+
+.franjaLista li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pausa {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.pausa:hover {
+  background: var(--marca-suave);
+  border-color: var(--foco);
+}
+
+.pausa:active {
+  transform: scale(0.96);
+}
+
+.pausaTexto {
+  display: none;
+}
+
+/* Con el movimiento en pausa se detiene todo lo que se mueve solo y sin fin. */
+.raiz[data-pausa] .luz,
+.raiz[data-pausa] .flota,
+.raiz[data-pausa] .franjaPista {
+  animation-play-state: paused;
+}
+
+/* ───────── Entradas de escenas y tarjetas que reaccionan al cursor ───────── */
+
+/* Las escenas (ejemplos grandes) entran desde un poco más abajo y algo más pequeñas. */
+.raiz[data-animar] [data-revelar="escena"] {
+  transform: translateY(28px) scale(0.98);
+}
+
+/* Con mouse, la tarjeta se inclina hasta 1,5 grados hacia el cursor (Escenario.tsx). */
+.raiz [data-inclinar] {
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.3s var(--curva), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .raiz [data-inclinar]:hover {
+    border-color: var(--foco);
+    box-shadow: 0 24px 48px -32px rgba(34, 22, 31, 0.3);
   }
 }
 
@@ -1451,5 +2018,57 @@
   }
   to {
     transform: scaleX(1);
+  }
+}
+
+@keyframes subirMascara {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes flotar {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes deriva {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-60px, 40px, 0) scale(1.06);
+  }
+}
+
+@keyframes desplazar {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Sin 'to': termina en el valor de la regla, que depende de la meta de cada persona. */
+@keyframes anilloLlenar {
+  from {
+    stroke-dashoffset: 1.2;
+  }
+}
+
+@keyframes bajar {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
   }
 }

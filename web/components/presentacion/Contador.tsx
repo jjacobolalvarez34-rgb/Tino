@@ -2,9 +2,11 @@
 // Un número que cuenta desde cero cuando entra a la pantalla (600 ms).
 //
 // El servidor escribe el valor final, así que sin JavaScript se lee bien. Si el número ya
-// está en pantalla al cargar, no se reinicia (evita que se vea saltar a cero). El lector de
-// pantalla siempre lee el valor final; la cifra que se mueve está oculta para él, y una
-// copia invisible del valor final reserva el ancho para que nada se corra.
+// está en pantalla al cargar, no se reinicia (evita que se vea saltar a cero), salvo que
+// sea de la portada (alCargar): esos están ocultos por su propia entrada mientras la
+// página despierta, y cuentan cuando terminan de entrar. El lector de pantalla siempre lee
+// el valor final; la cifra que se mueve está oculta para él, y una copia invisible del
+// valor final reserva el ancho para que nada se corra.
 import { useEffect, useRef, useState } from "react";
 import { formatear, type Formato } from "./ejemplo";
 import s from "./presentacion.module.css";
@@ -15,12 +17,14 @@ export function Contador({
   retraso = 0,
   duracion = 600,
   alinear = "inicio",
+  alCargar = false,
 }: {
   valor: number;
   formato?: Formato;
   retraso?: number;
   duracion?: number;
   alinear?: "inicio" | "fin";
+  alCargar?: boolean;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [mostrado, setMostrado] = useState(valor);
@@ -29,8 +33,9 @@ export function Contador({
     const el = ref.current;
     if (!el || !("IntersectionObserver" in window)) return;
     const caja = el.getBoundingClientRect();
-    if (caja.top < window.innerHeight && caja.bottom > 0) return;
+    if (!alCargar && caja.top < window.innerHeight && caja.bottom > 0) return;
 
+    const montado = performance.now();
     setMostrado(0);
     let cuadro = 0;
     let espera = 0;
@@ -40,6 +45,8 @@ export function Contador({
       ([entrada]) => {
         if (!entrada?.isIntersecting) return;
         observador.disconnect();
+        // En la portada el retraso cuenta desde que cargó la página, no desde que se ve.
+        const falta = alCargar ? Math.max(0, retraso - (performance.now() - montado)) : retraso;
         espera = window.setTimeout(() => {
           const inicio = performance.now();
           const avanzar = (ahora: number) => {
@@ -49,7 +56,7 @@ export function Contador({
             if (t < 1) cuadro = requestAnimationFrame(avanzar);
           };
           cuadro = requestAnimationFrame(avanzar);
-        }, retraso);
+        }, falta);
       },
       { threshold: 0.6 },
     );
@@ -59,7 +66,7 @@ export function Contador({
       window.clearTimeout(espera);
       cancelAnimationFrame(cuadro);
     };
-  }, [valor, retraso, duracion]);
+  }, [valor, retraso, duracion, alCargar]);
 
   const final = formatear(valor, formato);
   return (

@@ -1,16 +1,21 @@
-// Página pública de presentación de Tino (ruta "/"). Componente de servidor: lo único que
-// corre en el navegador es Escenario (entradas al hacer scroll), Contador y CopiarNumeros.
+// Página pública de presentación de Tino (ruta "/"). Componente de servidor: lo que corre
+// en el navegador es Escenario (entradas, inclinación y pausa), EscenaPortada, Contador,
+// CopiarNumeros y Movimiento (línea de avance y botón de pausa).
 // Todos los datos son de ejemplo e inventados (ver ejemplo.ts).
-import type { CSSProperties, ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { MAMUT } from "@/lib/mamut";
+import { Chip, Simbolo } from "./Chip";
 import { Contador } from "./Contador";
 import { CopiarNumeros } from "./CopiarNumeros";
+import { EscenaPortada } from "./EscenaPortada";
 import { Escenario } from "./Escenario";
 import { Icono } from "./Lucide";
 import { Chulito, LogoTino, SelloMamut } from "./Marcas";
+import { Avance, BotonPausa } from "./Movimiento";
 import {
   CIERRE,
   EQUIPO,
+  FRANJA,
   PAGOS,
   RESUMEN_PAGOS,
   TOTAL_DIA,
@@ -18,31 +23,12 @@ import {
   formatear,
   sumar,
   totalPunto,
-  type Estado,
 } from "./ejemplo";
 import s from "./presentacion.module.css";
 
 // Variables CSS por elemento (--i para escalonar, --p para las barras).
 const v = (variables: Record<string, string | number>) => variables as CSSProperties;
 const pesos = (n: number) => formatear(n, "pesos");
-
-const SIMBOLO: Record<Estado, string> = { ok: "●", revisar: "▲", mal: "■", espera: "—", neutro: "—" };
-const CLASE_CHIP: Record<Estado, string> = {
-  ok: s.chipOk,
-  revisar: s.chipRevisar,
-  mal: s.chipMal,
-  espera: s.chipEspera,
-  neutro: s.chipNeutro,
-};
-
-function Chip({ estado, children }: { estado: Estado; children: ReactNode }) {
-  return (
-    <span className={`${s.chip} ${CLASE_CHIP[estado]}`}>
-      <span aria-hidden="true">{SIMBOLO[estado]}</span>
-      {children}
-    </span>
-  );
-}
 
 // "Ir a la demo": abre la pantalla de entrada del programa en otra pestaña. Quien no tenga
 // usuario se queda ahí.
@@ -72,11 +58,30 @@ function CabezaSeccion({
   return (
     <div className={s.cabezaSeccion} data-revelar="">
       <p className={s.antetitulo}>{antetitulo}</p>
+      {/* El título sube desde detrás de una máscara cuando la sección entra. */}
       <h2 id={id} className={s.tituloSeccion}>
-        {titulo}
+        <span className={s.mascara}>
+          <span className={s.mascaraTexto}>{titulo}</span>
+        </span>
       </h2>
       {children}
     </div>
+  );
+}
+
+// Titular de la portada: cada palabra sube desde detrás de su propia máscara, en orden.
+// El texto sigue siendo un solo h1 que el lector de pantalla lee de corrido.
+function Palabras({ texto, desde = 0 }: { texto: string; desde?: number }) {
+  return (
+    <>
+      {texto.split(" ").map((palabra, i) => (
+        <Fragment key={i}>
+          <span className={s.palabra}>
+            <span style={v({ "--w": desde + i })}>{palabra}</span>
+          </span>{" "}
+        </Fragment>
+      ))}
+    </>
   );
 }
 
@@ -96,86 +101,75 @@ function Cabecera() {
         </nav>
         <BotonDemo variante="secundario" />
       </div>
+      <Avance />
     </header>
-  );
-}
-
-function CierreDelDia() {
-  return (
-    <div className={`${s.tarjeta} ${s.cierre} ${s.entra}`} style={v({ "--d": "120ms" })} role="group" aria-label="Ejemplo de cierre del día con cuatro puntos">
-      <div className={s.tarjetaCabeza}>
-        <div>
-          <p className={s.subtitulo}>Cierre del día</p>
-          <p className={s.pequeno}>{CIERRE.fecha} · 4 puntos · ejemplo</p>
-        </div>
-      </div>
-      <ul className={s.puntos}>
-        {CIERRE.puntos.map((p, i) => (
-          <li key={p.punto} className={s.punto} style={v({ "--i": i })}>
-            <span className={s.puntoNombre}>
-              <strong>{p.punto}</strong>
-              <span className={s.pequeno}>
-                {p.estado === "mal"
-                  ? `Falta ${pesos(-p.descuadre)}`
-                  : p.estado === "revisar"
-                    ? "Una transferencia por confirmar"
-                    : "Todo coincide"}
-              </span>
-            </span>
-            <span className={s.puntoValor}>
-              <span className={s.num}>{pesos(totalPunto(p))}</span>
-              <span className={s.puntoChip}>
-                <Chip estado={p.estado}>{p.chip}</Chip>
-              </span>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <div className={s.totalDia}>
-        <span className={s.pequeno}>Total del día</span>
-        <span className={`${s.cifraGrande} ${s.num}`}>{pesos(TOTAL_DIA)}</span>
-      </div>
-      <div className={s.revisado}>
-        <span className={s.revisadoMarca}>
-          <Chulito clase={s.trazoRevisado} />
-        </span>
-        <span>
-          <strong>Revisado a las {CIERRE.revisado}</strong>
-          <span className={s.pequeno}>1 descuadre, con su causa probable</span>
-        </span>
-      </div>
-    </div>
   );
 }
 
 function Portada() {
   return (
     <section id="inicio" className={s.portada} aria-labelledby="titulo-portada">
+      {/* Fondo: renglones de libro contable con su margen, y dos luces cálidas que se mueven
+          muy despacio. Decorativo. */}
+      <div className={s.portadaFondo} aria-hidden="true">
+        <span className={s.renglones} />
+        <span className={s.margenCuaderno} />
+        <span className={`${s.luz} ${s.luzUna}`} />
+        <span className={`${s.luz} ${s.luzOtra}`} />
+      </div>
       <div className={`${s.ancho} ${s.portadaRejilla}`}>
         <div className={s.portadaTexto}>
           <p className={`${s.antetitulo} ${s.entra}`}>Cuadre diario para negocios con varios puntos de venta</p>
-          <h1 id="titulo-portada" className={`${s.titular} ${s.entra}`} style={v({ "--d": "60ms" })}>
-            Cada noche, punto por punto, sabe si la plata cuadró.{" "}
-            <span className={s.titularSuave}>Y si no, por qué.</span>
+          <h1 id="titulo-portada" className={s.titular}>
+            <Palabras texto="Cada noche, punto por punto, sabe si la plata cuadró." />
+            <span className={s.titularSuave}>
+              <Palabras texto="Y si no, por qué." desde={10} />
+            </span>
           </h1>
-          <p className={`${s.entrada} ${s.entra}`} style={v({ "--d": "140ms" })}>
+          <p className={`${s.entrada} ${s.entra}`} style={v({ "--d": "520ms" })}>
             Tino junta el Excel de cada punto, el programa de facturación, los extractos de sus bancos, las
             liquidaciones de los datáfonos y los avisos de transferencia. Concilia los pagos y le pone arriba lo
             que necesita atención.
           </p>
-          <div className={`${s.acciones} ${s.entra}`} style={v({ "--d": "220ms" })}>
+          <div className={`${s.acciones} ${s.entra}`} style={v({ "--d": "620ms" })}>
             <BotonDemo variante="grande" />
             <a href="#conciliar" className={s.botonTexto}>
               Ver cómo concilia
               <Icono nombre="arrow-down" tamano={18} />
             </a>
           </div>
-          <p className={`${s.pequeno} ${s.entra}`} style={v({ "--d": "280ms" })}>
+          <p className={`${s.pequeno} ${s.entra}`} style={v({ "--d": "700ms" })}>
             La demo se abre en otra pestaña y pide usuario y contraseña.
           </p>
         </div>
-        <CierreDelDia />
+        <EscenaPortada />
       </div>
+    </section>
+  );
+}
+
+// Franja que pasa despacio bajo la portada con lo que Tino resuelve en un día. La primera
+// copia es la que lee el lector de pantalla; la segunda solo completa la vuelta.
+function Franja() {
+  const lista = (copia: boolean) => (
+    <ul className={s.franjaLista} aria-hidden={copia || undefined}>
+      {FRANJA.map((f, i) => (
+        <li key={i}>
+          <Simbolo estado={f.estado} />
+          {f.texto}
+        </li>
+      ))}
+    </ul>
+  );
+  return (
+    <section className={s.franja} aria-label="Ejemplos de lo que Tino revisa en un día">
+      <div className={s.franjaVentana}>
+        <div className={s.franjaPista}>
+          {lista(false)}
+          {lista(true)}
+        </div>
+      </div>
+      <BotonPausa />
     </section>
   );
 }
@@ -258,7 +252,8 @@ function Conciliacion() {
           <p className={s.pequeno}>Cifras de un día de ejemplo.</p>
         </CabezaSeccion>
 
-        <div className={`${s.tarjeta} ${s.escenaPagos}`} data-revelar="" role="group" aria-label="Ejemplo: seis pagos del sábado, conciliados">
+        <div className={s.escenaPagos} data-revelar="escena">
+          <div className={s.tarjeta} data-inclinar="" role="group" aria-label="Ejemplo: seis pagos del sábado, conciliados">
           <div className={s.tarjetaCabeza}>
             <div>
               <p className={s.subtitulo}>Pagos del sábado</p>
@@ -283,6 +278,7 @@ function Conciliacion() {
               </li>
             ))}
           </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -304,8 +300,8 @@ function Descuadres() {
           </p>
         </CabezaSeccion>
 
-        <div className={s.escenaDescuadres} data-revelar="">
-          <article className={`${s.tarjeta} ${s.descuadre}`} aria-label="Ejemplo: descuadre con causa probable">
+        <div className={s.escenaDescuadres} data-revelar="escena">
+          <article className={`${s.tarjeta} ${s.descuadre}`} data-inclinar="" aria-label="Ejemplo: descuadre con causa probable">
             <div className={s.tarjetaCabeza}>
               <div>
                 <p className={s.subtitulo}>Punto Plaza</p>
@@ -342,7 +338,7 @@ function Descuadres() {
             <p className={s.descuadrePie}>Queda abierto hasta que una persona lo confirme, con nota y nombre.</p>
           </article>
 
-          <article className={`${s.tarjeta} ${s.descuadre} ${s.sinCausa}`} aria-label="Ejemplo: descuadre sin causa clara">
+          <article className={`${s.tarjeta} ${s.descuadre} ${s.sinCausa}`} data-inclinar="" aria-label="Ejemplo: descuadre sin causa clara">
             <div className={s.tarjetaCabeza}>
               <div>
                 <p className={s.subtitulo}>Punto Norte</p>
@@ -371,7 +367,7 @@ function Excel() {
             puntos, separados por tabulación. Se pega en Excel y las columnas se pueden sumar. Pruébelo aquí.
           </p>
         </CabezaSeccion>
-        <div className={`${s.tarjeta} ${s.tablaTarjeta}`} data-revelar="">
+        <div className={`${s.tarjeta} ${s.tablaTarjeta}`} data-revelar="escena">
           <div className={s.caja} role="region" aria-labelledby="t-tabla" tabIndex={0}>
             <table className={s.tabla}>
               <caption id="t-tabla" className={s.tablaTitulo}>
@@ -429,7 +425,8 @@ function Equipo() {
           </p>
         </CabezaSeccion>
         <div className={s.equipoRejilla}>
-          <div className={`${s.tarjeta} ${s.ranking}`} data-revelar="" role="group" aria-label="Ejemplo: ranking de ventas de noviembre">
+          <div className={s.ranking} data-revelar="escena">
+          <div className={s.tarjeta} data-inclinar="" role="group" aria-label="Ejemplo: ranking de ventas de noviembre">
             <div className={s.tarjetaCabeza}>
               <div>
                 <p className={s.subtitulo}>Ventas de noviembre</p>
@@ -462,8 +459,10 @@ function Equipo() {
               ))}
             </ol>
           </div>
+          </div>
 
-          <div className={`${s.tarjeta} ${s.pendientes}`} data-revelar="" style={v({ "--i": 2 })}>
+          <div className={s.pendientes} data-revelar="escena" style={v({ "--i": 2 })}>
+          <div className={s.tarjeta} data-inclinar="">
             <div className={s.tarjetaCabeza}>
               <div>
                 <p className={s.subtitulo}>Pendientes de hoy</p>
@@ -499,6 +498,7 @@ function Equipo() {
                 </span>
               </li>
             </ul>
+          </div>
           </div>
         </div>
       </div>
@@ -608,6 +608,7 @@ export function Presentacion() {
       <Cabecera />
       <main id="contenido">
         <Portada />
+        <Franja />
         <Fuentes />
         <Conciliacion />
         <Descuadres />

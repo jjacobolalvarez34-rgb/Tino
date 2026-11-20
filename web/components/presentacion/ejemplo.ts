@@ -65,3 +65,54 @@ export const EQUIPO = [
   { nombre: "Camila", punto: "Punto Plaza", ventas: 12_700_000, ticket: 71_000, meta: 85 },
   { nombre: "Felipe", punto: "Punto Estación", ventas: 9_800_000, ticket: 52_000, meta: 77 },
 ];
+
+// Avisos que llegan a la portada y se concilian solos, uno tras otro. Inventados y
+// coherentes con el cierre de arriba: Punto Estación queda en "Revisar" por el tercero.
+export const AVISOS = [
+  {
+    origen: "Aviso del banco",
+    icono: "landmark",
+    hora: "19:02",
+    que: "Transferencia de $ 120.000",
+    punto: "Punto Centro",
+    estado: "ok" as Estado,
+    chip: "Verificada",
+    detalle: "Coincide con el Excel del punto",
+  },
+  {
+    origen: "Datáfono",
+    icono: "credit-card",
+    hora: "19:15",
+    que: "Tarjeta de $ 64.000",
+    punto: "Punto Norte",
+    estado: "ok" as Estado,
+    chip: "Verificada",
+    detalle: "Mismo valor y misma hora",
+  },
+  {
+    origen: "Aviso del banco",
+    icono: "landmark",
+    hora: "19:30",
+    que: "Transferencia de $ 250.000",
+    punto: "Punto Estación",
+    estado: "revisar" as Estado,
+    chip: "Revisar",
+    detalle: "En el Excel dice $ 205.000",
+  },
+];
+
+// La persona del anillo de meta en la portada (igual que en la sección Equipo).
+export const META_PORTADA = { nombre: "Andrés", punto: "Punto Norte", meta: 93, dias: 16 };
+
+// Frases de la franja que pasa bajo la portada: cosas que Tino resuelve en un día.
+export const FRANJA: { estado: Estado; texto: string }[] = [
+  { estado: "ok", texto: "Transferencia de $ 120.000 · Punto Centro · 19:02 · verificada" },
+  { estado: "ok", texto: "Tarjeta de $ 64.000 · Punto Norte · 19:15 · verificada" },
+  { estado: "revisar", texto: "Transferencia de $ 250.000 · Punto Estación · en el Excel dice $ 205.000" },
+  { estado: "ok", texto: "Consignación de $ 900.000 · Punto Plaza · está en el extracto" },
+  { estado: "mal", texto: "Punto Plaza · falta $ 85.000 · causa probable: transferencia que no llegó" },
+  { estado: "ok", texto: "Punto Centro · cuadrado" },
+  { estado: "revisar", texto: "Compromiso con Felipe · vence hoy" },
+  { estado: "ok", texto: "Laura · 104 % de la meta" },
+  { estado: "ok", texto: "Punto Norte · cuadrado" },
+];
