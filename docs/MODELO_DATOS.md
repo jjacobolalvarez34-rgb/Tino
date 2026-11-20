@@ -119,7 +119,7 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 | --- | --- | --- |
 | `perfil_fuente` | Cómo leer los reportes de cada empresa: mapeo de columnas. | 0001 |
 | `archivo_importado` | Cada archivo que entra; `hash` único por empresa evita duplicar plata. Se deshace, no se borra. | 0003 |
-| `error_importacion` | Filas que no se pudieron leer y nombres sin reconocer, hasta que alguien los resuelva. | 0003 |
+| `error_importacion` | Filas que no se pudieron leer, nombres y productos sin reconocer y problemas del archivo (`archivo_inconsistente`), hasta que alguien los resuelva. Se resuelven en la web con `resolver_nombre`, `resolver_producto` o `descartar_error` (con nota). | 0003 y 0012 |
 
 ### Operación diaria
 
@@ -152,6 +152,23 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 | `descuadre` | Diferencia esperada contra reportada, con causa, confianza y estado. | 0006 |
 | `descuadre_evidencia` | Las pruebas de cada causa. | 0006 |
 
+### Equipo
+
+| Tabla | Para qué | Migración |
+| --- | --- | --- |
+| `asesora_punto` | En qué puntos está cada persona, con vigencia (`desde`, `hasta`). Puede estar en varios a la vez; sin cruces en el mismo punto. | 0011 |
+| `venta_asesora_dia` | Venta y facturas por persona y día, del reporte de la empresa (perfil). Aparte de `venta` para no contar dos veces (D-048). El día de varias personas se reparte (D-049). Vista `v_venta_asesora`: cuenta el último archivo. | 0011 |
+| `meta_periodo` | Meta por punto o por persona para cualquier período; a mano o desde el Excel con su fila (D-050). | 0011 |
+| `equipo_catalogo` | Temas, criterios de evaluación y tipos de observación de cada empresa. Plantilla: 7 tipos de observación. | 0011 |
+| `seguimiento` | Diagnóstico, objetivo, observación o evaluación de una persona. Privado (D-051). | 0011 |
+| `seguimiento_criterio` | Puntaje de 1 a 5 por criterio de una evaluación. | 0011 |
+| `sesion_formacion`, `sesion_asistente` | Formaciones con fecha, punto (o todos) y asistencia. | 0011 |
+| `compromiso` | Qué, quién responde, fecha límite, prioridad, estado y avance. Se cierra o se anula con nota. | 0011 |
+| `recorrido_usuario` | Qué recorridos guiados vio o saltó cada usuario. Cada uno ve solo lo suyo. | 0011 |
+
+En `empresa_config` (0011): `equipo_reparto` ⚑, los umbrales de "quién necesita apoyo" (empiezan
+vacíos), `equipo_dias_proximos` y `textos` (las palabras de la pantalla de cada empresa).
+
 ### Inventario y personal (fases posteriores)
 
 | Tabla | Para qué |
@@ -163,19 +180,22 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 
 ## Roles y permisos
 
-| Acción | Dueño | Encargada | Finanzas | Asesora | Soporte |
-| --- | --- | --- | --- | --- | --- |
-| Ver datos de su empresa | Todo | Todo | Todo | Su punto y maestros | Todo |
-| Ver la lista de usuarios | Sí | Sí | No | No | Sí |
-| Editar maestros | Sí | Sí | No | No | Sí |
-| Configurar perfiles de fuente | Sí | No | No | No | Sí |
-| Subir archivos | Sí | Sí | Sí | No | Sí |
-| Confirmar conciliaciones | Sí | Sí | Sí | No | Sí |
-| Resolver descuadres | Sí | Sí | Sí | No | Sí |
-| Cerrar el día | Sí | Sí | No | Su punto | No |
-| Desbloquear un día cerrado | Sí | Sí | No | No | No |
-| Ver auditoría | Sí | No | No | No | Sí |
-| Gestionar usuarios | Sí | No | No | No | Sí |
+| Acción | Dueño | Encargada | Finanzas | Asesora | Soporte | Líder | Responsable de punto |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Ver datos de su empresa | Todo | Todo | Todo | Su punto y maestros | Todo | Ventas y equipo de todos los puntos | Ventas y equipo de su punto |
+| Ver la lista de usuarios | Sí | Sí | No | No | Sí | No | No |
+| Editar maestros | Sí | Sí | No | No | Sí | Personas y sus nombres | No |
+| Configurar perfiles de fuente | Sí | No | No | No | Sí | No | No |
+| Subir archivos | Sí | Sí | Sí | No | Sí | No | No |
+| Resolver nombres y productos (0012) | Sí | Sí | Sí | No | Sí | Nombres | No |
+| Confirmar conciliaciones | Sí | Sí | Sí | No | Sí | No | No |
+| Resolver descuadres | Sí | Sí | Sí | No | Sí | No | No |
+| Cerrar el día | Sí | Sí | No | Su punto | No | No | No |
+| Desbloquear un día cerrado | Sí | Sí | No | No | No | No | No |
+| Ver y registrar observaciones, evaluaciones y compromisos | Sí | Sí | No | No | Sí | Sí | Solo su punto |
+| Poner metas y umbrales de equipo | Sí | Sí | No | No | Sí | Sí | No |
+| Ver auditoría | Sí | No | No | No | Sí | No | No |
+| Gestionar usuarios (pantalla Usuarios) | Sí | No | No | No | Sí | No | No |
 
 "Soporte" es el proveedor del sistema (Jacobo). Su acceso a los datos de cada
 cliente debe quedar autorizado en el contrato.
@@ -183,6 +203,8 @@ cliente debe quedar autorizado en el contrato.
 Las reglas se implementan con dos funciones de la base:
 - `app.empresa_actual()`: la empresa del usuario que hace la consulta.
 - `app.rol_actual()`: su rol.
+- `app.ve_punto(punto)` y `app.ve_equipo(punto)` (0011): si puede ver lo de ese punto y su
+  acompañamiento.
 
 ## Plan de migraciones
 
@@ -197,6 +219,9 @@ Las reglas se implementan con dos funciones de la base:
 | `0007_vistas_panel.sql` | Vistas `v_*` para el panel y para copiar a Excel | 4.1 |
 | `0008_extracto_completo.sql` | El extracto entra completo con su tipo y etiqueta; asignar un pago a un punto exige nota | 3.1 |
 | `0009_facturas.sql` | Facturas del programa de facturación (Siigo) como ventas con su id de origen | 2.3 |
+| `0010_caja_del_excel.sql` | La caja del Excel (consignaciones, gastos, base) y la señal de consignación que no aparece | 3.3 |
+| `0011_equipo.sql` | Roles lider y responsable_punto, persona en varios puntos, venta por persona, metas por período, acompañamiento, recorrido | Equipo |
+| `0012_resolver_en_la_web.sql` | Problema del archivo y resolver nombres y productos en un toque | Revisión de la dueña |
 | Siguientes | Costos, inventario y personal, cuando los clientes los pidan | Fases posteriores |
 
 ## Cómo se prueba la separación entre empresas
