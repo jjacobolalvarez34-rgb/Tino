@@ -17,7 +17,7 @@ export default function Entrar() {
     const { error } = await base().auth.signInWithPassword({ email: correo.trim(), password: clave });
     setOcupado(false);
     if (error) setError("Correo o clave incorrectos.");
-    else router.replace("/resumen");
+    else router.replace("/hoy");
   }
 
   return (
