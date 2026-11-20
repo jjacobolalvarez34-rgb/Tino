@@ -1,8 +1,8 @@
 // Información de Mamut Herd, la empresa detrás de Tino. Sale del kit de marca
 // (Tino-datos/mamut/kit/mamut-herd-kit-de-marca/MAMUT-HERD.md). Si cambia allá, se cambia aquí.
 
-// Web de Mamut Herd. Pendiente: mientras esté vacía, el sello se muestra sin enlace.
-export const MAMUT_HERD_URL: string = "";
+// Web de Mamut Herd (20 nov 2026). El sello del pie enlaza aquí, en otra pestaña.
+export const MAMUT_HERD_URL: string = "https://mamutherdpage.vercel.app/#productos";
 
 export const MAMUT = {
   nombre: "Mamut Herd",
