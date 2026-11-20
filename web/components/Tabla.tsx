@@ -58,7 +58,7 @@ export function Tabla<F>({ titulo, columnas, filas, clave, alTocar, avisar, vaci
   return (
     <section className="m-tabla" aria-label={titulo}>
       <div className="m-tabla-barra">
-        <button className="boton texto compacto" onClick={copiar}><Icono id="copiar" />Copiar como números</button>
+        <button className="boton texto compacto" onClick={copiar} data-recorrido="copiar"><Icono id="copiar" />Copiar como números</button>
       </div>
       <div className="m-tabla-escritorio caja">
         <table>

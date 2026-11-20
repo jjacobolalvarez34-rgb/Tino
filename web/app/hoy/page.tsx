@@ -44,7 +44,7 @@ function Hoy() {
   useEffect(() => {
     if (!d || revisado) return;
     setRevisado(true);
-    yaLoVio().then((visto) => { if (!visto) verRecorrido(); });
+    yaLoVio("inicio").then((visto) => { if (!visto) verRecorrido("inicio"); });
   }, [d, revisado, verRecorrido]);
   const [error, setError] = useState("");
 

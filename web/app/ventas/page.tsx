@@ -7,6 +7,7 @@ import { Marco, useMarco } from "@/components/Marco";
 import { Avatar } from "@/components/Avatar";
 import { Icono } from "@/components/Iconos";
 import { Tabla } from "@/components/Tabla";
+import { yaLoVio } from "@/components/Recorrido";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { anterior, hoy, mesDe, metaDelPeriodo, metas, personas, porPersona, ticket, totales, ultimaFecha, ventas,
   type Meta, type Persona, type Totales, type VentaDia } from "@/lib/equipo";
@@ -26,7 +27,8 @@ function Variacion({ v }: { v: number | null }) {
 }
 
 function Ventas() {
-  const { config, avisar, version } = useMarco();
+  const { config, avisar, version, verRecorrido } = useMarco();
+  const [revisado, setRevisado] = useState(false);
   const t = config.textos;
   const router = useRouter();
   const [rango, setRango] = useState<[string, string] | null>(null);
@@ -51,6 +53,13 @@ function Ventas() {
     Promise.all([ventas(...rango), ventas(ad, ah), metas(...rango)])
       .then(([venta, antes, ms]) => setD({ venta, antes, metas: ms })).catch((e) => setError((e as Error).message));
   }, [rango, version]);
+
+  // La primera vez, el recorrido de Ventas sale cuando ya hay datos en pantalla.
+  useEffect(() => {
+    if (!d || revisado) return;
+    setRevisado(true);
+    yaLoVio("ventas").then((visto) => { if (!visto) setTimeout(() => verRecorrido("ventas"), 300); });
+  }, [d, revisado, verRecorrido]);
 
   function mes(n: number) {
     if (!rango) return;
@@ -96,7 +105,7 @@ function Ventas() {
     <>
       <header className="m-encabezado">
         <h1>Ventas</h1>
-        <div className="m-periodo" role="group" aria-label="Período">
+        <div className="m-periodo" role="group" aria-label="Período" data-recorrido="ventas-periodo">
           <button className="m-icono-boton" onClick={() => mes(-1)} aria-label="Mes anterior"><Icono id="izquierda" /></button>
           <span className="m-periodo-texto">{mesTexto}</span>
           <button className="m-icono-boton" onClick={() => mes(1)} aria-label="Mes siguiente"
@@ -107,7 +116,7 @@ function Ventas() {
       {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
       {!d && !error && <div className="m-esqueleto" style={{ height: 120 }} />}
       {d && tot && totAntes && (<>
-        <div className="m-cifras">
+        <div className="m-cifras" data-recorrido="ventas-cifras">
           <div className="m-cifra">
             <span className="m-cifra-valor num">{pesos(tot.venta)}</span>
             <span className="m-cifra-contexto"><Variacion v={cambio(tot.venta, totAntes.venta)} /> frente a {pesos(totAntes.venta)} antes</span>
@@ -124,10 +133,11 @@ function Ventas() {
         {sinPersona > 0 && (
           <p className="nota aviso"><span>▲ {pesos(sinPersona)} de venta no tienen {t.persona}: el nombre del reporte no se reconoció. Resuélvalo en Archivos.</span></p>
         )}
-        <div className="m-segmentos m-segmentos-chicos" role="group" aria-label="Ver por">
+        <div className="m-segmentos m-segmentos-chicos" role="group" aria-label="Ver por" data-recorrido="ventas-vista">
           <button className="m-segmento" aria-pressed={vista === "personas"} onClick={() => setVista("personas")}>Por {t.persona}</button>
           <button className="m-segmento" aria-pressed={vista === "puntos"} onClick={() => setVista("puntos")}>Por {t.punto}</button>
         </div>
+        <div data-recorrido="ventas-tabla">
         {vista === "personas" ? (
           <Tabla titulo={`Ranking por ${t.persona}`} avisar={avisar} clave={(f) => f.id} filas={filasPersonas}
             alTocar={(f) => router.push(`/equipo?p=${f.id}`)} columnas={[
@@ -158,6 +168,7 @@ function Ventas() {
             { clave: "cambio", titulo: "Vs. antes", tipo: "porcentaje", valor: (f) => f.cambio, mostrar: (f) => <Variacion v={f.cambio} /> },
           ]} />
         )}
+        </div>
         <p className="m-contexto">El ticket promedio solo cuenta los días que traen el número de facturas.</p>
       </>)}
     </>

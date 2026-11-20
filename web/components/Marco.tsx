@@ -10,13 +10,13 @@ import { config as leerConfig, type Config } from "@/lib/equipo";
 import { TEXTOS_BASE } from "@/lib/textos";
 import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
-import { iniciarRecorrido } from "./Recorrido";
+import { iniciarRecorrido, recorridoDe, type NombreRecorrido } from "./Recorrido";
 import { Registrar } from "./Registrar";
 
 export type Yo = { id: string; nombre: string; rol: string; empresa_id: string; empresa: string; punto_id: string | null };
 type Contexto = {
   yo: Yo; config: Config; avisar: (texto: string) => void;
-  registrar: (persona?: string, tipo?: string) => void; version: number; verRecorrido: () => void;
+  registrar: (persona?: string, tipo?: string) => void; version: number; verRecorrido: (nombre?: NombreRecorrido) => void;
 };
 const Ctx = createContext<Contexto | null>(null);
 export const useMarco = () => {
@@ -76,12 +76,13 @@ export function Marco({ children }: { children: React.ReactNode }) {
     reloj.current = setTimeout(() => setAviso(""), 2600);
   }, []);
   const registrar = useCallback((persona?: string, tipo?: string) => setReg({ persona, tipo }), []);
-  const verRecorrido = useCallback(() => {
-    if (!yo || !cfg) return;
+  const verRecorrido = useCallback((nombre?: NombreRecorrido) => {
+    const cual = nombre ?? recorridoDe(window.location.pathname);
+    if (!yo || !cfg || !cual) return;
     setMas(false);
     // Espera a que se cierre la hoja de "Más" antes de resaltar.
-    setTimeout(() => iniciarRecorrido({ empresa_id: yo.empresa_id, textos: cfg.textos,
-      alTerminar: () => setReg({ tipo: "compromiso" }) }), 200);
+    setTimeout(() => iniciarRecorrido({ nombre: cual, empresa_id: yo.empresa_id, textos: cfg.textos,
+      alTerminar: cual === "inicio" ? () => setReg({ tipo: "compromiso" }) : undefined }), 250);
   }, [yo, cfg]);
 
   async function salir() {
@@ -148,9 +149,10 @@ export function Marco({ children }: { children: React.ReactNode }) {
             </li>
           ))}
           <li>
-            <button className="m-fila" onClick={verRecorrido}>
+            <button className="m-fila" onClick={() => verRecorrido(recorridoDe(ruta) ?? "inicio")}>
               <span className="m-fila-icono"><Icono id="sol" /></span>
-              <span className="m-fila-texto"><b>Ver el recorrido otra vez</b><span>Seis pasos por lo importante</span></span>
+              <span className="m-fila-texto"><b>Ver el recorrido de esta pantalla</b>
+                <span>{recorridoDe(ruta) ? "Unos pasos por lo importante de aquí" : "El de Hoy: lo importante en seis pasos"}</span></span>
             </button>
           </li>
           <li>

@@ -9,6 +9,7 @@ import { Avatar } from "@/components/Avatar";
 import { AnilloMeta } from "@/components/AnilloMeta";
 import { Icono } from "@/components/Iconos";
 import { Tabla } from "@/components/Tabla";
+import { yaLoVio } from "@/components/Recorrido";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { base, mensaje } from "@/lib/supabase";
 import { anterior, avanzarCompromiso, catalogo, compromisos, hoy, mesDe, metaDelPeriodo, metas, personas, seguimientos,
@@ -46,11 +47,18 @@ function Equipo() {
           || g.puntos.some((a) => (puntos[a.punto_id] ?? "").toLowerCase().includes(q))));
   }, [gente, buscar, inactivas, puntos]);
   const persona = gente?.find((g) => g.id === elegida) ?? null;
+
+  // En el computador, la ficha de la primera persona ya abierta: la columna derecha no queda vacía.
+  useEffect(() => {
+    if (!gente || elegida || !window.matchMedia("(min-width: 900px)").matches) return;
+    const primera = gente.find((g) => g.activa);
+    if (primera) router.replace(`/equipo?p=${primera.id}`);
+  }, [gente, elegida, router]);
   const puedeEditar = ["dueno", "encargada", "soporte", "lider"].includes(yo.rol);
 
   return (
     <div className={"m-lista-detalle" + (elegida ? " con-detalle" : "")}>
-      <section className="m-ld-lista" aria-labelledby="t-equipo">
+      <section className="m-ld-lista" aria-labelledby="t-equipo" data-recorrido="lista-equipo">
         <header className="m-encabezado">
           <h1 id="t-equipo">{t.equipo}</h1>
           <p className="m-contexto">{gente ? `${gente.filter((g) => g.activa).length} ${t.personas} activas` : "Cargando…"}</p>
@@ -145,9 +153,10 @@ const TIPO_SEG: Record<string, [string, string]> = {
 function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
   persona: Persona; puntos: Record<string, string>; puedeEditar: boolean; alCambiar: () => void;
 }) {
-  const { config, registrar, avisar, version } = useMarco();
+  const { config, registrar, avisar, version, verRecorrido } = useMarco();
   const t = config.textos;
   const [mes, setMes] = useState<string | null>(null);
+  const [revisado, setRevisado] = useState(false);
   const [d, setD] = useState<DatosFicha | null>(null);
   const [error, setError] = useState("");
   const [recarga, setRecarga] = useState(0);
@@ -169,6 +178,13 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
       .then(([venta, antes, ms, comps, segs, cat]) => setD({ desde, hasta, venta, antes, metas: ms, comps, segs, cat }))
       .catch((e) => setError((e as Error).message));
   }, [mes, persona.id, version, recarga]);
+
+  // La primera vez, el recorrido de Equipo sale cuando la ficha ya tiene datos.
+  useEffect(() => {
+    if (!d || revisado) return;
+    setRevisado(true);
+    yaLoVio("equipo").then((visto) => { if (!visto) verRecorrido("equipo"); });
+  }, [d, revisado, verRecorrido]);
 
   function moverMes(n: number) {
     if (!mes) return;
@@ -226,7 +242,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
   return (
     <article className="m-ficha">
       <Link href="/equipo" className="m-volver m-solo-celular"><Icono id="izquierda" />{t.equipo}</Link>
-      <header className="m-ficha-cabeza">
+      <header className="m-ficha-cabeza" data-recorrido="ficha-cabeza">
         <Avatar id={persona.id} nombre={persona.nombre} tamano={64} />
         <div className="m-ficha-nombre">
           <h2>{persona.nombre}</h2>
@@ -248,7 +264,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
       {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
       {!d && !error && <div className="m-esqueleto" style={{ height: 140 }} />}
       {d && tot && (<>
-        <div className="m-cifras">
+        <div className="m-cifras" data-recorrido="ficha-cifras">
           <div className="m-cifra">
             <span className="m-cifra-valor num">{pesos(tot.venta)}</span>
             <span className="m-cifra-contexto">
@@ -280,7 +296,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
           ]} />
         )}
 
-        <div className="m-grupo">
+        <div className="m-grupo" data-recorrido="ficha-compromisos">
           <h2>Compromisos abiertos{abiertos.length > 0 && <span className="m-cuenta num">{abiertos.length}</span>}</h2>
           {!abiertos.length ? (
             <p className="m-frase-nota">No tiene compromisos abiertos. <button className="m-enlace" onClick={() => registrar(persona.id, "compromiso")}>Registrar uno</button></p>
@@ -310,7 +326,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
           )}
         </div>
 
-        <div className="m-grupo">
+        <div className="m-grupo" data-recorrido="ficha-linea">
           <h2>Línea de tiempo</h2>
           {!linea.length ? <p className="m-frase-nota">Todavía no hay registros. Lo que registre aparece aquí, lo más nuevo arriba.</p> : (
             <ol className="m-linea">
@@ -355,7 +371,7 @@ function Puntos({ persona, puntos, puedeEditar, alCambiar }: {
   }
 
   return (
-    <div className="m-puntos">
+    <div className="m-puntos" data-recorrido="ficha-puntos">
       {persona.puntos.length === 0 && <span className="m-contexto">Sin {t.punto} asignado.</span>}
       {persona.puntos.map((a) => (
         <span key={a.punto_id} className="m-punto">
