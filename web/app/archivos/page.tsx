@@ -2,21 +2,23 @@
 import { useEffect, useState } from "react";
 import { Programa } from "@/components/Programa";
 import { Cargando, Decidir, Nota, type Pedido } from "@/components/Decidir";
-import { archivos, deshacer, errores } from "@/lib/datos";
-import { fecha, miles } from "@/lib/formato";
+import { archivos, deshacer } from "@/lib/datos";
+import { PorResolver } from "@/components/PorResolver";
+import { fecha, fechaHora, miles } from "@/lib/formato";
 
 const FUENTE: Record<string, string> = { excel_dia: "Excel del día", banco: "Extracto del banco", bold: "Reporte de Bold", redeban: "Reporte de Redeban", siigo: "Siigo", correo: "Correo" };
 type Archivo = Awaited<ReturnType<typeof archivos>>[number];
 
 export default function Archivos() {
   const [lista, setLista] = useState<Archivo[] | null>(null);
-  const [pendientes, setPendientes] = useState<Awaited<ReturnType<typeof errores>>>([]);
+  const [aviso, setAviso] = useState("");
+  const [recarga, setRecarga] = useState(0);
   const [error, setError] = useState("");
   const [pedido, setPedido] = useState<Pedido | null>(null);
 
   async function ver() {
     setLista(null); setError("");
-    try { const [a, e] = await Promise.all([archivos(), errores()]); setLista(a.slice(0, 200)); setPendientes(e); }
+    try { setLista((await archivos()).slice(0, 200)); setRecarga((r) => r + 1); }
     catch (e) { setError((e as Error).message); }
   }
   useEffect(() => { ver(); }, []);
@@ -25,7 +27,8 @@ export default function Archivos() {
     <Programa>
       <section className="tarjeta">
         <div><h2>Archivos</h2><p className="pequeno">Lo que se ha subido. Por ahora los archivos se suben desde el programa de escritorio; aquí se ven y se pueden deshacer.</p></div>
-        {pendientes.length > 0 && <Nota clase="aviso" titulo={`${pendientes.length} nombre(s) por resolver`}>Tino no los reconoce y no adivina: {pendientes.slice(0, 8).map((e) => e.texto).join(", ")}{pendientes.length > 8 ? "…" : ""}.</Nota>}
+        <PorResolver key={recarga} alCambiar={() => undefined} avisar={(t) => { setAviso(t); setTimeout(() => setAviso(""), 3000); }} />
+        {aviso && <p className="nota ok" role="status"><span>{aviso}</span></p>}
         {error && <Nota clase="mal" titulo="No se pudo cargar el historial.">{error}</Nota>}
         {!lista && !error && <Cargando />}
         {lista && (!lista.length ? <p className="vacio">Todavía no hay archivos subidos.</p> : (
@@ -33,7 +36,7 @@ export default function Archivos() {
             <thead><tr><th>Archivo</th><th>Qué es</th><th>Días</th><th className="d">Filas</th><th>Estado</th><th></th></tr></thead>
             <tbody>{lista.map((a) => (
               <tr key={a.id}>
-                <td>{a.nombre}<div className="pequeno">Subido {fecha(a.creado_en)}</div></td><td>{FUENTE[a.fuente] ?? a.fuente}</td>
+                <td>{a.nombre}<div className="pequeno">Subido {fechaHora(a.creado_en)}</div></td><td>{FUENTE[a.fuente] ?? a.fuente}</td>
                 <td>{a.desde ? (a.desde === a.hasta ? fecha(a.desde) : `${fecha(a.desde)} a ${fecha(a.hasta)}`) : ""}</td>
                 <td className="d">{miles(a.filas)}</td>
                 <td>{a.estado === "cargado" ? <span className="chip c-ok">● Cargado</span> : <span className="chip c-neu">— Deshecho</span>}</td>

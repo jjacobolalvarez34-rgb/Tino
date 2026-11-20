@@ -90,6 +90,55 @@ class Leer(unittest.TestCase):
         self.assertIn("VENTAS", avisos[0])
 
 
+class Variaciones(unittest.TestCase):
+    """Casos de la revisión de octubre: los Excel del cliente no se corrigen, se toleran."""
+
+    def test_encabezado_de_fecha_con_otro_nombre(self):
+        wb = libro([(1, "Ana Ruiz", 0, 1000, 1)], encabezado=("v", "ASESOR", "X", "VENTA DIA", "FACTURAS"))
+        perfil = dict(PERFIL, columnas=dict(PERFIL["columnas"], fecha=["FECHA", "v"]))
+        filas, avisos = vp.leer(wb, perfil, ["2026-10-01"])
+        self.assertEqual([(f["fecha"], f["venta"]) for f in filas], [("2026-10-01", 1000)])
+        filas, avisos = vp.leer(wb, PERFIL, ["2026-10-01"])
+        self.assertEqual(filas, [])
+        self.assertIn("encabezado", avisos[0])
+
+    def test_dia_que_no_abrio_no_es_persona(self):
+        perfil = dict(PERFIL, dia_sin_venta=["No abrió"])
+        self.assertTrue(vp.es_dia_sin_venta("No Abrio", perfil))
+        self.assertTrue(vp.es_dia_sin_venta(" no  abrió ", perfil))
+        self.assertFalse(vp.es_dia_sin_venta("Noelia", perfil))
+        self.assertFalse(vp.es_dia_sin_venta("No Abrio", PERFIL))
+        wb = libro([(12, "No Abrio", 0, 0, None), (13, "Ana Ruiz", 0, 5000, 1)])
+        filas, _ = vp.leer(wb, perfil, ["2026-10-12"])
+        self.assertEqual([f["texto"] for f in filas], ["Ana Ruiz"])
+
+    def test_nombre_ambiguo_no_se_adivina(self):
+        # "tatiana" en minúscula y "Tatiana" son el mismo texto, pero quién es lo decide una persona.
+        wb = libro([(14, "tatiana", 0, 7000, 1)])
+        filas, _ = vp.leer(wb, PERFIL, ["2026-10-14"])
+        self.assertEqual(filas[0]["texto"], "tatiana")
+
+
+class Resumen(unittest.TestCase):
+    def test_hoja_y_resumen_distintos_es_problema_del_archivo(self):
+        from panel.datos.cargar import _revisar_contra_resumen
+
+        class Emp:
+            lectores = {"config": {"tolerancia_cuadra": 100}}
+
+        dias = {"2026-10-01": {"venta": 0, "caja": {"hoja": "01", "fila_venta": 176, "fila": 177}},
+                "2026-10-02": {"venta": 3932000, "caja": {"hoja": "02", "fila_venta": 176, "fila": 177}}}
+        ventas = [{"fecha": "2026-10-01", "venta_dia": 4675000}, {"fecha": "2026-10-02", "venta_dia": 3932050}]
+        errores, avisos = [], []
+        _revisar_contra_resumen(dias, ventas, Emp(), errores, avisos)
+        self.assertEqual(len(errores), 1)
+        self.assertEqual(errores[0]["tipo"], "archivo_inconsistente")
+        self.assertEqual(errores[0]["fila_origen"], 176)
+        self.assertIn("$ 0", errores[0]["texto"])
+        self.assertIn("$ 4.675.000", errores[0]["texto"])
+        self.assertEqual(dias["2026-10-01"]["venta"], 0)  # no se inventa ni se cambia nada
+
+
 class Meta(unittest.TestCase):
     def test_meta_del_mes(self):
         wb = openpyxl.Workbook()

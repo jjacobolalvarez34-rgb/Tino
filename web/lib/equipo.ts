@@ -3,7 +3,7 @@
 // (el responsable de punto, solo su punto; observaciones y evaluaciones, solo quien puede).
 // Cada consulta pide solo las columnas que la pantalla muestra.
 import { base, leer, mensaje } from "./supabase";
-import { correrDias } from "./formato";
+import { correrDias, hoyBogota } from "./formato";
 import { textosDe, type Textos } from "./textos";
 
 export type Asignacion = { punto_id: string; desde: string; hasta: string | null };
@@ -29,10 +29,7 @@ export type Config = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Libre = Record<string, any>;
 
-export const hoy = () => {
-  const d = new Date();
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-};
+export const hoy = () => hoyBogota();
 const ABIERTOS = new Set(["abierto", "en_curso"]);
 
 export async function config(): Promise<Config> {

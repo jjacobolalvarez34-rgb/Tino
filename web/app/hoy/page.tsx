@@ -8,6 +8,7 @@ import { Avatar } from "@/components/Avatar";
 import { AnilloMeta } from "@/components/AnilloMeta";
 import { Icono } from "@/components/Iconos";
 import { yaLoVio } from "@/components/Recorrido";
+import { Ayuda, AYUDA_TICKET } from "@/components/Ayuda";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { anterior, compromisos, correrDiasHoy, diasEntre, hoy, mesDe, metaDelPeriodo, metas, personas, porPersona,
   seguimientos, sesiones, ticket, totales, ultimaFecha, ventas,
@@ -232,7 +233,7 @@ function Resumen({ d, textos: t }: { d: Datos; textos: { persona: string; puntos
   const max = ranking[0]?.[1].venta ?? 1;
   const quien = new Map(d.gente.map((g) => [g.id, g]));
   const mes = nombreMes(d.desde);
-  const mesAntes = nombreMes(anterior(d.desde, d.hasta)[0]);
+  const mesAntes = nombreMes(anterior(d.desde, d.hasta)[1]);
   const enCurso = d.hasta >= hoy();  // hasta llega a hoy solo en el mes en curso
 
   return (
@@ -244,7 +245,7 @@ function Resumen({ d, textos: t }: { d: Datos; textos: { persona: string; puntos
         <div className="m-cifra">
           <span className="m-cifra-valor num">{pesos(tot.venta)}</span>
           <span className="m-cifra-contexto">
-            {cambio == null ? `vendidos en ${tot.dias} días de ${t.puntos}` : (
+            {cambio == null ? `Sin datos de ${mesAntes} para comparar` : (
               <><span className={cambio >= 0 ? "t-ok" : "t-mal"}><Icono id={cambio >= 0 ? "sube" : "baja"} />
                 {cambio >= 0 ? "+" : "−"}{Math.abs(cambio)} %</span> frente a {mesAntes}</>
             )}
@@ -253,7 +254,7 @@ function Resumen({ d, textos: t }: { d: Datos; textos: { persona: string; puntos
         <div className="m-par">
           <div className="m-cifra">
             <span className="m-cifra-valor m-cifra-media num">{tk ? pesos(tk) : "—"}</span>
-            <span className="m-cifra-contexto">ticket promedio en {miles(Math.round(tot.facturas))} facturas</span>
+            <span className="m-cifra-contexto">ticket promedio en {miles(Math.round(tot.facturas))} facturas<Ayuda texto={AYUDA_TICKET} /></span>
           </div>
           <div className="m-cifra m-cifra-anillo">
             <AnilloMeta valor={tot.venta} meta={meta || null} tamano={64} etiqueta="Cumplimiento" />

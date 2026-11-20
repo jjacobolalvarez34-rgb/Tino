@@ -57,6 +57,7 @@ def _excel(ruta, emp):
     if punto is None:
         raise ArchivoNoValido("No se sabe de qué punto es este Excel. " + " ".join(avisos[-1:]))
     punto_id = emp.id_por_nombre[punto]
+    perfil_vp = emp.lectores.get("venta_persona") or {}
     jornadas, errores = [], []
     for fecha, dia in sorted(dias.items()):
         caja = dia["caja"]
@@ -80,6 +81,9 @@ def _excel(ruta, emp):
                       "monto": m["monto"], "fila_origen": m["fila"]} for m in caja["movimientos"]]
         fila_asesoras = caja["fila_asesoras"]
         for texto in dia["lista_asesoras"] if fila_asesoras else []:
+            if venta_personas.es_dia_sin_venta(texto, perfil_vp):
+                avisos.append(f"Hoja {caja['hoja']}: el punto no abrió ese día.")
+                continue
             asesora = emp.asesora(punto_id, texto)
             j["turnos"].append({"asesora_id": asesora, "texto_original": texto, "fila_origen": fila_asesoras})
             if asesora is None:
@@ -105,10 +109,31 @@ def _excel(ruta, emp):
         raise ArchivoNoValido("El Excel no trae ningún día que se pueda leer.")
     fechas = [j["fecha"] for j in jornadas]
     ventas_persona, metas = _ventas_persona(ruta, emp, punto_id, fechas, errores, avisos)
+    _revisar_contra_resumen(dias, ventas_persona, emp, errores, avisos)
     # Un producto sin reconocer se repite cada día: basta un error por nombre.
-    unicos = {(e["tipo"], e["texto"].rsplit(" (", 1)[0]): e for e in errores}
+    unicos = {(e["tipo"], e["texto"].rsplit(" (", 1)[0] if e["tipo"] != "archivo_inconsistente" else e["texto"]): e
+              for e in errores}
     return {"jornadas": jornadas, "ventas_persona": ventas_persona, "metas": metas, "errores": list(unicos.values()),
             "desde": min(fechas), "hasta": max(fechas)}, avisos
+
+
+def _revisar_contra_resumen(dias, ventas_persona, emp, errores, avisos):
+    """Si la hoja del día y el resumen del mes no dicen la misma venta, es un problema del
+    archivo (por ejemplo, una fórmula que suma otra columna). Se avisa con su fila; no se
+    elige cuál de los dos vale ni se cambia ningún valor."""
+    resumen = {}
+    for v in ventas_persona:
+        resumen.setdefault(v["fecha"], v["venta_dia"])
+    tolerancia = emp.lectores["config"]["tolerancia_cuadra"]
+    for fecha, dia in sorted(dias.items()):
+        if fecha not in resumen or dia["venta"] is None or abs(dia["venta"] - resumen[fecha]) <= tolerancia:
+            continue
+        caja = dia["caja"]
+        texto = (f"{fecha}: la hoja «{caja['hoja']}» dice $ {dia['venta']:,} de venta y el resumen dice "
+                 f"$ {resumen[fecha]:,}. Revise la fórmula del total en esa hoja.").replace(",", ".")
+        errores.append({"fila_origen": caja["fila_venta"] or caja["fila"] or 1, "tipo": "archivo_inconsistente",
+                        "texto": texto})
+        avisos.append("Problema del archivo: " + texto)
 
 
 def _ventas_persona(ruta, emp, punto_id, fechas, errores, avisos):

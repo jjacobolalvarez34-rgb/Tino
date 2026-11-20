@@ -5,9 +5,14 @@ El perfil va en perfil_fuente (fuente excel_dia), dentro de mapeo_columnas:
 
     "venta_persona": {
         "hoja": "DESC FACT",
-        "columnas": {"fecha": "FECHA", "persona": "ASESOR", "venta": "VENTA DIA", "facturas": "FACTURAS"},
-        "separadores": "\\s+y\\s+|/|&|,|\\+|\\s-\\s"
+        "columnas": {"fecha": ["FECHA", "v"], "persona": "ASESOR", "venta": "VENTA DIA", "facturas": "FACTURAS"},
+        "separadores": "\\s+y\\s+|/|&|,|\\+|\\s-\\s",
+        "dia_sin_venta": ["No abrió"]
     }
+
+Cada columna acepta un nombre o una lista de nombres posibles: los Excel del cliente no se
+corrigen, Tino tolera sus variaciones desde el perfil. "dia_sin_venta" son los textos que el
+punto escribe cuando no abrió: ese día no tiene persona.
 
 La meta del mes, si el libro la trae, también va en el perfil:
 
@@ -44,6 +49,11 @@ def _numero(v):
         return None
 
 
+def es_dia_sin_venta(texto, perfil):
+    """¿El texto dice que el punto no abrió (según el perfil de la empresa)?"""
+    return _norm(texto) in {_norm(x) for x in (perfil or {}).get("dia_sin_venta", [])}
+
+
 def personas(texto, separadores=SEPARADORES):
     """Los nombres de una celda: "Ana y Luisa" -> ["Ana", "Luisa"]."""
     partes = re.split(separadores, str(texto or "").strip(), flags=re.IGNORECASE)
@@ -71,7 +81,10 @@ def leer(libro, perfil, fechas_libro, regla="partes_iguales"):
     hoja = next((n for n in libro.sheetnames if _norm(n) == _norm(perfil.get("hoja"))), None)
     if hoja is None:
         return [], [f"No está la hoja «{perfil.get('hoja')}» de la venta por persona."]
-    columnas = {k: _norm(v) for k, v in (perfil.get("columnas") or {}).items()}
+    # Cada columna puede tener varios nombres aceptados: los Excel del cliente no se corrigen,
+    # Tino tolera sus variaciones (por ejemplo, un encabezado mal escrito en un punto).
+    columnas = {k: [_norm(x) for x in (v if isinstance(v, list) else [v])]
+                for k, v in (perfil.get("columnas") or {}).items()}
     faltan = [k for k in ("fecha", "persona", "venta") if k not in columnas]
     if faltan:
         return [], [f"El perfil de venta por persona no dice qué columna es: {', '.join(faltan)}."]
@@ -81,14 +94,15 @@ def leer(libro, perfil, fechas_libro, regla="partes_iguales"):
     enc, pos = None, {}
     for i, fila in enumerate(filas[:15]):
         textos = [_norm(v) for v in fila]
-        if columnas["fecha"] in textos and columnas["persona"] in textos:
+        if any(n in textos for n in columnas["fecha"]) and any(n in textos for n in columnas["persona"]):
             enc = i
-            for campo, nombre in columnas.items():
-                if nombre in textos:
-                    pos[campo] = textos.index(nombre)
+            for campo, nombres_col in columnas.items():
+                pos_campo = next((textos.index(n) for n in nombres_col if n in textos), None)
+                if pos_campo is not None:
+                    pos[campo] = pos_campo
             break
     if enc is None:
-        return [], [f"Hoja «{hoja}»: no se encontró el encabezado {perfil['columnas']['fecha']!r}."]
+        return [], [f"Hoja «{hoja}»: no se encontró el encabezado de la fecha ({', '.join(columnas['fecha'])})."]
 
     meses = sorted({f[:7] for f in fechas_libro})
     mes = meses[0] if len(meses) == 1 else None
@@ -119,6 +133,9 @@ def leer(libro, perfil, fechas_libro, regla="partes_iguales"):
         fact = _numero(celda("facturas"))
         fact = int(round(fact)) if fact is not None else None
         nombres = personas(celda("persona"), separadores)
+        if es_dia_sin_venta(celda("persona"), perfil):
+            avisos.append(f"Hoja «{hoja}» fila {i}: dice que el punto no abrió pero trae venta; queda sin persona.")
+            nombres = ["(sin nombre)"]
         if not nombres:
             avisos.append(f"Hoja «{hoja}» fila {i}: hay venta pero no dice quién vendió.")
             nombres = ["(sin nombre)"]

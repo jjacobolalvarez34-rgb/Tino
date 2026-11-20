@@ -10,12 +10,13 @@ import { AnilloMeta } from "@/components/AnilloMeta";
 import { Icono } from "@/components/Iconos";
 import { Tabla } from "@/components/Tabla";
 import { yaLoVio } from "@/components/Recorrido";
+import { Ayuda, AYUDA_TICKET } from "@/components/Ayuda";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { base, mensaje } from "@/lib/supabase";
 import { anterior, avanzarCompromiso, catalogo, compromisos, hoy, mesDe, metaDelPeriodo, metas, personas, seguimientos,
   ticket, totales, ultimaFecha, ventas, type Compromiso, type ItemCatalogo, type Meta, type Persona, type Seguimiento,
   type VentaDia } from "@/lib/equipo";
-import { correrDias, fecha, miles, pesos } from "@/lib/formato";
+import { correrDias, diaBogota, fecha, miles, nombreMes, pesos } from "@/lib/formato";
 
 export default function PaginaEquipo() {
   return <Marco><Suspense><Equipo /></Suspense></Marco>;
@@ -208,7 +209,8 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
   const meta = d ? metaDelPeriodo(d.metas, d.desde, d.hasta, (m) => m.asesora_id === persona.id) : 0;
   const nombreCat = new Map(d?.cat.map((c) => [c.id, c.nombre]) ?? []);
   const abiertos = d?.comps.filter((c) => c.estado === "abierto" || c.estado === "en_curso") ?? [];
-  const mesTexto = mes ? new Date(mes + "-15").toLocaleDateString("es-CO", { month: "long", year: "numeric" }) : "";
+  const mesTexto = mes ? nombreMes(mes) : "";
+  const mesAntes = d ? nombreMes(anterior(d.desde, d.hasta)[1], false) : "";
 
   // Línea de tiempo: registros, compromisos y cambios de punto, lo más nuevo arriba.
   const linea = useMemo(() => {
@@ -221,10 +223,10 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
         texto: s.texto, chip: s.valoracion ? VALOR[s.valoracion] : undefined, donde: puntos[s.punto_id] });
     }
     for (const c of d.comps) {
-      items.push({ clave: c.id + "a", fecha: c.creado_en.slice(0, 10), icono: "bandera", titulo: <>Compromiso: «{c.que}»</>,
+      items.push({ clave: c.id + "a", fecha: diaBogota(c.creado_en), icono: "bandera", titulo: <>Compromiso: «{c.que}»</>,
         texto: `Para el ${fecha(c.fecha_limite)} · prioridad ${c.prioridad}`, chip: ESTADO[c.estado], donde: puntos[c.punto_id] });
       if (c.cerrado_en && c.estado !== "anulado")
-        items.push({ clave: c.id + "b", fecha: c.cerrado_en.slice(0, 10), icono: c.estado === "cumplido" ? "chulo" : "bandera",
+        items.push({ clave: c.id + "b", fecha: diaBogota(c.cerrado_en), icono: c.estado === "cumplido" ? "chulo" : "bandera",
           titulo: <>{c.estado === "cumplido" ? "Cumplió" : "No cumplió"} «{c.que}»</> });
     }
     for (const a of persona.puntos)
@@ -268,7 +270,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
           <div className="m-cifra">
             <span className="m-cifra-valor num">{pesos(tot.venta)}</span>
             <span className="m-cifra-contexto">
-              {!tot.venta ? `Sin ventas a su nombre en ${mesTexto}` : cambio == null ? `vendidos en ${tot.dias} días` : (
+              {!tot.venta ? `Sin ventas a su nombre en ${mesTexto}` : cambio == null ? `Sin datos de ${mesAntes} para comparar · ${tot.dias} días` : (
                 <><span className={cambio >= 0 ? "t-ok" : "t-mal"}><Icono id={cambio >= 0 ? "sube" : "baja"} />
                   {cambio >= 0 ? "+" : "−"}{Math.abs(cambio)} %</span> frente al mes anterior · {tot.dias} días</>
               )}
@@ -276,7 +278,7 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
           </div>
           <div className="m-cifra">
             <span className="m-cifra-valor m-cifra-media num">{ticket(tot) ? pesos(ticket(tot)) : "—"}</span>
-            <span className="m-cifra-contexto">ticket promedio{tot.facturas ? ` en ${miles(Math.round(tot.facturas))} facturas` : ""}</span>
+            <span className="m-cifra-contexto">ticket promedio{tot.facturas ? ` en ${miles(Math.round(tot.facturas))} facturas` : ""}<Ayuda texto={AYUDA_TICKET} /></span>
           </div>
           <div className="m-cifra m-cifra-anillo">
             <AnilloMeta valor={tot.venta} meta={meta || null} tamano={64} etiqueta="Meta personal" />
