@@ -386,6 +386,11 @@ cliente mientras tanto (contingencia de la DIAN) lo confirma un contador antes d
 (D-052), la transición de cambiar de pantalla corre aunque el sistema pida reducir movimiento. Es
 corta (menos de un segundo) y solo mueve opacidad, posición y giro. El sonido se apaga en Más.
 
+Corrección del mismo día: la ventisca va en la **portada** (la página de presentación), al pulsar
+una sección del menú (Inicio, Conciliación, Descuadres, Excel, Equipo, Precios) o "Ver cómo
+concilia". Dentro del programa se quitó, con el interruptor de sonido de Más. El sonido se oye si
+el navegador no tiene guardado `tino-sonido = no`.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

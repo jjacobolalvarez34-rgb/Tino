@@ -47,3 +47,40 @@ export function BotonPausa() {
     </button>
   );
 }
+
+// La ventisca entre secciones (pedido de Jacobo, 20 nov; D-065): al pulsar un enlace del menú
+// o un "Ver cómo…", el viento se lleva lo que se ve, la página salta a la sección elegida y esta
+// aparece. Con Ctrl, Mayús o clic del medio el enlace funciona normal. "Saltar al contenido" no
+// sopla: es para el teclado y el lector de pantalla.
+export function Ventisca() {
+  useEffect(() => {
+    let yendo = false;
+    const alPulsar = async (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const enlace = (e.target as Element | null)?.closest?.("a");
+      const href = enlace?.getAttribute("href") ?? "";
+      if (!enlace || enlace.target === "_blank" || href === "#contenido") return;
+      const interno = href.startsWith("#") && href.length > 1;
+      if (!interno && href !== "/precios") return;
+      const destino = interno ? document.getElementById(href.slice(1)) : null;
+      if (interno && !destino) return;
+      const principal = document.getElementById("contenido");
+      if (!principal) return;
+      e.preventDefault();
+      if (yendo) return;
+      yendo = true;
+      const { soplar, llevarseConElViento, piezasVisibles, aparecer } = await import("@/lib/ventisca");
+      soplar();
+      const volver = await llevarseConElViento(piezasVisibles(principal));
+      if (!destino) { window.location.assign(href); return; }
+      history.pushState(null, "", href);
+      destino.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
+      volver();
+      aparecer(destino);
+      yendo = false;
+    };
+    document.addEventListener("click", alPulsar);
+    return () => document.removeEventListener("click", alPulsar);
+  }, []);
+  return null;
+}

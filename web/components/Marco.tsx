@@ -12,7 +12,6 @@ import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
 import { iniciarRecorrido, recorridoDe, type NombreRecorrido } from "./Recorrido";
 import { Registrar } from "./Registrar";
-import { aparecer, guardarSonido, llevarseConElViento, soplar, sonidoActivo } from "@/lib/ventisca";
 
 export type Yo = { id: string; nombre: string; rol: string; empresa_id: string; empresa: string; punto_id: string | null };
 type Contexto = {
@@ -56,25 +55,11 @@ export function Marco({ children }: { children: React.ReactNode }) {
   const reloj = useRef<ReturnType<typeof setTimeout>>();
   const ruta = usePathname();
   const router = useRouter();
-  const [sonido, setSonido] = useState(true);
-  const yendo = useRef(false);
-  useEffect(() => { setSonido(sonidoActivo()); }, []);
   const listo = !!yo && !!cfg;
-  useEffect(() => { if (listo) aparecer(document.getElementById("contenido")); }, [listo]);
 
-  // Cambiar de pantalla con la ventisca: lo que se ve se lo lleva el viento y después aparece la
-  // otra pantalla. Con Ctrl o clic del medio se abre normal, en otra pestaña.
-  const irA = useCallback(async (e: React.MouseEvent, destino: string) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-    e.preventDefault();
-    setMas(false);
-    if (destino === ruta || yendo.current) return;
-    yendo.current = true;
-    soplar();
-    await llevarseConElViento(document.getElementById("contenido"));
-    router.push(destino);
-    yendo.current = false;
-  }, [ruta, router]);
+  // Al elegir una pantalla se cierra "Más". La ventisca va en la portada, no aquí (pedido de
+  // Jacobo, 20 nov).
+  const irA = useCallback((_e: React.MouseEvent, _destino: string) => { setMas(false); }, []);
 
   useEffect(() => {
     (async () => {
@@ -176,14 +161,6 @@ export function Marco({ children }: { children: React.ReactNode }) {
               <span className="m-fila-icono"><Icono id="sol" /></span>
               <span className="m-fila-texto"><b>Ver el recorrido de esta pantalla</b>
                 <span>{recorridoDe(ruta) ? "Unos pasos por lo importante de aquí" : "El de Hoy: lo importante en seis pasos"}</span></span>
-            </button>
-          </li>
-          <li>
-            <button className="m-fila" role="switch" aria-checked={sonido}
-              onClick={() => { const nuevo = !sonido; setSonido(nuevo); guardarSonido(nuevo); if (nuevo) soplar(); }}>
-              <span className="m-fila-icono"><Icono id="sol" /></span>
-              <span className="m-fila-texto"><b>Sonido al cambiar de pantalla</b><span>{sonido ? "Encendido" : "Apagado"}</span></span>
-              <span className={"chip " + (sonido ? "c-ok" : "c-neu")}>{sonido ? "Sí" : "No"}</span>
             </button>
           </li>
           <li>

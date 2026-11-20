@@ -15,6 +15,18 @@ Dudas:
 -
 ```
 
+## 2026-11-20 (tarde) · Ventisca en la portada y acceso de Irina
+
+- La ventisca pasó del programa a la portada (D-065, corrección): al pulsar una sección del menú
+  el viento se lleva lo que se ve, suena el soplido y aparece la sección. En el programa se quitó
+  (y el interruptor de sonido de Más). `lib/ventisca.ts` ahora elige sola los pedazos visibles.
+- Acceso de Irina (dueña) en tino-pruebas, en la empresa Milagros, con un correo inventado y sin
+  mandar ningún correo. La clave quedó fuera del repositorio, en Tino-datos.
+- Jacobo aplicó 0012, 0013 y 0014 en tino-pruebas (verificado).
+
+Falta: cargar Salitre en pruebas, descartar los "No Abrió", probar la cola (tests/web/probar_cola.py)
+y crear a Irina en producción cuando Tino esté listo para ella.
+
 ## 2026-11-20 (mañana, 2) · Siigo real, facturar por Siigo, cerrar el día, Caja y ventisca
 Hecho:
 - docs/PLAN.md: el plan maestro, con el principio de D-061 (Tino reemplaza las herramientas del

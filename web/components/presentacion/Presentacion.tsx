@@ -1,6 +1,6 @@
 // Página pública de presentación de Tino (ruta "/"). Componente de servidor: lo que corre
 // en el navegador es Escenario (entradas, inclinación y pausa), EscenaPortada, Contador,
-// CopiarNumeros y Movimiento (línea de avance y botón de pausa).
+// CopiarNumeros y Movimiento (línea de avance, botón de pausa y la ventisca entre secciones).
 // Todos los datos son de ejemplo e inventados (ver ejemplo.ts).
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { MAMUT } from "@/lib/mamut";
@@ -11,7 +11,7 @@ import { EscenaPortada } from "./EscenaPortada";
 import { Escenario } from "./Escenario";
 import { Icono } from "./Lucide";
 import { Chulito, LogoTino, SelloMamut } from "./Marcas";
-import { Avance, BotonPausa } from "./Movimiento";
+import { Avance, BotonPausa, Ventisca } from "./Movimiento";
 import {
   CIERRE,
   EQUIPO,
@@ -610,6 +610,7 @@ function Pie() {
 export function Presentacion() {
   return (
     <Escenario className={s.raiz}>
+      <Ventisca />
       <a href="#contenido" className={s.saltar}>
         Saltar al contenido
       </a>

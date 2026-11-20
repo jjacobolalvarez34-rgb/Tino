@@ -1,14 +1,11 @@
 "use client";
-// La "ventisca" al cambiar de pantalla (pedido de Jacobo, 20 nov): los elementos de la pantalla
-// actual se los lleva el viento uno por uno (se corren a la derecha, giran y se desvanecen) y
-// suena un soplido corto. Solo transform y opacity, con la Web Animations API: liviano en el
-// celular. Corre siempre, aunque el sistema pida reducir movimiento (D-065, decisión de Jacobo).
+// La "ventisca" de la portada (pedido de Jacobo, 20 nov): al pulsar una sección del menú, lo que
+// se ve se lo lleva el viento pedazo a pedazo (se corre a la derecha, gira y se desvanece),
+// suena un soplido corto y aparece la sección elegida. Solo transform y opacity, con la Web
+// Animations API: liviano en el celular. Corre siempre, aunque el sistema pida reducir
+// movimiento (D-065, decisión de Jacobo). Dentro del programa no se usa.
 
-const ELEMENTOS = [
-  "h1", ".m-contexto", ".m-cifra", ".m-frase", ".m-fila", ".m-ranking li", ".m-grupo > h2", ".m-linea li",
-  ".m-punto", ".chip", ".boton", "tr", ".m-anillo", ".m-avatar", ".m-esqueleto", ".tarjeta > *",
-].join(",");
-const MAXIMO = 48;
+const MAXIMO = 60;
 const DURACION = 700;
 
 export function sonidoActivo() {
@@ -53,21 +50,34 @@ export function soplar() {
   } catch { /* sin audio: la transición sigue sin sonido */ }
 }
 
-// Se lleva el viento lo que se ve de la pantalla. Termina cuando ya no queda nada a la vista.
-export function llevarseConElViento(contenedor: HTMLElement | null): Promise<void> {
-  if (!contenedor) return Promise.resolve();
-  const alto = window.innerHeight;
-  const vistos = [...contenedor.querySelectorAll<HTMLElement>(ELEMENTOS)]
-    .filter((e) => { const r = e.getBoundingClientRect(); return r.bottom > 0 && r.top < alto && r.width > 0; })
-    // Solo los de más afuera: si un padre ya vuela, sus hijos van con él.
-    .filter((e, _, todos) => !todos.some((o) => o !== e && o.contains(e)))
-    .slice(0, MAXIMO);
-  if (!vistos.length) return Promise.resolve();
-  const ancho = window.innerWidth;
-  const animaciones = vistos.map((e) => {
+// Los pedazos que se lleva el viento: se baja por el árbol desde el contenedor y cada bloque
+// visible que ocupe menos de una fracción de la pantalla vuela entero (una tarjeta, un título,
+// un párrafo). Lo grande se parte en sus hijos. Así sirve sin conocer las clases de la página.
+export function piezasVisibles(contenedor: HTMLElement, fraccion = 0.3): HTMLElement[] {
+  const ancho = window.innerWidth, alto = window.innerHeight, pantalla = ancho * alto;
+  const piezas: HTMLElement[] = [];
+  const visitar = (e: HTMLElement) => {
+    if (piezas.length >= MAXIMO) return;
+    const r = e.getBoundingClientRect();
+    const visible = Math.max(0, Math.min(r.right, ancho) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, alto) - Math.max(r.top, 0));
+    if (!visible) return;
+    const hijos = [...e.children].filter((h): h is HTMLElement => h instanceof HTMLElement);
+    if (visible / pantalla <= fraccion || !hijos.length) { piezas.push(e); return; }
+    hijos.forEach(visitar);
+  };
+  [...contenedor.children].forEach((h) => { if (h instanceof HTMLElement) visitar(h); });
+  return piezas;
+}
+
+// Se lleva el viento las piezas. Termina cuando ya no queda nada a la vista y devuelve con qué
+// ponerlas de nuevo en su sitio (se cancelan las animaciones).
+export async function llevarseConElViento(piezas: HTMLElement[]): Promise<() => void> {
+  if (!piezas.length) return () => {};
+  const ancho = window.innerWidth, alto = window.innerHeight;
+  const animaciones = piezas.map((e) => {
     const r = e.getBoundingClientRect();
     // El viento llega desde la izquierda: lo de la izquierda sale primero.
-    const espera = (r.left / ancho) * 160 + (r.top / alto) * 60 + Math.random() * 90;
+    const espera = (Math.max(0, r.left) / ancho) * 160 + (Math.max(0, r.top) / alto) * 60 + Math.random() * 90;
     const lejos = ancho - r.left + 120 + Math.random() * 160;
     const sube = -(30 + Math.random() * 90);
     const giro = (Math.random() < 0.8 ? 1 : -1) * (25 + Math.random() * 140);
@@ -77,13 +87,14 @@ export function llevarseConElViento(contenedor: HTMLElement | null): Promise<voi
       { transform: `translate(${lejos}px, ${sube}px) rotate(${giro}deg)`, opacity: 0 },
     ], { duration: DURACION + Math.random() * 200, delay: espera, easing: "cubic-bezier(.5,0,.75,.25)", fill: "forwards" });
   });
-  return Promise.race([
-    Promise.all(animaciones.map((a) => a.finished)).then(() => undefined),
+  await Promise.race([
+    Promise.all(animaciones.map((a) => a.finished)).then(() => undefined, () => undefined),
     new Promise<void>((r) => setTimeout(r, DURACION + 520)),
   ]);
+  return () => animaciones.forEach((a) => a.cancel());
 }
 
-// La pantalla a la que se llega aparece en fade. Con la Web Animations API, que no apaga la regla
+// La sección a la que se llega aparece en fade. Con la Web Animations API, que no apaga la regla
 // global de "reducir movimiento" de globals.css (D-065).
 export function aparecer(contenedor: HTMLElement | null) {
   contenedor?.animate([{ opacity: 0, transform: "translateX(-14px)" }, { opacity: 1, transform: "none" }],
