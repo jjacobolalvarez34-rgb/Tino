@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./marco.css";
 import { Iconos } from "@/components/Iconos";
 
 export const metadata: Metadata = {
