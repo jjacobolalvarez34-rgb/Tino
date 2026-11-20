@@ -273,3 +273,6 @@ span.t-ok svg.icono,span.t-mal svg.icono{width:16px;height:16px;vertical-align:-
 .m-resolver-acciones{display:flex;gap:var(--esp-2);align-items:center;flex-wrap:wrap}
 .m-resolver-acciones select{height:44px;border-radius:10px;max-width:260px}
 .m-resolver-acciones .boton.compacto{height:44px}
+.m-usuario{display:flex;flex-direction:column;gap:var(--esp-2);padding:var(--esp-3) 0}
+.m-usuario-quien{display:flex;align-items:center;gap:var(--esp-3)}
+.m-usuario .m-fila-texto .chip{align-self:flex-start;margin-top:4px}

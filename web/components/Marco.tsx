@@ -39,6 +39,7 @@ const MAS = [
   { ruta: "/archivos", texto: "Archivos", icono: "subir" },
   { ruta: "/puntos", texto: "Puntos de venta", icono: "tienda" },
   { ruta: "/equipo/ajustes", texto: "Ajustes de Equipo", icono: "ajustes" },
+  { ruta: "/usuarios", texto: "Usuarios", icono: "gente", roles: ["dueno", "soporte"] },
 ];
 
 export function Marco({ children }: { children: React.ReactNode }) {
@@ -139,7 +140,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
       <HojaInferior abierta={mas} titulo="Más" alCerrar={() => setMas(false)}>
         <p className="m-contexto">{yo.empresa} · {yo.nombre}</p>
         <ul className="m-lista">
-          {MAS.map((m) => (
+          {MAS.filter((m) => !("roles" in m) || (m.roles as string[]).includes(yo.rol)).map((m) => (
             <li key={m.ruta}>
               <Link href={m.ruta} className="m-fila" onClick={() => setMas(false)}>
                 <span className="m-fila-icono"><Icono id={m.icono} /></span>
