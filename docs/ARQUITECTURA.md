@@ -45,18 +45,18 @@ flowchart LR
 
 | Pieza | Qué hace | Estado |
 | --- | --- | --- |
-| Perfiles de fuente | Dicen cómo leer el archivo de cada empresa: qué columna es qué | Nuevo |
-| Importadores | Leen cada archivo con su perfil, validan y guardan con archivo y fila de origen | Lectores del conciliador ya existen |
+| Perfiles de fuente | Dicen cómo leer el archivo de cada empresa: qué columna es qué | Hecho en la base; falta pantalla (PLAN 3.2) |
+| Importadores | Leen cada archivo con su perfil, validan y guardan con archivo y fila de origen. El Excel de Milagros es un adaptador de transición (D-061) | Hecho |
 | Normalizador | Une las distintas formas de escribir un nombre de asesora o producto | Nuevo |
-| Lector de correos | Revisa el buzón de avisos del banco y crea movimientos | Nuevo |
+| Lector de correos | Revisa el buzón de avisos del banco y crea movimientos | Pendiente (PLAN 2.8) |
 | Conciliador | Cruza pagos reportados con movimientos reales | 80 % |
 | Verificador de transferencias | Comprobante contra aviso del banco en minutos; el extracto confirma | Nuevo |
 | Detector de descuadres | Diferencias por día, punto y medio de pago, con causa y pruebas | En progreso |
-| Programa de escritorio | Las pantallas de `docs/DESIGN.md` con datos reales, en un `.exe` (D-023) | Diseñado |
-| Panel web | Las mismas pantallas en la web | Fase posterior |
-| Excel y Sheets | Copiar como números y pestañas que se llenan solas | Nuevo |
-| Alertas | Descuadres grandes y transferencias sospechosas | Nuevo |
-| Respaldo | Copia nocturna y prueba de restauración mensual | Nuevo |
+| Programa de escritorio | Sube y procesa archivos (también la cola de la web, D-057); sin pantallas nuevas (D-044) | Hecho |
+| Panel web | La interfaz principal (D-044), dirección 2 (DESIGN.md §15), en Vercel | Hecho; pantallas de caja por pasar a la dirección 2 |
+| Exportes y reportes | Copiar como números ✅; reportes con gráficas en PDF y Excel (PLAN 2.3). El Sheet de control no se construye (D-061) | En progreso |
+| Alertas | Descuadres grandes y transferencias sospechosas | Pendiente (PLAN 2.7) |
+| Respaldo | Supabase Pro + copia propia; prueba de restauración (tests/respaldo) | Probado en local (D-058) |
 | App de asesoras | Nativa, con respaldo local de su punto | Fase posterior |
 
 ## Tecnología

@@ -351,6 +351,19 @@ crédito invertidos, neto del día, transacción o totales del día, conceptos e
 traslados, tolerancia). Entran a Tino como perfiles de banco por empresa (D-040), nada amarrado a
 un cliente. Los archivos de Redil traen cédulas y nombres reales: nunca entran al repositorio.
 
+### D-061 · Tino reemplaza las herramientas del cliente; no se construye alrededor de ellas
+20 nov 2026. Preocupación y decisión de Jacobo. Cada fuente entra por un adaptador configurado en el
+perfil de la empresa, y la fuente propia es Tino: el cierre del día en Tino reemplaza el Excel del día,
+y los reportes de Tino reemplazan el "Sheet de control" del plan original, que no se construye. El
+lector de la plantilla de Milagros queda como adaptador de transición. Ver docs/PLAN.md §1.
+
+### D-062 · Con Siigo, Tino solo lee
+20 nov 2026. Tomada por Claude, a confirmar por Jacobo. La API de Siigo permite crear, editar y anular
+facturas, notas crédito, recibos de caja y comprobantes, pero "Tino no factura" (VISION) y escribir
+toca la contabilidad legal del cliente. Tino lee facturas, notas crédito, recibos, centros de costo y
+productos. Escribir (por ejemplo, el recibo de caja de una consignación conciliada) se decide después,
+con cada cliente.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

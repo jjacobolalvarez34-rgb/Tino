@@ -36,6 +36,16 @@ vienen después. Los cinco emiten factura electrónica ante la DIAN.
   transferencia) y `annulled`. Qué campo dice el punto va en el `perfil_fuente` de la
   empresa, no en el código.
 
+## Siigo: qué deja hacer la API (revisado el 20 nov 2026)
+
+No es solo de lectura. Según developers.siigo.com se puede **crear, editar, anular y borrar**
+facturas de venta (y bajar su PDF o mandarla por correo); crear notas crédito, recibos de caja y
+comprobantes contables; crear y editar compras, cotizaciones, documentos soporte, pagos, clientes y
+productos; leer informes (balance de prueba, cartera); y suscribirse a **webhooks** (avisos al
+instante, un tema por suscripción). Límite: 100 peticiones por minuto por empresa (10 en la de
+pruebas). `Partner-Id` = nombre de la aplicación, 3 a 100 letras o números, sin registro previo.
+Tino solo lee (D-062). Ver docs/PLAN.md §2 con lo encontrado en octubre.
+
 ## Cómo encaja en Tino
 
 - Un conector por programa, todos con la misma salida: la factura normalizada (fecha,
@@ -50,9 +60,8 @@ vienen después. Los cinco emiten factura electrónica ante la DIAN.
 
 ## Lo que falta decidir o conseguir
 
-- Registrar Tino como aplicación en Siigo para tener `Partner-Id` (trámite de Jacobo).
-- Credenciales API de Milagros en Siigo (usuario y llave), para probar en tino-pruebas.
-- En Milagros, cuál campo de Siigo dice el punto: bodega, centro de costo o prefijo.
+- En Milagros el punto sale del **prefijo** o del **centro de costo** (uno por punto); la bodega de los
+  ítems no sirve (varias por punto). Las credenciales ya funcionan (20 nov 2026).
 
 ## Fuentes
 
