@@ -164,7 +164,8 @@ def main():
                   {"empresa_id": a, "codigo": f"F{marca}", "nombre": "x"}), "42501", "Finanzas no edita maestros")
     ok(len(ver("usuario", t["asesora.a"])) == 1, "La asesora solo se ve a sí misma")
     ok(len(ver("usuario", t["finanzas.a"])) == 1, "Finanzas no ve la lista de usuarios")
-    ok(len(ver("usuario", d_a)) == 5, "El dueño ve los 5 usuarios de su empresa y ninguno de B")
+    de_a = sum(1 for k in usuarios if k.endswith(".a"))  # 5 roles; más lider y responsable si corrió Equipo
+    ok(len(ver("usuario", d_a)) == de_a, f"El dueño ve los {de_a} usuarios de su empresa y ninguno de B")
 
     # Auditoría
     nombre = f"Punto A1 {marca}"
