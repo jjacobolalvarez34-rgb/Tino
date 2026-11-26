@@ -409,6 +409,14 @@ indicadores y etapas solo se llenan con el botón "Usar plantilla sugerida". La 
 calendario va de lunes a domingo. Cuando un día lo comparten varias personas (dos, tres o más), la
 conversión de cada una ese día es aproximada y la pantalla lo avisa.
 
+### D-068 · Una sola base: la app móvil es otra cara de Tino y el Excel es una salida
+26 nov 2026. Decisión de Jacobo. Tino tiene una sola base de datos. La app móvil es otra cara de esa
+base, como la web: mismos usuarios, roles, permisos, puntos, asesoras y productos. La única copia aparte
+es la del celular para trabajar sin internet, y se sincroniza con Tino. El Excel es una salida que Tino
+genera, nunca una base. Esto cambia la regla de la app vieja de registro de facturas ("el Excel es la
+fuente oficial"): mientras convivan, hay que acordar desde cuándo manda Tino y qué pasa con lo que se
+corrija a mano en el Excel (pendiente de Jacobo). Plan: docs/PLAN_APP_MOVIL.md.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?
