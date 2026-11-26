@@ -1269,8 +1269,20 @@
   stroke-dashoffset: 1.2;
 }
 
+/* «Buscando la causa…» sale y se va. Su estado final (sin animación, por ejemplo con
+   «reducir movimiento» del sistema) es oculto: nunca queda encima de «Causa probable». */
 .raiz[data-animar] .escenaDescuadres[data-visto] .buscando {
-  animation: aparecer 0.3s ease 0.5s both, irse 0.25s ease 1.3s forwards;
+  visibility: hidden;
+  opacity: 0;
+  animation: buscarYSalir 1.55s ease both;
+}
+
+@keyframes buscarYSalir {
+  0% { opacity: 0; visibility: visible; }
+  32% { opacity: 0; visibility: visible; }
+  52% { opacity: 1; visibility: visible; }
+  84% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
 }
 
 .raiz[data-animar] .escenaDescuadres[data-visto] .causaParte {

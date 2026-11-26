@@ -138,7 +138,8 @@ export function EscenaPortada() {
   const indice = Math.floor(paso / 2) % n;
   const resuelto = paso % 2 === 1;
   const anterior = (indice - 1 + n) % n;
-  const destacado = resuelto ? AVISOS[indice].punto : null;
+  // El resaltado va fijo en el punto del descuadre: es lo que el cierre quiere que se mire.
+  const destacado = CIERRE.puntos.find((p) => p.estado === "mal")?.punto ?? null;
 
   return (
     <div

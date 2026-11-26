@@ -16,8 +16,10 @@ export type Plan = {
 export const PLANES: Plan[] = [
   {
     id: "equipo", nombre: "Equipo", precio: 30_000,
-    resumen: "Para acompañar a las personas de cada punto y saber quién vende cómo.",
+    resumen: "Para formar y acompañar a las personas de cada punto y saber quién vende cómo.",
     incluye: [
+      "Ciclo de formación: en qué paso va cada persona y calendario de la semana",
+      "Registro del día: clientes atendidos, conversión y sus propios indicadores",
       "Personas por punto, aunque estén en varios",
       "Venta por persona, ranking y ticket promedio",
       "Metas y cumplimiento por punto y por persona",
