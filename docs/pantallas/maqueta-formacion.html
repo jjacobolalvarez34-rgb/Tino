@@ -1,0 +1,643 @@
+<title>Formación y desempeño</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Concepto: el ciclo de formación de las asesoras, en las palabras de la dueña. Arriba lo que hay que hacer, luego cómo van, luego el calendario. */
+:root{
+  --marca:#74305F; --marca-fuerte:#5A2449; --marca-suave:#F3E4EE; --foco:#C99BBB;
+  --fondo:#F7F5F7; --sup:#FFFFFF; --texto:#22161F; --suave:#5E5862; --borde:#E2DDE3; --div:#F0ECF0;
+  --ok:#1C7638; --ok-f:#E1F2E5; --rev:#7A5A00; --rev-f:#FBF1CC; --apo:#9A2A0A; --apo-f:#FDE5DA;
+  --info:#2557A7; --info-f:#E3ECFA;
+  --f:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --marca:#D7A6C8; --marca-fuerte:#E8C3DC; --marca-suave:#3A2236; --foco:#8E5A7E;
+  --fondo:#151017; --sup:#201823; --texto:#F3EEF4; --suave:#B8AEBD; --borde:#3A2F40; --div:#2A2130;
+  --ok:#7BD08F; --ok-f:#17321F; --rev:#E8C766; --rev-f:#3A3012; --apo:#F29A7C; --apo-f:#3D1E14;
+  --info:#8FB4F0; --info-f:#1B2840; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --marca:#D7A6C8; --marca-fuerte:#E8C3DC; --marca-suave:#3A2236; --foco:#8E5A7E;
+  --fondo:#151017; --sup:#201823; --texto:#F3EEF4; --suave:#B8AEBD; --borde:#3A2F40; --div:#2A2130;
+  --ok:#7BD08F; --ok-f:#17321F; --rev:#E8C766; --rev-f:#3A3012; --apo:#F29A7C; --apo-f:#3D1E14;
+  --info:#8FB4F0; --info-f:#1B2840; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--fondo);color:var(--texto);font-family:var(--f);font-size:16px;line-height:1.45}
+.envoltura{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--foco);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+/* Encabezado */
+.cabeza{display:flex;align-items:center;gap:12px;padding-block:20px 8px;flex-wrap:wrap}
+.logo{width:40px;height:40px;flex:none}
+.cabeza h1{font-size:clamp(22px,4vw,30px);font-weight:800;letter-spacing:-.01em}
+.cabeza p{margin:0;color:var(--suave);font-size:15px}
+.cabeza .der{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ejemplo{background:var(--info-f);color:var(--info);border-radius:12px;padding:12px 16px;font-size:15px;margin-block:8px 16px;display:flex;gap:10px;align-items:flex-start}
+.ejemplo b{font-weight:700}
+
+/* Pestañas */
+.pestanas{display:flex;gap:6px;background:var(--sup);border:1px solid var(--borde);border-radius:14px;padding:5px;width:fit-content;max-width:100%;overflow-x:auto}
+.pestanas button{border:0;background:transparent;padding:10px 18px;border-radius:10px;font-weight:600;font-size:16px;color:var(--suave);white-space:nowrap;min-height:44px}
+.pestanas button[aria-selected="true"]{background:var(--marca);color:#fff}
+:root[data-theme="dark"] .pestanas button[aria-selected="true"]{color:#201823}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pestanas button[aria-selected="true"]{color:#201823}}
+.barra{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-block:16px 8px}
+.periodo{display:flex;gap:6px;align-items:center;color:var(--suave);font-size:15px}
+.periodo select{border:1px solid var(--borde);background:var(--sup);border-radius:10px;padding:8px 10px;min-height:44px}
+
+/* Secciones */
+.seccion{margin-top:28px}
+.seccion > h2{font-size:21px;font-weight:800;margin-bottom:4px}
+.seccion > .sub{color:var(--suave);margin:0 0 14px;font-size:15px}
+.rejilla{display:grid;gap:12px}
+.dos{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+
+/* Pendientes */
+.pend{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.caja{background:var(--sup);border:1px solid var(--borde);border-radius:16px;padding:16px;min-width:0}
+.caja h3{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cuenta{font-size:13px;font-weight:700;border-radius:999px;padding:2px 9px}
+.c-apo{background:var(--apo-f);color:var(--apo)} .c-rev{background:var(--rev-f);color:var(--rev)} .c-ok{background:var(--ok-f);color:var(--ok)} .c-info{background:var(--info-f);color:var(--info)}
+.fila{display:flex;gap:10px;align-items:flex-start;padding-block:10px;border-top:1px solid var(--div)}
+.fila:first-of-type{border-top:0}
+.fila .t{font-weight:600}
+.fila .d{color:var(--suave);font-size:14px}
+.fila button.lnk{all:unset;cursor:pointer;color:var(--marca);font-weight:600}
+.fila button.lnk:focus-visible{outline:3px solid var(--foco)}
+
+/* Indicadores */
+.ind{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.kpi{background:var(--sup);border:1px solid var(--borde);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi .n{font-size:15px;color:var(--suave);font-weight:600}
+.kpi .v{font-size:30px;font-weight:800;letter-spacing:-.01em;margin-block:2px}
+.kpi .exp{font-size:13px;color:var(--suave)}
+.delta{font-size:14px;font-weight:700}
+.sube{color:var(--ok)} .baja{color:var(--apo)} .igual{color:var(--suave)}
+
+/* Ciclo */
+.ciclo{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+@media (max-width:760px){.ciclo{grid-template-columns:1fr}}
+.etapa{background:var(--sup);border:1px solid var(--borde);border-radius:14px;padding:14px;position:relative;min-width:0}
+.etapa .paso{font-size:13px;font-weight:700;color:var(--marca)}
+.etapa h3{font-size:17px;font-weight:800;margin-block:2px 4px}
+.etapa .q{font-size:13px;color:var(--suave);margin-bottom:8px}
+.caritas{display:flex;flex-wrap:wrap;gap:4px}
+.av{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;font-size:13px;font-weight:700;background:var(--marca-suave);color:var(--marca);flex:none;border:0}
+button.av{cursor:pointer}
+
+/* Calendario */
+.cal{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.dia{background:var(--sup);border:1px solid var(--borde);border-radius:14px;padding:12px;min-height:120px;min-width:0}
+.dia .f{font-weight:800;font-size:15px}
+.dia.hoy{border-color:var(--marca);box-shadow:0 0 0 1px var(--marca) inset}
+.ev{margin-top:8px;background:var(--marca-suave);border-radius:10px;padding:8px 10px;font-size:14px}
+.ev b{display:block;font-size:14px}
+.ev span{color:var(--suave);font-size:13px}
+.ev.inc{background:var(--rev-f)} .ev.coa{background:var(--ok-f)} .ev.eva{background:var(--info-f)}
+
+/* Lista asesoras / tabla */
+.tabla-cont{overflow-x:auto;background:var(--sup);border:1px solid var(--borde);border-radius:16px}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:15px}
+th{text-align:left;font-size:13px;color:var(--suave);font-weight:700;padding:12px 12px;border-bottom:1px solid var(--borde);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--div);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+tr.clic{cursor:pointer} tr.clic:hover td{background:var(--div)}
+.nom{display:flex;align-items:center;gap:10px;font-weight:600}
+.est{font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;display:inline-block}
+
+/* Chips punto / asesora */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--borde);background:var(--sup);border-radius:999px;padding:8px 14px;font-weight:600;font-size:15px;min-height:44px}
+.chip[aria-pressed="true"]{background:var(--marca-suave);border-color:var(--marca);color:var(--marca)}
+
+/* Ficha */
+.ficha-cab{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--sup);border:1px solid var(--borde);border-radius:16px;padding:16px}
+.ficha-cab .av{width:56px;height:56px;font-size:20px}
+.ficha-cab h2{font-size:24px;font-weight:800}
+.ficha-cab .d{color:var(--suave)}
+.bloque p{margin:6px 0 0}
+.etq{font-size:13px;font-weight:700;color:var(--suave);text-transform:uppercase;letter-spacing:.04em}
+.temas{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tema{background:var(--div);border-radius:999px;padding:4px 10px;font-size:14px}
+.barras{display:grid;gap:8px;margin-top:8px}
+.barra-c{display:grid;grid-template-columns:minmax(0,1fr) 120px 32px;gap:10px;align-items:center;font-size:14px}
+.pista{height:10px;border-radius:999px;background:var(--div);overflow:hidden}
+.pista i{display:block;height:100%;background:var(--marca);border-radius:999px}
+.linea{position:relative;margin-top:6px}
+.hito{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding-block:12px;border-top:1px solid var(--div)}
+.hito:first-child{border-top:0}
+.hito .fe{color:var(--suave);font-size:14px}
+.hito .ti{font-weight:700}
+.tipo{font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;margin-right:6px}
+
+/* Cómo funciona */
+.quien{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.quien .caja p{margin:6px 0 0;color:var(--suave);font-size:15px}
+
+/* Botón registrar flotante */
+.fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--marca);color:#fff;border:0;border-radius:999px;padding:14px 22px;font-weight:800;font-size:17px;box-shadow:0 6px 20px rgba(60,20,50,.28);min-height:52px;z-index:20}
+:root[data-theme="dark"] .fab{color:#201823}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fab{color:#201823}}
+
+/* Hoja */
+.velo{position:fixed;inset:0;background:rgba(20,10,18,.45);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:760px){.velo{align-items:center}}
+.hoja{background:var(--sup);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px))}
+@media (min-width:760px){.hoja{border-radius:20px}}
+.hoja h2{font-size:22px;font-weight:800;margin-bottom:4px}
+.hoja .sub{color:var(--suave);margin:0 0 14px}
+.opc{display:grid;gap:8px}
+.opc button{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--borde);background:var(--sup);border-radius:14px;padding:14px;min-height:60px}
+.opc button b{display:block;font-size:17px}
+.opc button span{color:var(--suave);font-size:14px}
+.campo{display:grid;gap:6px;margin-bottom:12px}
+.campo label{font-weight:700;font-size:15px}
+.campo select,.campo input,.campo textarea{border:1px solid var(--borde);background:var(--fondo);border-radius:12px;padding:12px;min-height:48px;width:100%}
+.contador{display:flex;align-items:center;gap:10px}
+.contador button{width:48px;height:48px;border-radius:12px;border:1px solid var(--borde);background:var(--fondo);font-size:22px;font-weight:700}
+.contador output{min-width:48px;text-align:center;font-size:22px;font-weight:800}
+.dos-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.dos-col{grid-template-columns:1fr}}
+.acciones{display:flex;gap:10px;margin-top:8px}
+.btn{border:0;border-radius:12px;padding:14px 18px;font-weight:800;min-height:52px;flex:1}
+.btn.pri{background:var(--marca);color:#fff}
+:root[data-theme="dark"] .btn.pri{color:#201823}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.pri{color:#201823}}
+.btn.sec{background:var(--div);color:var(--texto)}
+.aviso{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--texto);color:var(--fondo);padding:12px 18px;border-radius:12px;font-weight:600;z-index:40;max-width:calc(100% - 32px)}
+/* Guía: dibujos simplificados de Tino */
+.guia{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:800px){.guia{grid-template-columns:1fr}}
+.pant{border:2px solid var(--borde);border-radius:18px;background:var(--fondo);display:grid;grid-template-columns:70px minmax(0,1fr);overflow:hidden;min-width:0}
+.riel{background:var(--sup);border-right:1px solid var(--borde);display:flex;flex-direction:column;gap:6px;padding:10px 6px;align-items:stretch}
+.riel span{font-size:12px;text-align:center;padding:7px 2px;border-radius:9px;color:var(--suave);font-weight:600;position:relative}
+.riel span.on{background:var(--marca-suave);color:var(--marca)}
+.riel span.mas{background:var(--marca);color:#fff}
+.cont{padding:12px;display:grid;gap:8px;align-content:start;min-width:0}
+.cont .tit{font-weight:800;font-size:16px}
+.blk{background:var(--sup);border:1px solid var(--borde);border-radius:10px;padding:8px 10px;font-size:13px;position:relative;min-width:0}
+.blk.lado{display:flex;gap:8px;flex-wrap:wrap}
+.blk .mini{background:var(--div);border-radius:999px;padding:2px 8px;font-size:12px}
+.blk .bt{background:var(--marca);color:#fff;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:700}
+.marca-hl{box-shadow:0 0 0 3px var(--apo)}
+.pin{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:50%;background:var(--apo);color:#fff;font-size:12px;font-weight:800;padding:0 4px;vertical-align:middle}
+.riel .pin{position:absolute;top:-6px;right:-4px;min-width:18px;height:18px;font-size:11px}
+.blk > .pin{position:absolute;top:-9px;right:-7px}
+.pasos{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.pasos li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start}
+.pasos li b{display:block}
+.pasos li span.d{color:var(--suave);font-size:15px}
+.pronto{background:var(--info-f);color:var(--info);border-radius:999px;font-size:12px;font-weight:700;padding:2px 8px;margin-left:6px}
+.mapa-t td{white-space:normal;vertical-align:top}
+.mapa-t td:first-child{font-weight:600;width:34%}
+.ruta{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ruta span{background:var(--marca-suave);color:var(--marca);border-radius:8px;padding:2px 8px;font-weight:600;font-size:14px}
+.ruta i{font-style:normal;color:var(--suave)}
+@media (prefers-reduced-motion:no-preference){.hoja{animation:sube .18s ease-out}@keyframes sube{from{transform:translateY(16px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+
+<div class="envoltura">
+  <header class="cabeza">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="24" fill="#74305F"/><path d="M50 48 V78" stroke="#fff" stroke-width="12" stroke-linecap="round" fill="none"/><path d="M37 27 L46 36 L64 15" stroke="#E9C6DC" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div>
+      <h1>Formación y desempeño</h1>
+      <p>El ciclo de las asesoras de los varios puntos: planear, hacer y seguir</p>
+    </div>
+  </header>
+
+  <div class="ejemplo" role="note"><span aria-hidden="true">ⓘ</span><div><b>Esto es un ejemplo.</b> Los nombres y los números son inventados, para que veas cómo se vería. Cuando tu equipo empiece a anotar, aquí salen los datos reales.</div></div>
+
+  <nav class="pestanas" role="tablist" aria-label="Vistas">
+    <button role="tab" id="t-equipo" data-vista="equipo" aria-selected="true">Todo el equipo</button>
+    <button role="tab" id="t-punto" data-vista="punto" aria-selected="false">Por punto</button>
+    <button role="tab" id="t-asesora" data-vista="asesora" aria-selected="false">Por asesora</button>
+    <button role="tab" id="t-como" data-vista="como" aria-selected="false">Cómo se usa</button>
+    <button role="tab" id="t-guia" data-vista="guia" aria-selected="false">Dónde está en Tino</button>
+  </nav>
+
+  <div class="barra" id="barra-periodo">
+    <div class="periodo"><label for="sel-periodo">Ver:</label>
+      <select id="sel-periodo">
+        <option value="mes">Este mes (noviembre)</option>
+        <option value="semana">Esta semana</option>
+      </select>
+      <span id="compara">comparado con octubre</span>
+    </div>
+  </div>
+
+  <main id="vista"></main>
+</div>
+
+<button class="fab" id="fab" aria-haspopup="dialog">+ Anotar</button>
+<div id="capa"></div>
+
+<script>
+(function(){
+const HOY = new Date(2026,10,21);
+const PUNTOS = ["Punto Centro","Punto Norte","Punto Sur","Punto Plaza","Punto Estación","Punto Parque","Punto Avenida","Punto Occidente","Punto Oriente","Punto Terminal","Punto Calle 80"];
+const ETAPAS = [
+  {k:"diag",t:"Diagnóstico",q:"Ver cómo atiende hoy"},
+  {k:"form",t:"Formación",q:"Venta consultiva y Club de puntos"},
+  {k:"acomp",t:"Acompañamiento",q:"Coaching en el punto"},
+  {k:"eval",t:"Evaluación",q:"Cliente incógnito y estándares"},
+  {k:"comp",t:"Compromisos",q:"Lo que acordó mejorar"}
+];
+// [nombre, punto, etapa, atendidos, conversion%, club%, puntos%, referidos, ticket, estandares%, puntualidad%, celular(llamados), presentacion%, factorAnterior]
+const BASE = [
+ ["Laura Gómez","Punto Centro","comp",412,62,71,88,18,96500,92,98,0,96,0.93],
+ ["Paola Ruiz","Punto Centro","eval",365,55,58,79,11,88200,85,95,1,92,0.97],
+ ["Diana Torres","Punto Norte","acomp",298,41,33,52,4,74100,68,86,4,80,1.04],
+ ["Camila Rojas","Punto Sur","form",276,49,45,70,7,81300,79,92,2,88,0.95],
+ ["Natalia Peña","Punto Plaza","eval",388,58,64,84,14,102300,88,100,0,94,0.92],
+ ["Sandra Vargas","Punto Estación","acomp",254,37,29,47,3,69800,64,82,5,78,1.06],
+ ["Yuliana Mora","Punto Parque","comp",331,53,60,81,9,90100,84,97,1,90,0.96],
+ ["Marcela Ríos","Punto Avenida","diag",219,44,38,61,5,77400,72,90,3,85,1.0],
+ ["Johana Díaz","Punto Occidente","form",305,51,52,74,8,84600,81,94,1,89,0.94],
+ ["Lorena Castillo","Punto Oriente","eval",342,56,66,86,12,93700,87,96,0,93,0.95],
+ ["Viviana Suárez","Punto Terminal","acomp",267,46,41,63,6,79900,76,88,2,86,0.98],
+ ["Karen Molina","Punto Calle 80","diag",238,42,36,58,4,75200,70,91,3,84,1.02]
+];
+const iniciales = n => n.split(" ").map(p=>p[0]).slice(0,2).join("");
+const pesos = v => "$ " + Math.round(v).toLocaleString("es-CO");
+const ASES = BASE.map((b,i)=>({id:"a"+i,nombre:b[0],punto:b[1],etapa:b[2],
+  act:{at:b[3],conv:b[4],club:b[5],pts:b[6],ref:b[7],tick:b[8],est:b[9],pun:b[10],cel:b[11],pre:b[12]},f:b[13]}));
+// anterior: un poco distinto
+ASES.forEach(a=>{const f=a.f,x=a.act;a.ant={at:Math.round(x.at*f*0.98),conv:Math.round(x.conv*f),club:Math.round(x.club*f*0.97),pts:Math.round(x.pts*f),ref:Math.max(0,Math.round(x.ref*f)-1),tick:Math.round(x.tick*(0.97+(1-f)/2)),est:Math.round(Math.min(100,x.est*f)),pun:Math.round(Math.min(100,x.pun*(f>1?1.02:0.98))),cel:Math.max(0,x.cel+(f>1?-1:1)),pre:Math.round(Math.min(100,x.pre*f))};});
+
+const COMPROMISOS = [
+ {a:"a5",q:"Explicar el Club de puntos a todo cliente que compre",resp:"Líder comercial",lim:new Date(2026,10,14),estado:"vencido",av:"La vimos explicarlo 3 de 10 veces"},
+ {a:"a5",q:"No usar el celular frente al cliente",resp:"Responsable del punto",lim:new Date(2026,10,18),estado:"vencido",av:"2 llamados de atención esta semana"},
+ {a:"a2",q:"Consultar puntos antes de cobrar",resp:"Líder comercial",lim:new Date(2026,10,17),estado:"vencido",av:"Mejoró, pero aún olvida en hora pico"},
+ {a:"a2",q:"Llegar 10 minutos antes de abrir",resp:"Formación",lim:new Date(2026,10,25),estado:"en curso",av:"3 de 5 días a tiempo"},
+ {a:"a7",q:"Presentarse con nombre y ofrecer ayuda",resp:"Líder comercial",lim:new Date(2026,10,24),estado:"en curso",av:""},
+ {a:"a10",q:"Pedir un referido en cada venta grande",resp:"Líder comercial",lim:new Date(2026,10,27),estado:"en curso",av:"6 referidos este mes"},
+ {a:"a0",q:"Acompañar a una compañera nueva una semana",resp:"Formación",lim:new Date(2026,10,13),estado:"cumplido",av:"Lo hizo con Johana en Punto Occidente"},
+ {a:"a4",q:"Mostrar el producto complementario",resp:"Líder comercial",lim:new Date(2026,10,12),estado:"cumplido",av:"Subió su ticket promedio"}
+];
+const SESIONES = [
+ {d:new Date(2026,10,23),h:"8:00 a. m.",t:"Venta consultiva · módulo 2",lugar:"Punto Centro",tipo:"form",quien:"Formación",asis:["a3","a8","a7","a11"]},
+ {d:new Date(2026,10,24),h:"10:00 a. m.",t:"Coaching en el punto",lugar:"Punto Estación",tipo:"coa",quien:"Líder comercial",asis:["a5"]},
+ {d:new Date(2026,10,25),h:"Todo el día",t:"Cliente incógnito",lugar:"Punto Plaza y Punto Calle 80",tipo:"inc",quien:"Líder comercial",asis:["a4","a11"]},
+ {d:new Date(2026,10,26),h:"8:00 a. m.",t:"Club de puntos: cómo explicarlo en 30 segundos",lugar:"Virtual",tipo:"form",quien:"Formación",asis:["a2","a5","a10","a7"]},
+ {d:new Date(2026,10,27),h:"3:00 p. m.",t:"Evaluación de estándares",lugar:"Punto Oriente",tipo:"eva",quien:"Formación",asis:["a9","a1"]},
+ {d:new Date(2026,10,28),h:"9:00 a. m.",t:"Coaching en el punto",lugar:"Punto Norte",tipo:"coa",quien:"Líder comercial",asis:["a2"]}
+];
+const CRITERIOS = ["Saluda y ofrece ayuda","Pregunta qué necesita el cliente","Explica el Club de puntos","Consulta los puntos antes de cobrar","Ofrece un producto complementario","Presentación personal"];
+
+let estado = {vista:"equipo", periodo:"mes", punto:PUNTOS[0], asesora:"a5"};
+
+const DIAS=["dom","lun","mar","mié","jue","vie","sáb"], MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const fecha = d => DIAS[d.getDay()]+" "+d.getDate()+" "+MESES[d.getMonth()];
+const porA = id => ASES.find(a=>a.id===id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function escala(x){ return estado.periodo==="semana" ? 0.25 : 1; }
+
+// Agrega indicadores de un grupo de asesoras
+function suma(lista, cual){
+  const k=escala();
+  let at=0,ven=0,club=0,pts=0,ref=0,plata=0,est=0,pun=0,cel=0,pre=0;
+  lista.forEach(a=>{const x=a[cual];const at1=x.at*k;const v=at1*x.conv/100;
+    at+=at1;ven+=v;club+=at1*x.club/100;pts+=v*x.pts/100;ref+=x.ref*k;plata+=v*x.tick;est+=x.est;pun+=x.pun;cel+=x.cel*(k===1?1:0.5);pre+=x.pre;});
+  const n=lista.length||1;
+  return {at:Math.round(at),conv:ven/at*100,club:club/at*100,pts:pts/ven*100,ref:Math.round(ref),tick:plata/ven,est:est/n,pun:pun/n,cel:Math.round(cel),pre:pre/n};
+}
+
+const INDIC = [
+ {k:"at",n:"Atención de clientes",fmt:v=>v.toLocaleString("es-CO"),u:"",exp:"clientes atendidos",mejor:"sube",dif:"%"},
+ {k:"club",n:"Explicó el Club de puntos",fmt:v=>Math.round(v)+" %",exp:"de los clientes atendidos",mejor:"sube",dif:"pts"},
+ {k:"pts",n:"Consultó puntos antes de cobrar",fmt:v=>Math.round(v)+" %",exp:"de las ventas",mejor:"sube",dif:"pts"},
+ {k:"ref",n:"Referidos",fmt:v=>v,exp:"clientes que llegaron recomendados",mejor:"sube",dif:"%"},
+ {k:"conv",n:"Conversión",fmt:v=>Math.round(v)+" %",exp:"de los atendidos compraron",mejor:"sube",dif:"pts"},
+ {k:"tick",n:"Ticket promedio",fmt:v=>pesos(v),exp:"lo que compra cada cliente",mejor:"sube",dif:"%"},
+ {k:"est",n:"Cumplimiento de estándares",fmt:v=>Math.round(v)+" %",exp:"según las evaluaciones",mejor:"sube",dif:"pts"},
+ {k:"pre",n:"Presentación personal",fmt:v=>Math.round(v)+" %",exp:"de las revisiones, bien",mejor:"sube",dif:"pts"},
+ {k:"pun",n:"Puntualidad",fmt:v=>Math.round(v)+" %",exp:"de los días llegó a tiempo",mejor:"sube",dif:"pts"},
+ {k:"cel",n:"Uso del celular",fmt:v=>v,exp:"llamados de atención",mejor:"baja",dif:"num"}
+];
+function delta(ind, a, b){
+  let d, txt;
+  if(ind.dif==="pts"){ d=a-b; txt=(d>0?"▲ ":d<0?"▼ ":"")+Math.abs(Math.round(d))+" puntos"; }
+  else if(ind.dif==="%"){ d=b? (a-b)/b*100 : 0; txt=(d>0?"▲ ":d<0?"▼ ":"")+Math.abs(Math.round(d))+" %"; }
+  else { d=a-b; txt=(d>0?"▲ ":d<0?"▼ ":"")+Math.abs(Math.round(d)); }
+  if(Math.round(d)===0) return `<span class="delta igual">Igual que antes</span>`;
+  const bueno = ind.mejor==="sube" ? d>0 : d<0;
+  return `<span class="delta ${bueno?"sube":"baja"}">${txt}</span> <span class="exp">frente a ${estado.periodo==="mes"?"octubre":"la semana pasada"}</span>`;
+}
+function tarjetas(lista){
+  const a=suma(lista,"act"), b=suma(lista,"ant");
+  return `<div class="ind">${INDIC.map(i=>`<div class="kpi"><div class="n">${i.n}</div><div class="v num">${i.fmt(a[i.k])}</div><div class="exp">${i.exp}</div><div>${delta(i,a[i.k],b[i.k])}</div></div>`).join("")}</div>`;
+}
+
+// Quién necesita acompañamiento
+function razones(a){
+  const x=a.act, r=[];
+  if(x.club<40) r.push("explica poco el Club de puntos");
+  if(x.pts<55) r.push("no consulta los puntos antes de cobrar");
+  if(x.conv<45) r.push("baja conversión");
+  if(x.est<70) r.push("estándares bajos");
+  if(x.cel>=3) r.push("uso del celular");
+  const venc=COMPROMISOS.filter(c=>c.a===a.id&&c.estado==="vencido").length;
+  if(venc>=2) r.push(venc+" compromisos vencidos");
+  return r;
+}
+function semaforo(a){
+  const n=razones(a).length;
+  if(n>=3) return `<span class="est c-apo">■ Necesita apoyo</span>`;
+  if(n>=1) return `<span class="est c-rev">▲ Revisar</span>`;
+  return `<span class="est c-ok">● Va bien</span>`;
+}
+function avatar(a,btn){ return btn?`<button class="av" data-ir="${a.id}" title="${esc(a.nombre)}" aria-label="Ver a ${esc(a.nombre)}">${iniciales(a.nombre)}</button>`:`<span class="av" aria-hidden="true">${iniciales(a.nombre)}</span>`; }
+
+function pendientes(lista){
+  const ids=new Set(lista.map(a=>a.id));
+  const venc=COMPROMISOS.filter(c=>ids.has(c.a)&&c.estado==="vencido");
+  const apoyo=lista.filter(a=>razones(a).length>=3);
+  const fin=new Date(HOY); fin.setDate(fin.getDate()+7);
+  const ses=SESIONES.filter(s=>s.d>=HOY&&s.d<=fin&&s.asis.some(x=>ids.has(x)));
+  return `<div class="pend">
+   <div class="caja"><h3>Compromisos vencidos <span class="cuenta c-apo">${venc.length}</span></h3>
+    ${venc.length?venc.map(c=>{const a=porA(c.a);return `<div class="fila">${avatar(a)}<div><div class="t">${esc(c.q)}</div><div class="d">${esc(a.nombre)} · venció el ${fecha(c.lim)} · ${esc(c.resp)}</div><button class="lnk" data-ir="${a.id}">Ver a ${esc(a.nombre.split(" ")[0])}</button></div></div>`}).join(""):`<p class="d">No hay compromisos vencidos.</p>`}
+   </div>
+   <div class="caja"><h3>Asesoras que necesitan acompañamiento <span class="cuenta c-rev">${apoyo.length}</span></h3>
+    ${apoyo.length?apoyo.map(a=>`<div class="fila">${avatar(a)}<div><div class="t">${esc(a.nombre)} · ${esc(a.punto)}</div><div class="d">${razones(a).join(" · ")}</div><button class="lnk" data-ir="${a.id}">Ver qué pasa</button></div></div>`).join(""):`<p class="d">Nadie por ahora.</p>`}
+   </div>
+   <div class="caja"><h3>Capacitaciones esta semana <span class="cuenta c-info">${ses.length}</span></h3>
+    ${ses.length?ses.map(s=>`<div class="fila"><div><div class="t">${esc(s.t)}</div><div class="d">${fecha(s.d)} · ${s.h} · ${esc(s.lugar)} · ${s.asis.length} asesora${s.asis.length>1?"s":""}</div></div></div>`).join(""):`<p class="d">No hay capacitaciones esta semana.</p>`}
+   </div>
+  </div>`;
+}
+
+function ciclo(lista){
+  return `<div class="ciclo">${ETAPAS.map((e,i)=>{const en=lista.filter(a=>a.etapa===e.k);
+    return `<div class="etapa"><div class="paso">Paso ${i+1}</div><h3>${e.t}</h3><div class="q">${e.q}</div><div class="caritas">${en.map(a=>avatar(a,true)).join("")||'<span class="q">Nadie</span>'}</div></div>`}).join("")}</div>`;
+}
+
+function calendario(lista){
+  const ids=new Set(lista.map(a=>a.id));
+  const dias=[];for(let i=2;i<=7;i++){const d=new Date(2026,10,21+i-0);dias.push(d);}
+  const semana=[]; for(let i=0;i<6;i++){const d=new Date(2026,10,23+i);semana.push(d);}
+  return `<div class="cal">${semana.map(d=>{const ev=SESIONES.filter(s=>s.d.toDateString()===d.toDateString()&&s.asis.some(x=>ids.has(x)));
+    return `<div class="dia"><div class="f">${fecha(d)}</div>${ev.map(s=>`<div class="ev ${s.tipo}"><b>${esc(s.t)}</b><span>${s.h} · ${esc(s.lugar)}</span><br><span>${esc(s.quien)} · ${s.asis.length} asesora${s.asis.length>1?"s":""}</span></div>`).join("")||'<div class="ev" style="background:transparent;padding-left:0"><span>Nada programado</span></div>'}</div>`}).join("")}</div>`;
+}
+
+function tablaAsesoras(lista){
+  return `<div class="tabla-cont"><table><thead><tr><th>Asesora</th><th>Punto</th><th>Paso del ciclo</th><th>Cómo va</th><th class="r">Atendió</th><th class="r">Club de puntos</th><th class="r">Consultó puntos</th><th class="r">Referidos</th><th class="r">Conversión</th><th class="r">Ticket</th></tr></thead><tbody>
+  ${lista.map(a=>{const k=escala(),x=a.act;return `<tr class="clic" data-ir="${a.id}" tabindex="0"><td><div class="nom">${avatar(a)}${esc(a.nombre)}</div></td><td>${esc(a.punto)}</td><td>${ETAPAS.find(e=>e.k===a.etapa).t}</td><td>${semaforo(a)}</td><td class="r num">${Math.round(x.at*k)}</td><td class="r num">${x.club} %</td><td class="r num">${x.pts} %</td><td class="r num">${Math.round(x.ref*k)}</td><td class="r num">${x.conv} %</td><td class="r num">${pesos(x.tick)}</td></tr>`}).join("")}
+  </tbody></table></div>`;
+}
+
+function vistaEquipo(){
+  return `
+  <section class="seccion"><h2>Lo que hay que hacer</h2><p class="sub">Lo primero que debes mirar cada semana.</p>${pendientes(ASES)}</section>
+  <section class="seccion"><h2>Cómo van</h2><p class="sub">Todo el equipo, ${estado.periodo==="mes"?"este mes":"esta semana"}. La flecha dice si mejoró o empeoró.</p>${tarjetas(ASES)}</section>
+  <section class="seccion"><h2>En qué paso va cada asesora</h2><p class="sub">El ciclo de formación. Toca una cara para ver a esa asesora.</p>${ciclo(ASES)}</section>
+  <section class="seccion"><h2>Calendario de capacitaciones y seguimientos</h2><p class="sub">Semana del lunes 23 al sábado 28 de noviembre.</p>${calendario(ASES)}</section>
+  <section class="seccion"><h2>Todas las asesoras</h2><p class="sub">Toca una fila para ver todo lo de esa asesora.</p>${tablaAsesoras(ASES)}</section>`;
+}
+
+function vistaPunto(){
+  const lista=ASES.filter(a=>a.punto===estado.punto);
+  return `
+  <section class="seccion"><h2>Elige un punto</h2><div class="chips" role="group" aria-label="Puntos">${PUNTOS.map(p=>`<button class="chip" data-punto="${esc(p)}" aria-pressed="${p===estado.punto}">${esc(p)}</button>`).join("")}</div></section>
+  ${lista.length?`
+  <section class="seccion"><h2>${esc(estado.punto)}</h2><p class="sub">${lista.length} asesora${lista.length>1?"s":""} · ${estado.periodo==="mes"?"este mes":"esta semana"}</p>${tarjetas(lista)}</section>
+  <section class="seccion"><h2>Lo que hay que hacer en este punto</h2>${pendientes(lista)}</section>
+  <section class="seccion"><h2>Sus asesoras</h2>${tablaAsesoras(lista)}</section>`
+  :`<section class="seccion"><div class="caja"><h3>Este punto todavía no tiene asesoras en el ejemplo</h3><p class="d">Con tus datos reales aparecen aquí las asesoras de ${esc(estado.punto)}.</p></div></section>`}`;
+}
+
+function hitos(a){
+  const h=[];
+  COMPROMISOS.filter(c=>c.a===a.id).forEach(c=>h.push({d:c.lim,tipo:"Compromiso",cl:c.estado==="vencido"?"c-apo":c.estado==="cumplido"?"c-ok":"c-rev",ti:c.q,de:(c.estado==="vencido"?"Venció · ":c.estado==="cumplido"?"Cumplido · ":"En curso · ")+c.resp+(c.av?" · Avance: "+c.av:"")}));
+  SESIONES.filter(s=>s.asis.includes(a.id)).forEach(s=>h.push({d:s.d,tipo:s.tipo==="inc"?"Cliente incógnito":s.tipo==="coa"?"Coaching":s.tipo==="eva"?"Evaluación":"Formación",cl:"c-info",ti:s.t,de:"Programado · "+s.lugar+" · "+s.quien}));
+  const x=a.act, nombre=a.nombre.split(" ")[0];
+  h.push({d:new Date(2026,10,10),tipo:"Cliente incógnito",cl:"c-rev",ti:x.club<45?"No ofreció el Club de puntos":"Atendió muy bien",de:x.club<45?"Saludó bien, pero no preguntó qué necesitaba ni consultó puntos. Acción correctiva: coaching en el punto.":"Explicó el Club de puntos y ofreció un producto complementario."});
+  h.push({d:new Date(2026,10,6),tipo:"Observación",cl:x.cel>=3?"c-apo":"c-ok",ti:x.cel>=3?"Uso del celular frente al cliente":"Buena presentación personal",de:x.cel>=3?"Llamado de atención de la responsable del punto.":"Uniforme completo y puesto ordenado."});
+  h.push({d:new Date(2026,10,3),tipo:"Formación",cl:"c-info",ti:"Venta consultiva · módulo 1",de:"Asistió. Evaluación al final: "+Math.round(x.est/20)+" de 5. Dificultad: hacer preguntas sin que suene a interrogatorio."});
+  h.push({d:new Date(2026,9,20),tipo:"Diagnóstico",cl:"c-info",ti:"Diagnóstico inicial",de:"Punto de partida de "+nombre+": ver abajo."});
+  return h.sort((p,q)=>q.d-p.d);
+}
+
+function vistaAsesora(){
+  const a=porA(estado.asesora), x=a.act;
+  const r=razones(a);
+  const evals=CRITERIOS.map((c,i)=>{let v=Math.max(1,Math.min(5,Math.round(x.est/20+((i*7+a.id.length)%3-1)*0.6)));if(i===2&&x.club<45)v=2;if(i===3&&x.pts<55)v=2;return [c,v];});
+  const diag = r.length>=3 ? "Atiende con amabilidad, pero no hace preguntas para entender qué necesita el cliente. Casi nunca menciona el Club de puntos." : r.length ? "Buena atención. Le falta constancia en la consulta de puntos y en pedir referidos." : "Atención muy completa. Puede apoyar a compañeras nuevas.";
+  const obj = r.length>=3 ? "Que explique el Club de puntos a la mitad de sus clientes y consulte puntos antes de cada cobro, en 4 semanas." : r.length ? "Llegar al 80 % en consulta de puntos este mes." : "Acompañar a una asesora nueva y mantener su nivel.";
+  return `
+  <section class="seccion"><h2>Elige una asesora</h2><div class="chips" role="group" aria-label="Asesoras">${ASES.map(s=>`<button class="chip" data-asesora="${s.id}" aria-pressed="${s.id===a.id}">${esc(s.nombre)}</button>`).join("")}</div></section>
+  <section class="seccion">
+    <div class="ficha-cab"><span class="av" aria-hidden="true">${iniciales(a.nombre)}</span><div><h2>${esc(a.nombre)}</h2><div class="d">${esc(a.punto)} · Paso: ${ETAPAS.find(e=>e.k===a.etapa).t}</div></div><div style="margin-left:auto">${semaforo(a)}</div></div>
+    ${r.length?`<p class="sub" style="margin-top:10px"><b>Por qué:</b> ${r.join(" · ")}</p>`:""}
+  </section>
+  <section class="seccion rejilla dos">
+    <div class="caja bloque"><div class="etq">Diagnóstico inicial</div><p>${diag}</p></div>
+    <div class="caja bloque"><div class="etq">Objetivo de desarrollo</div><p>${obj}</p></div>
+  </section>
+  <section class="seccion"><h2>Cómo va</h2><p class="sub">${estado.periodo==="mes"?"Este mes":"Esta semana"}, comparado con antes.</p>${tarjetas([a])}</section>
+  <section class="seccion rejilla dos">
+    <div class="caja"><div class="etq">Última evaluación · de 1 a 5</div><div class="barras">${evals.map(([c,v])=>`<div class="barra-c"><span>${c}</span><span class="pista"><i style="width:${v*20}%"></i></span><b class="num">${v}</b></div>`).join("")}</div></div>
+    <div class="caja"><div class="etq">Temas trabajados</div><div class="temas">${["Saludo y primera impresión","Venta consultiva","Club de puntos","Consulta de puntos"].slice(0, a.etapa==="diag"?1:a.etapa==="form"?2:4).map(t=>`<span class="tema">${t}</span>`).join("")}</div>
+      <div class="etq" style="margin-top:14px">Avances</div><p style="margin:6px 0 0">${x.conv>=50?"Hace más preguntas antes de ofrecer. Subió su ticket promedio.":"Ya saluda y ofrece ayuda a todos los clientes."}</p>
+      <div class="etq" style="margin-top:14px">Dificultades</div><p style="margin:6px 0 0">${x.club<45?"Le da pena ofrecer el Club de puntos cuando hay fila.":"Pocas. En hora pico olvida consultar puntos."}</p>
+    </div>
+  </section>
+  <section class="seccion"><h2>Historial</h2><p class="sub">Formaciones, observaciones, cliente incógnito, coaching y compromisos, del más nuevo al más viejo.</p>
+    <div class="caja linea">${hitos(a).map(h=>`<div class="hito"><div class="fe">${fecha(h.d)}</div><div><span class="tipo ${h.cl}">${h.tipo}</span><span class="ti">${esc(h.ti)}</span><div class="d" style="color:var(--suave);font-size:14px;margin-top:2px">${esc(h.de)}</div></div></div>`).join("")}</div>
+  </section>`;
+}
+
+function vistaComo(){
+  return `
+  <section class="seccion"><h2>Quién anota qué</h2><p class="sub">Cada persona anota solo su parte, desde el celular. Lo demás se calcula solo.</p>
+  <div class="quien">
+    <div class="caja"><h3>Responsable de cada punto</h3><p>Al cerrar el día, por cada asesora: cuántos clientes atendió, a cuántos les explicó el Club de puntos, a cuántos les consultó los puntos, referidos y novedades. Toma 1 minuto.</p></div>
+    <div class="caja"><h3>Líder comercial</h3><p>Coaching, cliente incógnito, evaluaciones y los compromisos que acuerda con cada asesora.</p></div>
+    <div class="caja"><h3>Formación</h3><p>Capacitaciones: fecha, tema, quién asistió y cómo le fue. También puntualidad y presentación personal.</p></div>
+    <div class="caja"><h3>Tú</h3><p>Pones las metas y los criterios de evaluación, y cada semana revisas "Lo que hay que hacer".</p></div>
+  </div></section>
+  <section class="seccion"><h2>Lo que Tino saca solo</h2>
+  <div class="quien">
+    <div class="caja"><h3>Ventas y ticket promedio</h3><p>Salen de los reportes que ya llenan los puntos. Nadie los vuelve a escribir.</p></div>
+    <div class="caja"><h3>Conversión</h3><p>Clientes que compraron ÷ clientes atendidos.</p></div>
+    <div class="caja"><h3>Alertas</h3><p>Compromisos vencidos y asesoras que necesitan acompañamiento, según las reglas que tú pongas.</p></div>
+    <div class="caja"><h3>Comparar periodos</h3><p>Esta semana contra la pasada, o este mes contra el anterior.</p></div>
+  </div></section>
+  <section class="seccion"><h2>Cada semana, en 10 minutos</h2>
+    <div class="caja"><div class="fila"><span class="av">1</span><div><div class="t">Mira "Lo que hay que hacer"</div><div class="d">Compromisos vencidos y quién necesita apoyo.</div></div></div>
+    <div class="fila"><span class="av">2</span><div><div class="t">Revisa "Cómo van"</div><div class="d">Las flechas te dicen qué mejoró y qué empeoró.</div></div></div>
+    <div class="fila"><span class="av">3</span><div><div class="t">Mira el calendario</div><div class="d">Las capacitaciones y seguimientos de la semana que viene.</div></div></div></div>
+  </section>`;
+}
+
+const R = (...p) => `<span class="ruta">${p.map(x=>`<span>${x}</span>`).join("<i>›</i>")}</span>`;
+const pin = n => `<span class="pin" aria-hidden="true">${n}</span>`;
+function riel(on, pins){
+  const items=[["mas","+ Registrar"],["hoy","Hoy"],["equipo","Equipo"],["ventas","Ventas"],["caja","Caja"],["masm","Más"]];
+  return `<div class="riel">${items.map(([k,t])=>`<span class="${k==="mas"?"mas":k===on?"on":""}">${t}${pins&&pins[k]?pin(pins[k]):""}</span>`).join("")}</div>`;
+}
+function pasos(lista){return `<ol class="pasos">${lista.map((p,i)=>`<li>${pin(i+1)}<div><b>${p[0]}</b><span class="d">${p[1]}</span></div></li>`).join("")}</ol>`;}
+function vistaGuia(){
+  return `
+  <div class="ejemplo" role="note"><span aria-hidden="true">ⓘ</span><div><b>Así está Tino hoy.</b> Los dibujos son simplificados para que se entienda dónde está cada cosa. Lo marcado <span class="pronto">Pronto</span> todavía no está.</div></div>
+
+  <section class="seccion"><h2>Para entrar</h2>
+    <div class="caja">${pasos([["Abre el enlace de Tino","En el celular o en el computador."],["Toca “Ir a la demo”","Está en la página de inicio."],["Escribe tu usuario y tu clave","La primera vez te pide crear una clave nueva."],["Sigue la guía corta","Sale sola la primera vez. Dale “Siguiente”."]])}</div>
+  </section>
+
+  <section class="seccion"><h2>1. El menú</h2><p class="sub">Está siempre al lado izquierdo. Desde ahí llegas a todo.</p>
+    <div class="guia">
+      <div class="pant">${riel("hoy",{mas:1,hoy:2,equipo:3,ventas:4,caja:5,masm:6})}<div class="cont"><div class="tit">Hoy</div><div class="blk">Lo que hay que hacer</div><div class="blk">Así cerró el mes</div><div class="blk">Quién más vendió</div></div></div>
+      ${pasos([["+ Registrar","Para anotar algo: observación, compromiso, evaluación, capacitación o meta."],["Hoy","El resumen: lo urgente y cómo va el mes."],["Equipo","Tus asesoras, una por una."],["Ventas","Ventas por asesora y por punto, mes por mes."],["Caja","El cuadre de la plata (otro módulo)."],["Más","Archivos, puntos de venta y lo demás."]])}
+    </div>
+  </section>
+
+  <section class="seccion"><h2>2. Hoy</h2><p class="sub">Lo primero que ves al entrar.</p>
+    <div class="guia">
+      <div class="pant">${riel("hoy")}<div class="cont"><div class="tit">Hoy</div>
+        <div class="blk marca-hl">● Todo al día · compromisos vencidos ${pin(1)}</div>
+        <div class="blk marca-hl">Asesoras que necesitan apoyo ${pin(2)}</div>
+        <div class="blk marca-hl"><b>$ 405.000.000</b> · ticket · 90 % de la meta ${pin(3)}</div>
+        <div class="blk marca-hl">1 · 2 · 3 Quién más vendió ${pin(4)}</div></div></div>
+      ${pasos([["Compromisos vencidos","Si alguien no cumplió a tiempo, sale aquí."],["Asesoras que necesitan apoyo","Sale quién va mal, según las reglas que pongas en Equipo › Ajustes."],["Cómo cerró el mes","Venta total, ticket promedio y cuánto va de la meta."],["Quién más vendió","El ranking. Toca “Ver el ranking completo” para ver a todas."]])}
+    </div>
+  </section>
+
+  <section class="seccion"><h2>3. Equipo y la ficha de cada asesora</h2><p class="sub">A la izquierda la lista; al tocar una, a la derecha sale todo lo de ella.</p>
+    <div class="guia">
+      <div class="pant">${riel("equipo")}<div class="cont"><div class="tit">Equipo</div>
+        <div class="blk lado marca-hl"><span class="mini">Buscar</span><span class="mini">Activas</span><span class="mini">Inactivas</span>${pin(1)}</div>
+        <div class="blk lado marca-hl"><span class="bt">+ Nueva asesora</span><span class="mini">Ajustes</span>${pin(2)}</div>
+        <div class="blk marca-hl"><b>Ficha de la asesora</b><br>Punto Centro · Punto Estación · <u>Asignar a otro punto</u>${pin(3)}</div>
+        <div class="blk marca-hl">Ventas del mes por punto · <u>Poner meta</u>${pin(4)}</div>
+        <div class="blk marca-hl">Compromisos abiertos${pin(5)}</div>
+        <div class="blk marca-hl">Línea de tiempo${pin(6)}</div></div></div>
+      ${pasos([["Buscar y filtrar","Escribe el nombre o el punto. Arriba cambias entre activas e inactivas. Nadie se borra."],["Crear asesora y Ajustes","“+ Nueva asesora” para agregar a alguien. “Ajustes” para las reglas del equipo."],["Dónde trabaja","Los puntos de la asesora, con desde cuándo. Para moverla: “Asignar a otro punto”."],["Sus ventas y su meta","Lo que vendió en cada punto. Para ponerle meta: “Poner meta”."],["Compromisos abiertos","Lo que acordó mejorar y para cuándo."],["Línea de tiempo","Todo lo que se ha anotado de ella, del más nuevo al más viejo."]])}
+    </div>
+  </section>
+
+  <section class="seccion"><h2>4. Anotar algo: el botón + Registrar</h2><p class="sub">Arriba a la izquierda. Se abre una lista y eliges qué anotar.</p>
+    <div class="guia">
+      <div class="pant">${riel("hoy",{mas:"+"})}<div class="cont"><div class="tit">Registrar</div>
+        <div class="blk">${pin(1)} Observación</div><div class="blk">${pin(2)} Compromiso</div><div class="blk">${pin(3)} Evaluación</div><div class="blk">${pin(4)} Diagnóstico u objetivo</div><div class="blk">${pin(5)} Sesión</div><div class="blk">${pin(6)} Meta</div><div class="blk">${pin(7)} Registro del día <span class="pronto">Pronto</span></div></div></div>
+      ${pasos([["Observación","Coaching, cliente incógnito, presentación personal, uso del celular, puntualidad o novedad."],["Compromiso","Qué va a mejorar, quién le hace seguimiento y para cuándo."],["Evaluación","De 1 a 5 por cada criterio. Antes, crea los criterios en Equipo › Ajustes."],["Diagnóstico u objetivo","Cómo está la asesora al empezar y hacia dónde va."],["Sesión","Una capacitación: fecha, tema y quiénes asistieron."],["Meta","Cuánto debe vender un punto o una asesora."],["Registro del día","Clientes atendidos, Club de puntos, consulta de puntos y referidos. Todavía no está."]])}
+    </div>
+  </section>
+
+  <section class="seccion"><h2>5. Ventas</h2><p class="sub">Para comparar meses y ver por asesora o por punto.</p>
+    <div class="guia">
+      <div class="pant">${riel("ventas")}<div class="cont"><div class="tit">Ventas</div>
+        <div class="blk lado marca-hl"><span class="mini">‹</span> octubre de 2026 <span class="mini">›</span>${pin(1)}</div>
+        <div class="blk marca-hl"><b>$ 405.000.000</b> · ticket · meta${pin(2)}</div>
+        <div class="blk lado marca-hl"><span class="mini">Por asesora</span><span class="mini">Por punto</span>${pin(3)}</div>
+        <div class="blk marca-hl">⧉ Copiar como números${pin(4)}</div></div></div>
+      ${pasos([["Cambiar de mes","Con las flechas. Compara solo con el periodo anterior."],["El resumen","Venta total, ticket promedio y meta."],["Por asesora o por punto","Toca uno de los dos botones."],["Copiar como números","Para pegar la tabla en Excel sin el signo $."]])}
+    </div>
+  </section>
+
+  <section class="seccion"><h2>6. Las reglas de tu equipo: Equipo › Ajustes</h2><p class="sub">Esto se hace una vez, al principio. Lo que no uses, lo desactivas.</p>
+    <div class="caja">${pasos([["Tipos de observación","Ya vienen: coaching, cliente incógnito, presentación personal, celular, puntualidad, novedad y otro."],["Temas","Los temas de las capacitaciones. Por ejemplo: “Venta consultiva”, “Club de puntos”."],["Criterios de evaluación","Lo que se califica de 1 a 5. Por ejemplo: “Saluda y ofrece ayuda”."],["Quién necesita apoyo","Las reglas: cumplimiento mínimo de la meta, días sin seguimiento, compromisos vencidos."],["Palabras","Si en tu negocio no dicen “asesora” o “punto”, las cambias aquí."]])}</div>
+  </section>
+
+  <section class="seccion"><h2>Lo que pediste y dónde está</h2>
+    <div class="tabla-cont"><table class="mapa-t"><thead><tr><th>Lo que pediste</th><th>Dónde está en Tino</th></tr></thead><tbody>
+      <tr><td>Vista de todo el equipo</td><td>${R("Hoy")}</td></tr>
+      <tr><td>Vista por punto</td><td>${R("Ventas","Por punto")}</td></tr>
+      <tr><td>Vista por asesora</td><td>${R("Equipo","toca la asesora")}</td></tr>
+      <tr><td>Diagnóstico inicial</td><td>${R("+ Registrar","Diagnóstico u objetivo")}</td></tr>
+      <tr><td>Formación en venta consultiva</td><td>${R("Equipo","Ajustes","Temas")} y luego ${R("+ Registrar","Sesión")}</td></tr>
+      <tr><td>Asistencia y temas trabajados</td><td>${R("+ Registrar","Sesión")}: quiénes asistieron y qué temas</td></tr>
+      <tr><td>Evaluaciones</td><td>${R("+ Registrar","Evaluación")} (primero los criterios en Ajustes)</td></tr>
+      <tr><td>Cliente incógnito y coaching</td><td>${R("+ Registrar","Observación")} y eliges el tipo</td></tr>
+      <tr><td>Presentación personal, celular, puntualidad, novedades</td><td>${R("+ Registrar","Observación")}</td></tr>
+      <tr><td>Compromisos, avances y acciones correctivas</td><td>${R("+ Registrar","Compromiso")}. Se ven en la ficha y los vencidos en ${R("Hoy")}</td></tr>
+      <tr><td>Asesoras que requieren acompañamiento</td><td>${R("Hoy")}, después de poner las reglas en ${R("Equipo","Ajustes")}</td></tr>
+      <tr><td>Metas</td><td>${R("+ Registrar","Meta")} o en la ficha: “Poner meta”</td></tr>
+      <tr><td>Ticket promedio y comparar periodos</td><td>${R("Ventas")} con las flechas del mes</td></tr>
+      <tr><td>Atención de clientes, Club de puntos, consulta de puntos, referidos, conversión</td><td><span class="pronto">Pronto</span> ${R("+ Registrar","Registro del día")}</td></tr>
+      <tr><td>Calendario de capacitaciones</td><td><span class="pronto">Pronto</span> Hoy se ven las sesiones con fecha en la ficha</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="seccion"><h2>Para dejarlo listo, en este orden</h2>
+    <div class="caja">${pasos([["Pon las reglas","Equipo › Ajustes: temas, criterios y quién necesita apoyo."],["Pon las metas","Por punto o por asesora."],["Revisa tus asesoras","Que estén todas y en sus puntos."],["Empieza a anotar","Cada quien su parte, con el botón + Registrar."],["Cada semana, mira Hoy","Compromisos vencidos y quién necesita apoyo."]])}</div>
+  </section>`;
+}
+
+function pintar(){
+  document.querySelectorAll(".pestanas button").forEach(b=>b.setAttribute("aria-selected",b.dataset.vista===estado.vista));
+  document.getElementById("barra-periodo").hidden = estado.vista==="como"||estado.vista==="guia";
+  document.getElementById("compara").textContent = estado.periodo==="mes"?"comparado con octubre":"comparada con la semana pasada";
+  const v=document.getElementById("vista");
+  v.innerHTML = estado.vista==="equipo"?vistaEquipo():estado.vista==="punto"?vistaPunto():estado.vista==="asesora"?vistaAsesora():estado.vista==="guia"?vistaGuia():vistaComo();
+}
+
+document.querySelector(".pestanas").addEventListener("click",e=>{const b=e.target.closest("button[data-vista]");if(!b)return;estado.vista=b.dataset.vista;pintar();window.scrollTo({top:0});});
+document.getElementById("sel-periodo").addEventListener("change",e=>{estado.periodo=e.target.value;pintar();});
+document.getElementById("vista").addEventListener("click",e=>{
+  const ir=e.target.closest("[data-ir]"); if(ir){estado.asesora=ir.dataset.ir;estado.vista="asesora";pintar();window.scrollTo({top:0});return;}
+  const p=e.target.closest("[data-punto]"); if(p){estado.punto=p.dataset.punto;pintar();return;}
+  const s=e.target.closest("[data-asesora]"); if(s){estado.asesora=s.dataset.asesora;pintar();return;}
+});
+document.getElementById("vista").addEventListener("keydown",e=>{if(e.key==="Enter"){const t=e.target.closest("tr[data-ir]");if(t){estado.asesora=t.dataset.ir;estado.vista="asesora";pintar();}}});
+
+// Hoja para anotar
+const capa=document.getElementById("capa");
+function cerrar(){capa.innerHTML="";document.getElementById("fab").focus();}
+function hoja(html){capa.innerHTML=`<div class="velo" id="velo"><div class="hoja" role="dialog" aria-modal="true" aria-labelledby="hoja-t">${html}</div></div>`;
+  document.getElementById("velo").addEventListener("click",e=>{if(e.target.id==="velo")cerrar();});
+  const f=capa.querySelector("button,select,input");f&&f.focus();}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&capa.innerHTML)cerrar();});
+const opAses=()=>ASES.map(a=>`<option value="${a.id}">${esc(a.nombre)} · ${esc(a.punto)}</option>`).join("");
+function contador(id,label){return `<div class="campo"><label id="l-${id}">${label}</label><div class="contador" role="group" aria-labelledby="l-${id}"><button type="button" data-menos="${id}" aria-label="Menos">−</button><output id="${id}">0</output><button type="button" data-mas="${id}" aria-label="Más">+</button></div></div>`;}
+function aviso(t){const d=document.createElement("div");d.className="aviso";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),3200);}
+const FORMS={
+ dia:{t:"Registro del día",s:"Lo llena la responsable del punto al cerrar. Por cada asesora.",
+  c:()=>`<div class="campo"><label for="f-a">Asesora</label><select id="f-a">${opAses()}</select></div>
+   <div class="dos-col">${contador("c1","Clientes atendidos")}${contador("c2","Les explicó el Club de puntos")}${contador("c3","Consultó puntos antes de cobrar")}${contador("c4","Referidos")}</div>
+   <div class="campo"><label for="f-n">Novedades del día (si hubo)</label><textarea id="f-n" rows="2" placeholder="Ej.: llegó tarde 15 minutos"></textarea></div>`},
+ obs:{t:"Observación",s:"Lo que viste hoy de una asesora.",
+  c:()=>`<div class="campo"><label for="f-a">Asesora</label><select id="f-a">${opAses()}</select></div>
+   <div class="campo"><label for="f-t">Qué fue</label><select id="f-t"><option>Coaching</option><option>Cliente incógnito</option><option>Presentación personal</option><option>Uso del celular</option><option>Puntualidad</option><option>Novedad operativa</option></select></div>
+   <div class="campo"><label for="f-c">¿Cómo le fue?</label><select id="f-c"><option>Bien</option><option>Puede mejorar</option><option>Mal</option></select></div>
+   <div class="campo"><label for="f-n">Qué viste</label><textarea id="f-n" rows="3"></textarea></div>`},
+ comp:{t:"Compromiso",s:"Qué va a mejorar, quién responde y para cuándo.",
+  c:()=>`<div class="campo"><label for="f-a">Asesora</label><select id="f-a">${opAses()}</select></div>
+   <div class="campo"><label for="f-q">Qué se compromete a hacer</label><input id="f-q" placeholder="Ej.: explicar el Club de puntos a todo cliente que compre"></div>
+   <div class="dos-col"><div class="campo"><label for="f-r">Quién le hace seguimiento</label><select id="f-r"><option>Líder comercial</option><option>Formación</option><option>Responsable del punto</option></select></div>
+   <div class="campo"><label for="f-l">Para cuándo</label><input id="f-l" type="date" value="2026-11-28"></div></div>`},
+ ses:{t:"Capacitación",s:"Programa una capacitación o anota una que ya pasó.",
+  c:()=>`<div class="campo"><label for="f-q">Tema</label><select id="f-q"><option>Venta consultiva</option><option>Club de puntos</option><option>Consulta de puntos</option><option>Estándares de atención</option></select></div>
+   <div class="dos-col"><div class="campo"><label for="f-l">Fecha</label><input id="f-l" type="date" value="2026-11-30"></div><div class="campo"><label for="f-p">Dónde</label><select id="f-p">${PUNTOS.map(p=>`<option>${p}</option>`).join("")}<option>Virtual</option></select></div></div>
+   <div class="campo"><label for="f-a">Quiénes asisten</label><select id="f-a" multiple size="5">${opAses()}</select></div>`},
+ eva:{t:"Evaluación",s:"Califica de 1 a 5 cada criterio.",
+  c:()=>`<div class="campo"><label for="f-a">Asesora</label><select id="f-a">${opAses()}</select></div>
+   ${CRITERIOS.map((c,i)=>`<div class="campo"><label for="f-e${i}">${c}</label><select id="f-e${i}"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>`).join("")}`}
+};
+function menu(){hoja(`<h2 id="hoja-t">¿Qué quieres anotar?</h2><p class="sub">Elige una opción.</p><div class="opc">
+ <button data-f="dia"><span class="av">1</span><span><b>Registro del día</b><span>Clientes, Club de puntos, puntos y referidos</span></span></button>
+ <button data-f="obs"><span class="av">2</span><span><b>Observación</b><span>Coaching, cliente incógnito, celular, puntualidad…</span></span></button>
+ <button data-f="comp"><span class="av">3</span><span><b>Compromiso</b><span>Qué va a mejorar y para cuándo</span></span></button>
+ <button data-f="ses"><span class="av">4</span><span><b>Capacitación</b><span>Fecha, tema y quiénes asisten</span></span></button>
+ <button data-f="eva"><span class="av">5</span><span><b>Evaluación</b><span>De 1 a 5 por criterio</span></span></button>
+ </div><div class="acciones"><button class="btn sec" data-cerrar>Cerrar</button></div>`);}
+function formulario(k){const f=FORMS[k];hoja(`<h2 id="hoja-t">${f.t}</h2><p class="sub">${f.s}</p><form id="frm">${f.c()}<div class="acciones"><button type="button" class="btn sec" data-volver>Atrás</button><button class="btn pri">Guardar</button></div></form>`);
+  capa.querySelector("#frm").addEventListener("submit",e=>{e.preventDefault();cerrar();aviso("Listo. En el ejemplo no se guarda; en Tino quedaría anotado.");});}
+capa.addEventListener("click",e=>{
+  const f=e.target.closest("[data-f]"); if(f){formulario(f.dataset.f);return;}
+  if(e.target.closest("[data-cerrar]")){cerrar();return;}
+  if(e.target.closest("[data-volver]")){menu();return;}
+  const m=e.target.closest("[data-mas]"); if(m){const o=document.getElementById(m.dataset.mas);o.value=o.textContent=+o.textContent+1;return;}
+  const n=e.target.closest("[data-menos]"); if(n){const o=document.getElementById(n.dataset.menos);o.textContent=Math.max(0,+o.textContent-1);return;}
+});
+document.getElementById("fab").addEventListener("click",menu);
+
+pintar();
+})();
+</script>
