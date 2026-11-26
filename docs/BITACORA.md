@@ -15,6 +15,39 @@ Dudas:
 -
 ```
 
+## 2026-11-26 · Formación y desempeño (tarea 011: A, B y diseño de C)
+
+Hecho:
+- **Base (0015)**: registro del día por persona con origen manual o integración (A9), indicadores por
+  empresa, etapas del ciclo con su historia, vista de lo que cuenta cada día, plantilla sugerida solo
+  con botón. 53 pruebas nuevas (467 en total, las 414 de antes sin cambios). Aplicada en tino-pruebas
+  con la verificación de permisos en verde.
+- **Web**: Equipo abre con la formación (lo que hay que hacer, cómo van, pasos, calendario de lunes a
+  domingo, lista). Registro del día en + Registrar (todas las personas del punto en una pantalla, con
+  + y −). Ficha con paso del ciclo y sus indicadores. Ajustes con etapas, indicadores, nombre del
+  programa y plantilla. Evaluación sin criterios explica cómo crearlos. Recorrido de Equipo empieza
+  por la formación. Para la responsable de punto, "quién necesita apoyo" ya no muestra personas de
+  otros puntos (también en Hoy).
+- **Portada (B)**: «Buscando la causa…» ya no queda encima de «Causa probable» aunque el sistema pida
+  reducir movimiento; el resaltado del cierre va en Punto Plaza; /precios ya mostraba los tres planes
+  (lo de Vercel era una versión vieja); el plan Equipo nombra la formación.
+- **Roles (C)**: diseño en docs/ROLES.md y D-066. Sin código.
+- **Pruebas en el navegador**: tests/demo/navegador.mjs (prende la web y Chrome sin ventana y los
+  apaga), capturas_formacion.mjs (la responsable registra 2 personas en 20 toques), capturas_portada.mjs
+  e instructivo.mjs, el agente que recorre Tino como la dueña y escribe docs/INSTRUCTIVO/duena.md
+  (13 de 13 pasos comprobados).
+- La maqueta quedó en docs/pantallas con puntos y programa genéricos; el original, fuera del repositorio.
+- La empresa demo tiene formación sembrada (tests/demo/sembrar_formacion.py), con una responsable y una líder.
+
+Falta:
+- A7: crear los usuarios del equipo de Milagros cuando Jacobo pase los correos.
+- Aplicar 0012 a 0015 en producción cuando Jacobo lo diga.
+- Construir los roles configurables cuando Jacobo apruebe docs/ROLES.md.
+
+Dudas para Jacobo:
+- ¿La encargada también llena el registro del día? Hoy no (el brief dice responsable, líder y dueño).
+- La clave de la base de tino-pruebas quedó escrita en el chat: cambiarla al pasar a vender.
+
 ## 2026-11-20 (tarde, 2) · Clave temporal, sonido apagado y Salitre
 
 - Usuarios sin correo: crear da una clave temporal que se ve una sola vez; al entrar, Tino obliga a

@@ -169,6 +169,20 @@ La columna "Migración" dice en qué archivo nace cada tabla.
 En `empresa_config` (0011): `equipo_reparto` ⚑, los umbrales de "quién necesita apoyo" (empiezan
 vacíos), `equipo_dias_proximos` y `textos` (las palabras de la pantalla de cada empresa).
 
+Formación (0015, D-067):
+
+| Tabla | Para qué | Migración |
+| --- | --- | --- |
+| `indicador_dia` | Los indicadores del registro del día de cada empresa y contra qué se sacan: atendidos, facturas o solo conteo. La base no cambia después de creado. | 0015 |
+| `registro_dia` | Por persona, punto, día y origen (`manual` o `integracion`): clientes atendidos (fijo). Una fila vigente por persona, punto, día y origen. Se escribe solo con `guardar_registros_dia`; después del día, con nota. Se anula con nota. | 0015 |
+| `registro_dia_valor` | El contador de cada indicador de un registro. | 0015 |
+| `asesora_etapa` | Historia del paso del ciclo de cada persona (etapas = clase `etapa` de `equipo_catalogo`). El actual es el último: vista `v_asesora_etapa`. | 0015 |
+
+Vista `v_registro_dia`: lo que cuenta de cada día (manual primero, avisa si hay otro origen) con
+las facturas de la venta por persona. Función `usar_plantilla_formacion`: temas, criterios,
+etapas e indicadores sugeridos, solo con el botón. En `textos`, `programa`: el nombre del
+programa de fidelización de la empresa.
+
 ### Inventario y personal (fases posteriores)
 
 | Tabla | Para qué |
@@ -222,7 +236,10 @@ Las reglas se implementan con dos funciones de la base:
 | `0010_caja_del_excel.sql` | La caja del Excel (consignaciones, gastos, base) y la señal de consignación que no aparece | 3.3 |
 | `0011_equipo.sql` | Roles lider y responsable_punto, persona en varios puntos, venta por persona, metas por período, acompañamiento, recorrido | Equipo |
 | `0012_resolver_en_la_web.sql` | Problema del archivo y resolver nombres y productos en un toque | Revisión de la dueña |
-| Siguientes | Costos, inventario y personal, cuando los clientes los pidan | Fases posteriores |
+| `0013_archivos_en_cola.sql` | Subir archivos desde la web: cola y Storage por empresa | Revisión de la dueña |
+| `0014_cerrar_el_dia.sql` | Cerrar el día con candado y desbloquear con nota | Revisión de la dueña |
+| `0015_formacion.sql` | Registro del día, indicadores, etapas del ciclo y plantilla sugerida | Formación (tarea 011) |
+| Siguientes | Roles configurables (docs/ROLES.md, D-066); costos, inventario y personal cuando los pidan | Fases posteriores |
 
 ## Cómo se prueba la separación entre empresas
 

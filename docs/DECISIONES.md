@@ -391,6 +391,24 @@ una sección del menú (Inicio, Conciliación, Descuadres, Excel, Equipo, Precio
 concilia". Dentro del programa se quitó, con el interruptor de sonido de Más. El sonido se oye si
 el navegador no tiene guardado `tino-sonido = no`.
 
+### D-066 · Roles configurables por empresa. Se construyen después del bloque A
+26 nov 2026. Decisión de Jacobo (tarea 011, bloque C). Los roles dejan de estar fijos en la base: Tino
+define una lista fija de permisos, cada empresa arma sus roles como paquetes de permisos con nombre,
+y el alcance por puntos va aparte del rol. Plantillas: Gerencia, Coordinación, Responsable de punto y
+Asesora. "Ver como" solo para mirar, solo Gerencia y soporte, auditado. La migración tiene que dejar
+a cada usuario viendo exactamente lo mismo (prueba de equivalencia) y las pruebas actuales sin
+cambios. Diseño completo en docs/ROLES.md. Sin código hasta que Jacobo apruebe el diseño.
+
+### D-067 · Formación: registro del día manual o de integración, sin pisarse
+26 nov 2026. Decisión de Jacobo (tarea 011, A1–A9). El registro del día guarda su origen (manual o
+integración). Si los dos existen el mismo día, se guardan y se muestran los dos; para los
+porcentajes cuenta el manual (propuesta de Claude que Jacobo no objetó). Hoy los usuarios solo
+escriben "manual"; la integración queda preparada, sin construir. Un día sin registro no cuenta
+como cero. Se corrige libre el mismo día (hora de Bogotá) y después solo con nota. Temas, criterios,
+indicadores y etapas solo se llenan con el botón "Usar plantilla sugerida". La semana del
+calendario va de lunes a domingo. Cuando un día lo comparten varias personas (dos, tres o más), la
+conversión de cada una ese día es aproximada y la pantalla lo avisa.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

@@ -56,3 +56,31 @@ marcados ⚑ se leen de `empresa_config` y nunca se escriben fijos en el código
   - ⚑ `equipo_umbral_dias_sin_seguimiento`: lleva más de esos días sin ningún registro.
   - ⚑ `equipo_umbral_compromisos_vencidos`: tiene esa cantidad o más de compromisos vencidos.
 - **Sesiones de la semana**: de lunes a domingo de la semana actual.
+
+## Formación (tarea 011, D-067)
+
+- **Registro del día**: por persona, punto y día, los clientes atendidos (fijo: es la base de la
+  conversión) y un contador por cada indicador de la empresa. Una sola fila por persona, punto,
+  día y origen. Lo llenan el responsable de punto (solo su punto), el lider y el dueño.
+- **Origen**: "manual" o "integracion" (otra aplicación, en el futuro). Si el mismo día hay
+  de los dos, se guardan y se muestran los dos; para los porcentajes cuenta el manual.
+- **Correcciones**: libres el mismo día (hora de Bogotá); después, solo con nota. Nada se borra:
+  un registro se anula con nota.
+- **Un día sin registro no cuenta como cero**: no entra en ninguna cuenta y la pantalla lo dice.
+- **Indicadores** ⚑ (`indicador_dia`): cada uno dice contra qué se mide.
+  - Sobre atendidos: valor ÷ clientes atendidos (ej.: explicó el programa de fidelización). No
+    puede pasar de los atendidos.
+  - Sobre facturas: valor ÷ facturas de esa persona ese día (ej.: consultó puntos antes de cobrar).
+  - Conteo: se suma (ej.: referidos).
+- **Conversión** = facturas ÷ clientes atendidos, solo en los días con registro y con venta de esa
+  persona en el Excel del día. Si el día lo compartieron varias personas (dos, tres o más), las
+  facturas se reparten por partes iguales (D-049) y la conversión de cada una ese día es
+  aproximada; la pantalla avisa cuántos días fueron así.
+- **Comparación**: con los mismos días del período anterior (mes o semana).
+- **Etapas del ciclo** ⚑ (clase `etapa`): las define cada empresa. El paso de cada persona lo
+  cambia una persona (no es automático) y queda la historia.
+- **Plantilla sugerida**: temas, criterios, etapas e indicadores; solo con el botón "Usar plantilla
+  sugerida", sin pisar lo que la empresa ya tenga. El nombre del programa sale de
+  `textos.programa` ⚑.
+- **Calendario**: sesiones y compromisos que vencen, de lunes a domingo.
+

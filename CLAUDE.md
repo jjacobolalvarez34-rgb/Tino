@@ -134,4 +134,15 @@ quiere entender cada decisión, no solo recibir código.
   (aplica, y verifica permisos con `tests/produccion/verificar.sql`), y comparar totales con
   `python tests/produccion/comparar_totales.py ...`. Ver docs/OPERACION/produccion.md.
 - Respaldo, restauración en local y comparación de filas: `python tests/respaldo/respaldar.py ...`
+- Probar los cálculos de Formación, desde `web/`:
+  `node --experimental-strip-types --test lib/formacion-calculo.test.ts`
+- Sembrar la formación de la empresa demo (después de sembrar_demo.py):
+  `python tests/demo/sembrar_formacion.py <contraseñas>`
+- Recorrer la web como una persona (compila antes con `NEXT_DIST_DIR=.next-build`; prende la web y Chrome
+  sin ventana y los apaga al terminar): `node tests/demo/capturas_formacion.mjs <contraseñas> <carpeta>`,
+  `node tests/demo/capturas_portada.mjs <carpeta>` y `node tests/demo/instructivo.mjs <contraseñas>`
+- Postgres local para las pruebas (datos en D:): `pg_ctl -D D:/Repositorios/Tino-datos/trabajo/pg -l <log en D:> -o "-p 55433" start > <log en D:> 2>&1 < /dev/null`
+  y `./tests/rls/correr.sh "postgresql://postgres@localhost:55433/postgres"`. En Windows, psql ignora lo que va
+  después de la URL: la URL va de última.
+- Aplicar migraciones nuevas en tino-pruebas: `python tests/produccion/aplicar_migraciones.py <pruebas_conexion.json fuera del repo> --desde 00NN`
 - Abrir la web en este PC: `D:\Repositorios\Tino-datos\abrir_web.cmd` (http://localhost:6001).
