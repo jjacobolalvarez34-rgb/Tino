@@ -42,6 +42,13 @@ Hecho:
 - A7 (más tarde el mismo día, Jacobo: "los creamos nosotros"): en tino-pruebas, 2 de coordinación (lider) y
   11 encargadas (responsable_punto, una por punto, también Kennedy), con correos inventados, nombres de
   relleno, sin invitar y con clave temporal. Las claves quedaron fuera del repositorio.
+- Nombres de octubre (Jacobo): «Angie» de Plaza Imperial = Angie Padilla; «tatiana» de Salitre y Plaza Claro =
+  Angie Tatiana Gordo. Se agregaron sus asignaciones a esos puntos con las fechas de los Excel (cerradas) y se
+  resolvieron: ya no queda venta de octubre sin persona. Ojo: el alias «tatiana» en Plaza Claro queda para Angie
+  Tatiana, y allí también trabajó Tatiana Castro (que en el Excel aparece con nombre completo).
+- Comprobado en Supabase (tino-pruebas): separación entre empresas 66/66, operación 12/12, Equipo 30/30 y la cola
+  de archivos de punta a punta 7/7. probar_supabase.py ya no cuenta exacto los usuarios de A (otras pruebas crean
+  más) ni intenta entrar con los usuarios de la demo.
 - Producción: no se aplicaron migraciones. La clave que Jacobo pasó es la de tino-pruebas y no se probó en
   producción (sería adivinar una clave). Falta que Jacobo ponga la conexión de producción.
 

@@ -100,6 +100,8 @@ def entrar(usuarios):
     tokens = {}
     for clave, u in usuarios.items():
         rol, letra = clave.split(".")
+        if letra not in ("a", "b"):   # el archivo también guarda los usuarios de la empresa demo
+            continue
         estado, r = pedir("POST", "/auth/v1/token?grant_type=password", PUBLICA, cuerpo={
             "email": f"{rol}.{letra}@prueba-tino.example.com", "password": u["contrasena"]})
         assert estado == 200, (clave, estado, r.get("msg") or r.get("error_description"))
@@ -164,8 +166,12 @@ def main():
                   {"empresa_id": a, "codigo": f"F{marca}", "nombre": "x"}), "42501", "Finanzas no edita maestros")
     ok(len(ver("usuario", t["asesora.a"])) == 1, "La asesora solo se ve a sí misma")
     ok(len(ver("usuario", t["finanzas.a"])) == 1, "Finanzas no ve la lista de usuarios")
-    de_a = sum(1 for k in usuarios if k.endswith(".a"))  # 5 roles; más lider y responsable si corrió Equipo
-    ok(len(ver("usuario", d_a)) == de_a, f"El dueño ve los {de_a} usuarios de su empresa y ninguno de B")
+    # Al menos los de la empresa A del archivo (otras pruebas, como la de la API de usuarios, crean más
+    # en A) y ninguno de otra empresa.
+    de_a = sum(1 for k in usuarios if k.endswith(".a"))
+    vistos = ver("usuario", d_a)
+    ok(len(vistos) >= de_a and all(f["empresa_id"] == a for f in vistos),
+       f"El dueño ve a los {len(vistos)} usuarios de su empresa y a ninguno de B")
 
     # Auditoría
     nombre = f"Punto A1 {marca}"
