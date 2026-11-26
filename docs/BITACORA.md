@@ -39,8 +39,13 @@ Hecho:
 - La maqueta quedó en docs/pantallas con puntos y programa genéricos; el original, fuera del repositorio.
 - La empresa demo tiene formación sembrada (tests/demo/sembrar_formacion.py), con una responsable y una líder.
 
+- A7 (más tarde el mismo día, Jacobo: "los creamos nosotros"): en tino-pruebas, 2 de coordinación (lider) y
+  11 encargadas (responsable_punto, una por punto, también Kennedy), con correos inventados, nombres de
+  relleno, sin invitar y con clave temporal. Las claves quedaron fuera del repositorio.
+- Producción: no se aplicaron migraciones. La clave que Jacobo pasó es la de tino-pruebas y no se probó en
+  producción (sería adivinar una clave). Falta que Jacobo ponga la conexión de producción.
+
 Falta:
-- A7: crear los usuarios del equipo de Milagros cuando Jacobo pase los correos.
 - Aplicar 0012 a 0015 en producción cuando Jacobo lo diga.
 - Construir los roles configurables cuando Jacobo apruebe docs/ROLES.md.
 

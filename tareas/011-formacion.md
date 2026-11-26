@@ -1,7 +1,7 @@
 # 011 · Formación y desempeño, arreglos de la portada y diseño de roles
 
 Paso del plan: Equipo (después de la revisión de la dueña)
-Estado: en curso. A hecho salvo A7 (esperando los correos), B hecho, C diseñado (espera aprobación).
+Estado: A y B hechos; C diseñado (espera aprobación para construirlo).
 
 ## Objetivo
 La dueña revisó Tino y dijo "no vi lo que necesito": pidió el ciclo de formación de sus asesoras.
@@ -37,7 +37,8 @@ Equipo abre con la formación; las ventas siguen en Ventas y en la ficha.
 - La segunda empresa de prueba funciona con sus propios indicadores y etapas. → Pruebas de 0015
   (empresa B con "Ofreció garantía extendida" y la etapa "Inducción").
 - Todas las pruebas en verde: 467 de permisos, 6 del cálculo.
-- Falta A7 (correos).
+- A7: 2 de coordinación (lider) y 11 encargadas (responsable_punto, una por punto) creados en tino-pruebas el
+  26 nov, con correos inventados, sin invitar y con clave temporal (claves fuera del repositorio).
 
 ## Cómo lo reviso yo (Jacobo)
 - Seguir el instructivo `docs/INSTRUCTIVO/duena.md` con el usuario de la demo.
