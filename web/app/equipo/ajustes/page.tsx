@@ -1,13 +1,15 @@
 "use client";
 // Ajustes de Equipo: lo que cambia de un negocio a otro (DESIGN.md §15, REGLAS/equipo.md).
-// Tipos de observación, temas y criterios de evaluación; umbrales de "quién necesita apoyo";
-// y las palabras de la pantalla (solo el dueño).
+// Etapas del ciclo, temas, criterios de evaluación, tipos de observación e indicadores del
+// registro del día; la plantilla sugerida (solo con el botón: nada se llena solo); umbrales de
+// "quién necesita apoyo"; y las palabras de la pantalla con el nombre del programa (dueño y soporte).
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Marco, useMarco } from "@/components/Marco";
 import { Icono } from "@/components/Iconos";
 import { base, leer, mensaje, textoDeError } from "@/lib/supabase";
 import { TEXTOS_BASE } from "@/lib/textos";
+import { indicadores as leerIndicadores, usarPlantilla, type Indicador } from "@/lib/formacion";
 
 export default function PaginaAjustesEquipo() {
   return <Marco><Ajustes /></Marco>;
@@ -15,10 +17,14 @@ export default function PaginaAjustesEquipo() {
 
 type Item = { id: string; clase: string; nombre: string; activo: boolean; orden: number };
 const CLASES = [
-  { clase: "tipo_observacion", titulo: "Tipos de observación", ayuda: "Lo que se elige al registrar una observación." },
+  { clase: "etapa", titulo: "Etapas del ciclo de formación", ayuda: "Los pasos por los que va cada persona, en orden. El paso de cada una lo cambia alguien desde su ficha." },
   { clase: "tema", titulo: "Temas", ayuda: "De qué tratan las sesiones de formación." },
   { clase: "criterio", titulo: "Criterios de evaluación", ayuda: "Lo que se califica de 1 a 5 en una evaluación." },
+  { clase: "tipo_observacion", titulo: "Tipos de observación", ayuda: "Lo que se elige al registrar una observación." },
 ];
+const BASES: Record<Indicador["base"], string> = {
+  atendidos: "% de los clientes atendidos", facturas: "% de las ventas (facturas)", conteo: "Solo se cuenta",
+};
 const UMBRALES = [
   { clave: "equipo_umbral_cumplimiento", titulo: "Cumplimiento mínimo de la meta", unidad: "%", ayuda: "Si va por debajo, sale en «necesita apoyo»." },
   { clave: "equipo_umbral_dias_sin_seguimiento", titulo: "Días sin seguimiento", unidad: "días", ayuda: "Si pasan más días sin ningún registro, sale en «necesita apoyo»." },
@@ -36,13 +42,20 @@ function Ajustes() {
   const [nuevo, setNuevo] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [recarga, setRecarga] = useState(0);
+  const [inds, setInds] = useState<Indicador[]>([]);
+  const [nuevoInd, setNuevoInd] = useState("");
+  const [baseInd, setBaseInd] = useState<Indicador["base"]>("atendidos");
+  const [usando, setUsando] = useState(false);
+  const editaTextos = ["dueno", "soporte"].includes(yo.rol);
 
   useEffect(() => {
     Promise.all([
       leer<Item>("equipo_catalogo", "id,clase,nombre,activo,orden", [], "orden"),
       leer<Record<string, unknown>>("empresa_config", UMBRALES.map((u) => u.clave).join(",") + ",textos", [], "empresa_id"),
-    ]).then(([cat, [c]]) => {
+      leerIndicadores(true),
+    ]).then(([cat, [c], ind]) => {
       setItems(cat);
+      setInds(ind);
       setUmbral(Object.fromEntries(UMBRALES.map((u) => [u.clave, c?.[u.clave] == null ? "" : String(c[u.clave])])));
       setPalabras((c?.textos as Record<string, string>) ?? {});
     }).catch((e) => setError(textoDeError(e)));
@@ -60,6 +73,28 @@ function Ajustes() {
     const { error: er } = await base().from("equipo_catalogo").update({ activo: !i.activo }).eq("id", i.id);
     if (er) { avisar(mensaje(er)); return; }
     avisar(i.activo ? "Desactivado: ya no sale para elegir" : "Activado"); setRecarga((r) => r + 1);
+  }
+  async function plantilla() {
+    setUsando(true);
+    try {
+      const n = await usarPlantilla();
+      avisar(n ? `Listo: ${n} agregados. Edítelos o desactive lo que no use.` : "Ya tenía todo lo de la plantilla: no se repitió nada.");
+      setRecarga((r) => r + 1);
+    } catch (e) { avisar(textoDeError(e)); } finally { setUsando(false); }
+  }
+  async function agregarIndicador(e: React.FormEvent) {
+    e.preventDefault();
+    const nombre = nuevoInd.trim();
+    if (!nombre) return;
+    const orden = Math.max(0, ...inds.map((i) => i.orden)) + 1;
+    const { error: er } = await base().from("indicador_dia").insert({ empresa_id: yo.empresa_id, nombre, base: baseInd, orden });
+    if (er) { avisar(er.code === "23505" ? "Ese indicador ya está." : mensaje(er)); return; }
+    setNuevoInd(""); avisar("Indicador agregado"); setRecarga((r) => r + 1);
+  }
+  async function alternarIndicador(i: Indicador) {
+    const { error: er } = await base().from("indicador_dia").update({ activo: !i.activo }).eq("id", i.id);
+    if (er) { avisar(mensaje(er)); return; }
+    avisar(i.activo ? "Desactivado: ya no sale en el registro del día" : "Activado"); setRecarga((r) => r + 1);
   }
   async function guardarUmbrales(e: React.FormEvent) {
     e.preventDefault();
@@ -88,6 +123,40 @@ function Ajustes() {
       {!items && !error && <div className="m-esqueleto" style={{ height: 200 }} />}
       {items && (
         <div className="m-ajustes">
+          {puede && (
+            <section className="m-grupo m-plantilla" aria-labelledby="t-plantilla">
+              <h2 id="t-plantilla">Plantilla sugerida</h2>
+              <p className="m-contexto">Llena de una vez las etapas del ciclo (Diagnóstico, Formación, Acompañamiento, Evaluación y Compromisos), los temas, los criterios de evaluación y los indicadores del registro del día (explicó el {t.programa}, consultó puntos antes de cobrar y referidos). No borra ni repite lo que ya tenga; después puede editar o desactivar cada cosa.</p>
+              <button className="boton secundario" style={{ alignSelf: "flex-start" }} disabled={usando} onClick={plantilla}>
+                {usando ? "Agregando…" : "Usar plantilla sugerida"}</button>
+            </section>
+          )}
+
+          <section className="m-grupo" aria-labelledby="t-indicadores">
+            <h2 id="t-indicadores">Indicadores del registro del día</h2>
+            <p className="m-contexto">Lo que se cuenta al cerrar el día, además de los clientes atendidos (ese siempre está: es la base de la conversión).</p>
+            {!inds.length && <p className="m-frase-nota">Todavía no hay ninguno.</p>}
+            <ul className="m-lista">
+              {inds.map((i) => (
+                <li key={i.id} className="m-fila">
+                  <span className="m-fila-texto"><b className={i.activo ? "" : "t-neu"}>{i.nombre}</b><span>{BASES[i.base]}{i.activo ? "" : " · Desactivado"}</span></span>
+                  {puede && <button className="boton texto compacto" onClick={() => alternarIndicador(i)}>{i.activo ? "Desactivar" : "Activar"}</button>}
+                </li>
+              ))}
+            </ul>
+            {puede && (
+              <form className="m-agregar m-agregar-indicador" onSubmit={agregarIndicador}>
+                <input type="text" aria-label="Nuevo indicador" placeholder="Ej.: Ofreció el producto del mes" maxLength={80}
+                  value={nuevoInd} onChange={(e) => setNuevoInd(e.target.value)} />
+                <select aria-label="Cómo se mide" value={baseInd} onChange={(e) => setBaseInd(e.target.value as Indicador["base"])}>
+                  {Object.entries(BASES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </select>
+                <button className="boton secundario compacto" type="submit"><Icono id="mas" />Agregar</button>
+              </form>
+            )}
+            {puede && <p className="m-contexto">Cómo se mide no se cambia después: cambiaría el sentido de lo ya registrado. Si se equivocó, desactívelo y cree otro.</p>}
+          </section>
+
           {CLASES.map((c) => {
             const lista = items.filter((i) => i.clase === c.clase);
             return (
@@ -133,15 +202,15 @@ function Ajustes() {
             </form>
           </section>
 
-          {yo.rol === "dueno" && (
+          {editaTextos && (
             <section className="m-grupo" aria-labelledby="t-palabras">
               <h2 id="t-palabras">Palabras de la pantalla</h2>
               <p className="m-contexto">Si en su negocio no dicen «asesora» o «punto», cámbielas aquí.</p>
               <form className="m-form" onSubmit={guardarPalabras}>
                 <div className="m-dos">
-                  {(["persona", "personas", "punto", "puntos"] as const).map((k) => (
+                  {(["persona", "personas", "punto", "puntos", "programa"] as const).map((k) => (
                     <div key={k} className="campo">
-                      <label htmlFor={"p-" + k}>En vez de «{TEXTOS_BASE[k]}»</label>
+                      <label htmlFor={"p-" + k}>{k === "programa" ? "Nombre del programa de fidelización" : `En vez de «${TEXTOS_BASE[k]}»`}</label>
                       <input id={"p-" + k} type="text" maxLength={30} placeholder={TEXTOS_BASE[k]} value={palabras[k] ?? ""}
                         onChange={(e) => setPalabras((x) => ({ ...x, [k]: e.target.value }))} />
                     </div>

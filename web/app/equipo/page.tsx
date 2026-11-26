@@ -1,6 +1,7 @@
 "use client";
-// Equipo: la lista de personas y la ficha de cada una. En el computador, lista a la
-// izquierda y ficha a la derecha; en el celular, la ficha abre a pantalla completa.
+// Equipo abre con la formación (A5): lo que hay que hacer, cómo van los indicadores, en qué paso
+// va cada persona, el calendario de la semana y al final la lista. Con ?p=<persona>, la ficha:
+// en el computador, lista a la izquierda y ficha a la derecha; en el celular, la ficha sola.
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -17,13 +18,17 @@ import { anterior, avanzarCompromiso, catalogo, compromisos, hoy, mesDe, metaDel
   ticket, totales, ultimaFecha, ventas, type Compromiso, type ItemCatalogo, type Meta, type Persona, type Seguimiento,
   type VentaDia } from "@/lib/equipo";
 import { correrDias, diaBogota, fecha, miles, nombreMes, pesos } from "@/lib/formato";
+import { cargarPendientes, Pendientes, type DatosPendientes } from "@/components/Pendientes";
+import { CalendarioSemana, ComoVan, FranjaEtapas, type Periodo } from "@/components/Formacion";
+import { cambiarPaso, etapas as leerEtapas, historiaPasos, indicadores as leerIndicadores, pasos as leerPasos,
+  type Etapa, type HistoriaPaso, type Indicador, type Paso } from "@/lib/formacion";
 
 export default function PaginaEquipo() {
   return <Marco><Suspense><Equipo /></Suspense></Marco>;
 }
 
 function Equipo() {
-  const { config, version, yo } = useMarco();
+  const { config, version, yo, registrar, verRecorrido } = useMarco();
   const t = config.textos;
   const params = useSearchParams();
   const router = useRouter();
@@ -35,11 +40,31 @@ function Equipo() {
   const [nueva, setNueva] = useState(false);
   const [error, setError] = useState("");
   const [recarga, setRecarga] = useState(0);
+  const [form, setForm] = useState<{ pend: DatosPendientes; ind: Indicador[]; et: Etapa[]; pasos: Paso[] } | null>(null);
+  const [periodo, setPeriodo] = useState<Periodo>("mes");
+  const [punto, setPunto] = useState(yo.rol === "responsable_punto" && yo.punto_id ? yo.punto_id : "");
+  const [revisado, setRevisado] = useState(false);
 
   useEffect(() => {
     Promise.all([personas(), leerPuntos()]).then(([g, p]) => { setGente(g); setPuntos(p); })
       .catch((e) => setError(textoDeError(e)));
   }, [version, recarga]);
+
+  // La portada de Equipo es la formación (A5): lo que hay que hacer, cómo van, los pasos y el
+  // calendario. Se carga solo cuando no hay una ficha abierta.
+  useEffect(() => {
+    if (elegida) return;
+    Promise.all([cargarPendientes(), leerIndicadores(), leerEtapas(), leerPasos()])
+      .then(([pend, ind, et, ps]) => setForm({ pend, ind, et, pasos: ps }))
+      .catch((e) => setError(textoDeError(e)));
+  }, [elegida, version, recarga]);
+
+  // La primera vez, el recorrido de Equipo sale cuando la formación ya tiene datos (A8).
+  useEffect(() => {
+    if (!form || revisado || elegida) return;
+    setRevisado(true);
+    yaLoVio("equipo").then((visto) => { if (!visto) verRecorrido("equipo"); });
+  }, [form, revisado, elegida, verRecorrido]);
 
   const visibles = useMemo(() => {
     const q = buscar.trim().toLowerCase();
@@ -48,61 +73,126 @@ function Equipo() {
           || g.puntos.some((a) => (puntos[a.punto_id] ?? "").toLowerCase().includes(q))));
   }, [gente, buscar, inactivas, puntos]);
   const persona = gente?.find((g) => g.id === elegida) ?? null;
-
-  // En el computador, la ficha de la primera persona ya abierta: la columna derecha no queda vacía.
-  useEffect(() => {
-    if (!gente || elegida || !window.matchMedia("(min-width: 900px)").matches) return;
-    const primera = gente.find((g) => g.activa);
-    if (primera) router.replace(`/equipo?p=${primera.id}`);
-  }, [gente, elegida, router]);
   const puedeEditar = ["dueno", "encargada", "soporte", "lider"].includes(yo.rol);
+  const llenaRegistro = ["dueno", "lider", "responsable_punto"].includes(yo.rol);
+  const pasoDe = new Map(form?.pasos.map((x) => [x.asesora_id, x.etapa_id]) ?? []);
+  const nombreEtapa = new Map(form?.et.map((e) => [e.id, e.nombre]) ?? []);
+  const hoyF = hoy();
+  const enPunto = (g: Persona) => !punto || g.puntos.some((a) => a.punto_id === punto && (!a.hasta || a.hasta >= hoyF));
 
-  return (
-    <div className={"m-lista-detalle" + (elegida ? " con-detalle" : "")}>
-      <section className="m-ld-lista" aria-labelledby="t-equipo" data-recorrido="lista-equipo">
-        <header className="m-encabezado">
-          <h1 id="t-equipo">{t.equipo}</h1>
-          <p className="m-contexto">{gente ? `${gente.filter((g) => g.activa).length} ${t.personas} activas` : "Cargando…"}</p>
-        </header>
-        <div className="m-filtros">
-          <input type="search" aria-label={`Buscar ${t.persona} o ${t.punto}`} placeholder={`Buscar ${t.persona} o ${t.punto}`}
-            value={buscar} onChange={(e) => setBuscar(e.target.value)} />
-          <div className="m-segmentos m-segmentos-chicos" role="group" aria-label="Mostrar">
-            <button className="m-segmento" aria-pressed={!inactivas} onClick={() => setInactivas(false)}>Activas</button>
-            <button className="m-segmento" aria-pressed={inactivas} onClick={() => setInactivas(true)}>Inactivas</button>
-          </div>
+  const lista = (
+    <>
+      <div className="m-filtros">
+        <input type="search" aria-label={`Buscar ${t.persona} o ${t.punto}`} placeholder={`Buscar ${t.persona} o ${t.punto}`}
+          value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+        <div className="m-segmentos m-segmentos-chicos" role="group" aria-label="Mostrar">
+          <button className="m-segmento" aria-pressed={!inactivas} onClick={() => setInactivas(false)}>Activas</button>
+          <button className="m-segmento" aria-pressed={inactivas} onClick={() => setInactivas(true)}>Inactivas</button>
         </div>
-        {puedeEditar && (
-          <div className="m-pie-acciones">
-            <button className="boton secundario" onClick={() => setNueva(true)}><Icono id="mas" />Nueva {t.persona}</button>
-            <Link href="/equipo/ajustes" className="boton texto"><Icono id="ajustes" />Ajustes</Link>
-          </div>
-        )}
-        {nueva && <NuevaPersona alCerrar={() => setNueva(false)} alCrear={(id) => { setNueva(false); setRecarga((r) => r + 1); router.push(`/equipo?p=${id}`); }} />}
-        {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
-        {!gente && !error && [0, 1, 2, 3, 4].map((i) => <div key={i} className="m-esqueleto" style={{ height: 60 }} />)}
-        {gente && !visibles.length && (
-          <p className="m-vacio">{buscar ? "Nadie coincide con esa búsqueda." : inactivas ? `No hay ${t.personas} inactivas.` : `Todavía no hay ${t.personas}. Cree la primera.`}</p>
-        )}
-        <ul className="m-lista">
-          {visibles.map((g) => (
+      </div>
+      {puedeEditar && (
+        <div className="m-pie-acciones">
+          <button className="boton secundario" onClick={() => setNueva(true)}><Icono id="mas" />Nueva {t.persona}</button>
+          <Link href="/equipo/ajustes" className="boton texto"><Icono id="ajustes" />Ajustes</Link>
+        </div>
+      )}
+      {nueva && <NuevaPersona alCerrar={() => setNueva(false)} alCrear={(id) => { setNueva(false); setRecarga((r) => r + 1); router.push(`/equipo?p=${id}`); }} />}
+      {!gente && !error && [0, 1, 2, 3, 4].map((i) => <div key={i} className="m-esqueleto" style={{ height: 60 }} />)}
+      {gente && !visibles.length && (
+        <p className="m-vacio">{buscar ? "Nadie coincide con esa búsqueda." : inactivas ? `No hay ${t.personas} inactivas.` : `Todavía no hay ${t.personas}. Cree la primera.`}</p>
+      )}
+      <ul className="m-lista">
+        {visibles.map((g) => {
+          const etapa = pasoDe.get(g.id);
+          return (
             <li key={g.id}>
               <Link href={`/equipo?p=${g.id}`} className="m-fila" aria-current={g.id === elegida ? "true" : undefined}>
                 <Avatar id={g.id} nombre={g.nombre} />
                 <span className="m-fila-texto">
                   <b>{g.nombre}</b>
-                  <span>{g.puntos.length ? g.puntos.map((a) => puntos[a.punto_id]).filter(Boolean).join(" · ") : `Sin ${t.punto}`}</span>
+                  <span>{g.puntos.length ? g.puntos.map((a) => puntos[a.punto_id]).filter(Boolean).join(" · ") : `Sin ${t.punto}`}
+                    {etapa && nombreEtapa.get(etapa) ? ` · Paso: ${nombreEtapa.get(etapa)}` : ""}</span>
                 </span>
                 <Icono id="derecha" />
               </Link>
             </li>
-          ))}
-        </ul>
-      </section>
-      <section className="m-ld-detalle" aria-label={`Ficha de la ${t.persona}`}>
-        {persona
-          ? <Ficha key={persona.id} persona={persona} puntos={puntos} puedeEditar={puedeEditar} alCambiar={() => setRecarga((r) => r + 1)} />
-          : gente && <p className="m-vacio m-solo-escritorio">Elija una {t.persona} de la lista para ver su ficha.</p>}
+          );
+        })}
+      </ul>
+    </>
+  );
+
+  // Con una persona elegida: lista a la izquierda y ficha a la derecha (en el celular, la ficha).
+  if (elegida) {
+    return (
+      <div className="m-lista-detalle con-detalle">
+        <section className="m-ld-lista" aria-labelledby="t-equipo" data-recorrido="lista-equipo">
+          <header className="m-encabezado">
+            <Link href="/equipo" className="m-volver" style={{ display: "inline-flex" }}><Icono id="izquierda" />Formación</Link>
+            <h1 id="t-equipo">{t.Personas}</h1>
+          </header>
+          {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
+          {lista}
+        </section>
+        <section className="m-ld-detalle" aria-label={`Ficha de la ${t.persona}`}>
+          {persona
+            ? <Ficha key={persona.id} persona={persona} puntos={puntos} puedeEditar={puedeEditar} alCambiar={() => setRecarga((r) => r + 1)} />
+            : gente && <p className="m-vacio">No se encontró esa {t.persona}. <Link className="m-enlace" href="/equipo">Volver</Link></p>}
+        </section>
+      </div>
+    );
+  }
+
+  const activas = (gente ?? []).filter((g) => g.activa);
+  return (
+    <div className="m-formacion">
+      <header className="m-encabezado">
+        <h1 id="t-equipo">{t.equipo}</h1>
+        <p className="m-contexto">Formación y desempeño{gente ? ` · ${activas.length} ${t.personas} activas` : ""}</p>
+      </header>
+      <div className="m-formacion-controles">
+        <div className="m-segmentos m-segmentos-chicos" role="group" aria-label="Período">
+          <button className="m-segmento" aria-pressed={periodo === "mes"} onClick={() => setPeriodo("mes")}>Este mes</button>
+          <button className="m-segmento" aria-pressed={periodo === "semana"} onClick={() => setPeriodo("semana")}>Esta semana</button>
+        </div>
+        {yo.rol !== "responsable_punto" && Object.keys(puntos).length > 1 && (
+          <select aria-label={`Ver un ${t.punto}`} value={punto} onChange={(e) => setPunto(e.target.value)}>
+            <option value="">Todo el {t.equipo.toLowerCase()}</option>
+            {Object.entries(puntos).map(([id, n]) => <option key={id} value={id}>{n}</option>)}
+          </select>
+        )}
+        {llenaRegistro && <button className="boton" data-recorrido="formacion-registro" onClick={() => registrar(undefined, "registro")}><Icono id="dia" />Registro del día</button>}
+        {puedeEditar && <Link href="/equipo/ajustes" className="boton texto"><Icono id="ajustes" />Ajustes</Link>}
+      </div>
+      {error && <div className="nota mal" role="alert"><b>{error}</b></div>}
+      {!form && !error && [0, 1, 2].map((i) => <div key={i} className="m-esqueleto" style={{ height: 120 }} />)}
+      {form && gente && (<>
+        <section className="m-grupo" aria-labelledby="t-hacer" data-recorrido="formacion-hacer">
+          <h2 id="t-hacer">Lo que hay que hacer</h2>
+          <Pendientes d={form.pend} conProximos={false} conAccion={false} />
+        </section>
+        <section className="m-grupo" aria-labelledby="t-como" data-recorrido="formacion-como">
+          <h2 id="t-como">Cómo van</h2>
+          <p className="m-contexto">{punto ? puntos[punto] : `Todo el ${t.equipo.toLowerCase()}`}, {periodo === "mes" ? "este mes" : "esta semana"}. La flecha dice si mejoró o empeoró.</p>
+          {!form.ind.length && (
+            <p className="m-frase-nota">Todavía no hay indicadores del registro del día (explicó el programa, consultó puntos, referidos). <Link className="m-enlace" href="/equipo/ajustes#t-indicadores">Ponerlos en Ajustes</Link></p>
+          )}
+          <ComoVan indicadores={form.ind} punto={punto || undefined} periodo={periodo} />
+        </section>
+        <section className="m-grupo" aria-labelledby="t-pasos" data-recorrido="formacion-pasos">
+          <h2 id="t-pasos">En qué paso va cada {t.persona}</h2>
+          <p className="m-contexto">El ciclo de formación. Toque una cara para ver su ficha y cambiarle el paso.</p>
+          <FranjaEtapas etapas={form.et} pasos={form.pasos} gente={activas.filter(enPunto)} />
+        </section>
+        <section className="m-grupo" aria-labelledby="t-calendario" data-recorrido="formacion-calendario">
+          <h2 id="t-calendario">Calendario de la semana</h2>
+          <p className="m-contexto">Sesiones de formación y compromisos que vencen, de lunes a domingo.</p>
+          <CalendarioSemana compromisos={form.pend.abiertos.filter((c) => !punto || c.punto_id === punto)} gente={gente} puntos={puntos} />
+        </section>
+      </>)}
+      <section className="m-grupo" aria-labelledby="t-todas" data-recorrido="lista-equipo">
+        <h2 id="t-todas">Todas las {t.personas}</h2>
+        {lista}
       </section>
     </div>
   );
@@ -138,7 +228,7 @@ function NuevaPersona({ alCerrar, alCrear }: { alCerrar: () => void; alCrear: (i
 
 type DatosFicha = {
   desde: string; hasta: string; venta: VentaDia[]; antes: VentaDia[]; metas: Meta[]; comps: Compromiso[];
-  segs: Seguimiento[]; cat: ItemCatalogo[];
+  segs: Seguimiento[]; cat: ItemCatalogo[]; etapas: Etapa[]; historia: HistoriaPaso[]; indicadores: Indicador[];
 };
 
 const VALOR: Record<string, [string, string]> = { bien: ["● Bien", "c-ok"], a_mejorar: ["▲ A mejorar", "c-rev"], neutral: ["Neutral", "c-neu"] };
@@ -175,8 +265,9 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
     const [ad, ah] = anterior(desde, hasta);
     setD(null);
     Promise.all([ventas(desde, hasta, persona.id), ventas(ad, ah, persona.id), metas(desde, hasta), compromisos(persona.id),
-      seguimientos(correrDias(hoy(), -365), persona.id), catalogo()])
-      .then(([venta, antes, ms, comps, segs, cat]) => setD({ desde, hasta, venta, antes, metas: ms, comps, segs, cat }))
+      seguimientos(correrDias(hoy(), -365), persona.id), catalogo(), leerEtapas(), historiaPasos(persona.id), leerIndicadores()])
+      .then(([venta, antes, ms, comps, segs, cat, etapas, historia, indicadores]) =>
+        setD({ desde, hasta, venta, antes, metas: ms, comps, segs, cat, etapas, historia, indicadores }))
       .catch((e) => setError(textoDeError(e)));
   }, [mes, persona.id, version, recarga]);
 
@@ -229,6 +320,10 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
         items.push({ clave: c.id + "b", fecha: diaBogota(c.cerrado_en), icono: c.estado === "cumplido" ? "chulo" : "bandera",
           titulo: <>{c.estado === "cumplido" ? "Cumplió" : "No cumplió"} «{c.que}»</> });
     }
+    const etapa = new Map(d.etapas.map((e) => [e.id, e.nombre]));
+    for (const h of d.historia)
+      items.push({ clave: "e" + h.id, fecha: h.desde, icono: "sube", titulo: <>Pasó a «{etapa.get(h.etapa_id) ?? "otra etapa"}»</>,
+        texto: h.nota ?? undefined });
     for (const a of persona.puntos)
       items.push({ clave: "p" + a.punto_id + a.desde, fecha: a.desde, icono: "tienda", titulo: <>Empezó en {puntos[a.punto_id] ?? `un ${t.punto}`}</> });
     return items.sort((x, y) => (x.fecha < y.fecha ? 1 : -1));
@@ -255,6 +350,14 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
       {puedeEditar && <EditarPersona persona={persona} alCambiar={alCambiar} />}
 
       <Puntos persona={persona} puntos={puntos} puedeEditar={puedeEditar} alCambiar={alCambiar} />
+
+      {d && <PasoDelCiclo persona={persona} etapas={d.etapas} historia={d.historia} alCambiar={() => setRecarga((r) => r + 1)} />}
+      {d && (
+        <div className="m-grupo" data-recorrido="ficha-como-va">
+          <h2>Cómo va este mes</h2>
+          <ComoVan indicadores={d.indicadores} persona={persona.id} periodo="mes" />
+        </div>
+      )}
 
       <div className="m-periodo" role="group" aria-label="Período">
         <button className="m-icono-boton" onClick={() => moverMes(-1)} aria-label="Mes anterior"><Icono id="izquierda" /></button>
@@ -348,6 +451,79 @@ function Ficha({ persona, puntos, puedeEditar, alCambiar }: {
         </div>
       </>)}
     </article>
+  );
+}
+
+// El paso del ciclo de formación: lo cambia una persona (no es automático) y queda en la línea
+// de tiempo. Lo cambian quienes ven el acompañamiento; el responsable, solo en su punto.
+function PasoDelCiclo({ persona, etapas, historia, alCambiar }: {
+  persona: Persona; etapas: Etapa[]; historia: HistoriaPaso[]; alCambiar: () => void;
+}) {
+  const { yo, avisar, config } = useMarco();
+  const t = config.textos;
+  const [abierto, setAbierto] = useState(false);
+  const [etapa, setEtapa] = useState("");
+  const [nota, setNota] = useState("");
+  const [ocupado, setOcupado] = useState(false);
+  const actual = historia[0];
+  const nombre = new Map(etapas.map((e) => [e.id, e.nombre]));
+  const hoyF = hoy();
+  const puede = ["dueno", "encargada", "soporte", "lider"].includes(yo.rol)
+    || (yo.rol === "responsable_punto" && persona.puntos.some((a) => a.punto_id === yo.punto_id && (!a.hasta || a.hasta >= hoyF)));
+
+  async function guardar(e: React.FormEvent) {
+    e.preventDefault();
+    if (!etapa) { avisar("Elija el paso."); return; }
+    setOcupado(true);
+    try {
+      await cambiarPaso({ empresa_id: yo.empresa_id, asesora_id: persona.id, etapa_id: etapa, nota });
+      avisar(`Ahora va en «${nombre.get(etapa)}»`); setAbierto(false); setNota(""); alCambiar();
+    } catch (er) { avisar(textoDeError(er)); } finally { setOcupado(false); }
+  }
+
+  return (
+    <div className="m-grupo" data-recorrido="ficha-paso">
+      <h2>Paso del ciclo</h2>
+      {!etapas.length ? (
+        <p className="m-frase-nota">La empresa todavía no tiene las etapas del ciclo. <Link className="m-enlace" href="/equipo/ajustes#t-etapa">Ponerlas en Ajustes</Link></p>
+      ) : (
+        <>
+          <ol className="m-pasos" aria-label="Etapas del ciclo">
+            {etapas.map((x, i) => {
+              const es = actual?.etapa_id === x.id;
+              return <li key={x.id} className={es ? "m-paso-actual" : ""} aria-current={es ? "step" : undefined}><span className="num">{i + 1}</span>{x.nombre}</li>;
+            })}
+          </ol>
+          <p className="m-contexto">{actual && nombre.has(actual.etapa_id)
+            ? <>Va en <b>{nombre.get(actual.etapa_id)}</b> desde el {fecha(actual.desde)}.</>
+            : `Todavía no tiene paso asignado.`}</p>
+          {puede && !abierto && <button className="boton secundario compacto" style={{ alignSelf: "flex-start" }} onClick={() => { setEtapa(""); setAbierto(true); }}>Cambiar el paso</button>}
+          {abierto && (
+            <form className="m-form" onSubmit={guardar}>
+              <fieldset className="m-opciones">
+                <legend>¿En qué paso va {persona.nombre.split(" ")[0]}?</legend>
+                {etapas.map((x) => (
+                  <label key={x.id} className="m-opcion">
+                    <input type="radio" name="etapa" checked={etapa === x.id} disabled={actual?.etapa_id === x.id}
+                      onChange={() => setEtapa(x.id)} />{x.nombre}{actual?.etapa_id === x.id ? " (actual)" : ""}
+                  </label>
+                ))}
+              </fieldset>
+              <div className="campo">
+                <label htmlFor="paso-nota">Nota (opcional)</label>
+                <input id="paso-nota" type="text" maxLength={200} value={nota} onChange={(e) => setNota(e.target.value)}
+                  placeholder={`Ej.: terminó la formación de venta consultiva`} />
+              </div>
+              <div className="m-pie-acciones">
+                <button type="button" className="boton secundario" onClick={() => setAbierto(false)}>Cancelar</button>
+                <button type="submit" className="boton" disabled={ocupado}>{ocupado ? "Guardando…" : "Guardar el paso"}</button>
+              </div>
+              <p className="m-contexto">El cambio queda en la línea de tiempo de la {t.persona}; no se borra.</p>
+            </form>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 

@@ -13,6 +13,9 @@ export const TEXTOS_BASE = {
   equipo: "Equipo",
   lider: "líder",
   responsable_punto: "responsable de punto",
+  // El nombre del programa de fidelización de la empresa (en Milagros, otro): sale en la
+  // plantilla sugerida de Formación y en sus textos.
+  programa: "programa de fidelización",
 };
 
 export type Textos = typeof TEXTOS_BASE;

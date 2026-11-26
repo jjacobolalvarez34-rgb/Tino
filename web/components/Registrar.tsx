@@ -1,7 +1,9 @@
 "use client";
-// "+ Registrar": observación, compromiso, sesión o meta, cada uno en una sola pantalla y en
-// menos de 30 segundos. Lo que se puede adivinar ya viene puesto (la persona, su punto, hoy).
-import { useEffect, useMemo, useState } from "react";
+// "+ Registrar": registro del día, observación, compromiso, evaluación, sesión o meta, cada uno
+// en una sola pantalla y en menos de 30 segundos. Lo que se puede adivinar ya viene puesto (la
+// persona, su punto, hoy).
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { base, mensaje, textoDeError } from "@/lib/supabase";
 import { puntos as leerPuntos } from "@/lib/datos";
 import { catalogo, correrDiasHoy, hoy, mesDe, personas as leerPersonas, registrarCompromiso, registrarObservacion,
@@ -9,9 +11,13 @@ import { catalogo, correrDiasHoy, hoy, mesDe, personas as leerPersonas, registra
 import { HojaInferior } from "./HojaInferior";
 import { Icono } from "./Iconos";
 import { useMarco } from "./Marco";
+import { RegistroDia } from "./RegistroDia";
 
-type Tipo = "observacion" | "compromiso" | "evaluacion" | "objetivo" | "sesion" | "meta";
+type Tipo = "registro" | "observacion" | "compromiso" | "evaluacion" | "objetivo" | "sesion" | "meta";
+// Quién llena el registro del día: el responsable (de su punto), el lider y el dueño (0015).
+const LLENAN_REGISTRO = ["dueno", "lider", "responsable_punto"];
 const TIPOS: { id: Tipo; titulo: string; detalle: string; icono: string }[] = [
+  { id: "registro", titulo: "Registro del día", detalle: "Clientes atendidos y lo que hizo cada una, con + y −", icono: "dia" },
   { id: "observacion", titulo: "Observación", detalle: "Lo que vio hoy: coaching, cliente incógnito…", icono: "ojo" },
   { id: "compromiso", titulo: "Compromiso", detalle: "Qué va a hacer, quién y para cuándo", icono: "bandera" },
   { id: "evaluacion", titulo: "Evaluación", detalle: "Un puntaje de 1 a 5 por cada criterio", icono: "chulo" },
@@ -20,8 +26,8 @@ const TIPOS: { id: Tipo; titulo: string; detalle: string; icono: string }[] = [
   { id: "meta", titulo: "Meta", detalle: "Cuánto vender en un período", icono: "diana" },
 ];
 
-export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
-  abierta: boolean; persona?: string; tipo?: string; alCerrar: () => void; alGuardar: (texto: string) => void;
+export function Registrar({ abierta, persona, tipo, dia, alCerrar, alGuardar }: {
+  abierta: boolean; persona?: string; tipo?: string; dia?: string; alCerrar: () => void; alGuardar: (texto: string) => void;
 }) {
   const { yo, config } = useMarco();
   const t = config.textos;
@@ -51,14 +57,16 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
   useEffect(() => {
     if (!abierta) return;
     setPaso((tipo as Tipo) || null); setError(""); setQuien(persona ?? ""); setTexto(""); setTipoObs("");
-    setValor("bien"); setFecha(hoy()); setLimite(correrDiasHoy(7)); setPrioridad("media"); setHora(""); setMonto(""); setPuntajes({}); setClase("diagnostico");
+    setValor("bien"); setFecha(dia ?? hoy()); setLimite(correrDiasHoy(7)); setPrioridad("media"); setHora(""); setMonto(""); setPuntajes({}); setClase("diagnostico");
     const [d, h] = mesDe(hoy()); setDesde(d); setHasta(h);
     if (!gente) {
       Promise.all([leerPersonas(), leerPuntos(), catalogo()])
         .then(([g, p, c]) => { setGente(g.filter((x) => x.activa)); setPuntos(p); setCat(c); })
         .catch((e) => setError(textoDeError(e)));
     }
-  }, [abierta, persona, tipo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [abierta, persona, tipo, dia]); // eslint-disable-line react-hooks/exhaustive-deps
+  const ponerError = useCallback((m: string) => setError(m), []);
+  const tipos = TIPOS.filter((x) => x.id !== "registro" || LLENAN_REGISTRO.includes(yo.rol));
 
   const elegida = gente?.find((g) => g.id === quien);
   const puntosDe = useMemo(() => {
@@ -163,7 +171,7 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
       ) : undefined}>
       {!paso && (
         <ul className="m-lista" aria-label="Qué quiere registrar">
-          {TIPOS.map((x) => (
+          {tipos.map((x) => (
             <li key={x.id}>
               <button className="m-fila" onClick={() => setPaso(x.id)}>
                 <span className="m-fila-icono"><Icono id={x.icono} /></span>
@@ -175,7 +183,10 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
         </ul>
       )}
       {paso && !gente && !error && <div className="m-esqueleto" style={{ height: 180 }} />}
-      {paso && gente && (
+      {paso === "registro" && gente && (
+        <RegistroDia formId="r-form" gente={gente} puntos={puntos} alGuardar={alGuardar} alError={ponerError} />
+      )}
+      {paso && paso !== "registro" && gente && (
         <form id="r-form" className="m-form" onSubmit={guardar} noValidate>
           {paso === "observacion" && <>
             {listaPersonas()}
@@ -239,7 +250,13 @@ export function Registrar({ abierta, persona, tipo, alCerrar, alGuardar }: {
             {listaPersonas()}
             {listaPuntos()}
             {!criterios.length ? (
-              <p className="nota aviso"><span>La empresa todavía no tiene criterios de evaluación. Agréguelos en Más → Ajustes de {t.equipo}.</span></p>
+              <div className="nota aviso">
+                <span className="cuerpo">
+                  <b>Para evaluar, primero hacen falta los criterios.</b>
+                  <span>Son lo que se califica de 1 a 5 (por ejemplo, «Saluda y ofrece ayuda»). Se crean una vez en Ajustes de {t.equipo}: puede escribirlos uno por uno o tocar «Usar plantilla sugerida» y después editarlos.</span>
+                  <Link href="/equipo/ajustes#t-criterio" className="boton secundario compacto" onClick={alCerrar}>Ir a crear los criterios</Link>
+                </span>
+              </div>
             ) : criterios.map((c) => (
               <fieldset key={c.id} className="m-segmentos m-puntaje">
                 <legend>{c.nombre}</legend>

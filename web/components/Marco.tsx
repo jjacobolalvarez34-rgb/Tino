@@ -16,7 +16,7 @@ import { Registrar } from "./Registrar";
 export type Yo = { id: string; nombre: string; rol: string; empresa_id: string; empresa: string; punto_id: string | null };
 type Contexto = {
   yo: Yo; config: Config; avisar: (texto: string) => void;
-  registrar: (persona?: string, tipo?: string) => void; version: number; verRecorrido: (nombre?: NombreRecorrido) => void;
+  registrar: (persona?: string, tipo?: string, dia?: string) => void; version: number; verRecorrido: (nombre?: NombreRecorrido) => void;
 };
 const Ctx = createContext<Contexto | null>(null);
 export const useMarco = () => {
@@ -50,7 +50,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState("");
   const [aviso, setAviso] = useState("");
   const [mas, setMas] = useState(false);
-  const [reg, setReg] = useState<{ persona?: string; tipo?: string } | null>(null);
+  const [reg, setReg] = useState<{ persona?: string; tipo?: string; dia?: string } | null>(null);
   const [version, setVersion] = useState(0);
   const reloj = useRef<ReturnType<typeof setTimeout>>();
   const ruta = usePathname();
@@ -85,7 +85,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
     clearTimeout(reloj.current);
     reloj.current = setTimeout(() => setAviso(""), 2600);
   }, []);
-  const registrar = useCallback((persona?: string, tipo?: string) => setReg({ persona, tipo }), []);
+  const registrar = useCallback((persona?: string, tipo?: string, dia?: string) => setReg({ persona, tipo, dia }), []);
   const verRecorrido = useCallback((nombre?: NombreRecorrido) => {
     const cual = nombre ?? recorridoDe(window.location.pathname);
     if (!yo || !cfg || !cual) return;
@@ -174,7 +174,7 @@ export function Marco({ children }: { children: React.ReactNode }) {
         </ul>
       </HojaInferior>
 
-      <Registrar abierta={!!reg} persona={reg?.persona} tipo={reg?.tipo}
+      <Registrar abierta={!!reg} persona={reg?.persona} tipo={reg?.tipo} dia={reg?.dia}
         alCerrar={() => setReg(null)}
         alGuardar={(texto) => { setReg(null); avisar(texto); setVersion((v) => v + 1); }} />
 

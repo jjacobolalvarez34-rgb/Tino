@@ -1,0 +1,167 @@
+"use client";
+// Lo que hay que hacer, en frases que se tocan y ordenadas por urgencia: compromisos vencidos,
+// quién necesita apoyo, lo que viene y las sesiones de la semana. Lo usan Hoy y Equipo.
+import Link from "next/link";
+import { puntos as leerPuntos } from "@/lib/datos";
+import { compromisos, correrDiasHoy, diasEntre, hoy, mesDe, metaDelPeriodo, metas, personas, porPersona, seguimientos,
+  sesiones, ultimaFecha, ventas, type Compromiso, type Meta, type Persona, type Sesion, type Seguimiento,
+  type VentaDia } from "@/lib/equipo";
+import { fecha } from "@/lib/formato";
+import { Icono } from "./Iconos";
+import { useMarco } from "./Marco";
+
+export type DatosPendientes = {
+  gente: Persona[]; puntos: Record<string, string>; desde: string; hasta: string;
+  venta: VentaDia[]; metas: Meta[]; abiertos: Compromiso[]; segs: Seguimiento[]; sesiones: Sesion[];
+};
+
+const primerNombre = (n: string) => n.trim().split(/\s+/)[0];
+
+export function lunes(f: string) {
+  const d = new Date(f + "T00:00:00Z");
+  const dia = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dia);
+  return d.toISOString().slice(0, 10);
+}
+
+// Lo mismo que carga Hoy para sus frases: el mes en curso (o el último con ventas), los
+// compromisos abiertos, los seguimientos recientes y las sesiones de lunes a domingo.
+export async function cargarPendientes(): Promise<DatosPendientes> {
+  const [gente, pts, ultima, abiertos, segs] = await Promise.all([
+    personas(), leerPuntos(), ultimaFecha(), compromisos(), seguimientos(correrDiasHoy(-120)),
+  ]);
+  const ref = ultima && ultima < mesDe(hoy())[0] ? ultima : hoy();
+  const [desde, finMes] = mesDe(ref);
+  const hasta = finMes < hoy() ? finMes : hoy();
+  const lun = lunes(hoy());
+  const [venta, ms, ses] = await Promise.all([ventas(desde, hasta), metas(desde, hasta), sesiones(lun, correrDiasHoy(6 - diasEntre(lun, hoy())))]);
+  return { gente, puntos: pts, desde, hasta, venta, metas: ms, abiertos, segs, sesiones: ses };
+}
+
+type Frase = { clave: string; tono: "mal" | "rev" | "ok" | "neu"; icono: string; texto: React.ReactNode; detalle: string; ir?: string };
+
+export function Pendientes({ d, conProximos = true, conAccion = true }: { d: DatosPendientes; conProximos?: boolean; conAccion?: boolean }) {
+  const hoyF = hoy();
+  const { config, registrar } = useMarco();
+  const t = config.textos;
+  const quien = new Map(d.gente.map((g) => [g.id, g]));
+  const nombre = (id: string) => quien.get(id)?.nombre ?? `una ${t.persona}`;
+
+  const vencidos = d.abiertos.filter((c) => c.fecha_limite < hoyF);
+  const limiteProx = correrDiasHoy(config.dias_proximos);
+  const proximos = d.abiertos.filter((c) => c.fecha_limite >= hoyF && c.fecha_limite <= limiteProx);
+
+  // Quién necesita apoyo: solo con los umbrales que la empresa haya puesto.
+  const venta = porPersona(d.venta);
+  const ultimoSeg = new Map<string, string>();
+  for (const s of d.segs) if (!ultimoSeg.has(s.asesora_id)) ultimoSeg.set(s.asesora_id, s.fecha);
+  const hayUmbrales = config.umbral_cumplimiento != null || config.umbral_dias_sin_seguimiento != null
+    || config.umbral_compromisos_vencidos != null;
+  const apoyo: { id: string; razones: string[] }[] = [];
+  if (hayUmbrales) {
+    for (const g of d.gente.filter((x) => x.activa && x.puntos.length)) {
+      const razones: string[] = [];
+      const meta = metaDelPeriodo(d.metas, d.desde, d.hasta, (m) => m.asesora_id === g.id);
+      if (config.umbral_cumplimiento != null && meta > 0) {
+        const pct = Math.round(((venta.get(g.id)?.venta ?? 0) / meta) * 100);
+        if (pct < config.umbral_cumplimiento) razones.push(`va en ${pct} % de su meta`);
+      }
+      if (config.umbral_dias_sin_seguimiento != null) {
+        const u = ultimoSeg.get(g.id);
+        const dias = u ? diasEntre(u, hoyF) : null;
+        if (dias == null || dias > config.umbral_dias_sin_seguimiento)
+          razones.push(dias == null ? "no tiene seguimiento reciente" : `lleva ${dias} días sin seguimiento`);
+      }
+      const venc = vencidos.filter((c) => c.asesora_id === g.id).length;
+      if (config.umbral_compromisos_vencidos != null && venc >= config.umbral_compromisos_vencidos)
+        razones.push(`${venc} compromiso${venc === 1 ? "" : "s"} vencido${venc === 1 ? "" : "s"}`);
+      if (razones.length) apoyo.push({ id: g.id, razones });
+    }
+  }
+
+  const todas: { titulo: string; filas: Frase[]; vacio?: React.ReactNode; proximos?: boolean }[] = [
+    {
+      titulo: "Compromisos vencidos",
+      filas: vencidos.map((c) => {
+        const dias = diasEntre(c.fecha_limite, hoyF);
+        return {
+          clave: c.id, tono: "mal", icono: "bandera", ir: `/equipo?p=${c.asesora_id}`,
+          texto: <><b>{primerNombre(nombre(c.asesora_id))}</b> tenía que «{c.que}»</>,
+          detalle: `Venció hace ${dias} día${dias === 1 ? "" : "s"} · ${d.puntos[c.punto_id] ?? ""} · avance ${c.avance} %`,
+        };
+      }),
+    },
+    {
+      titulo: `${t.Personas} que necesitan apoyo`,
+      filas: apoyo.map((a) => ({
+        clave: a.id, tono: "rev", icono: "salvavidas", ir: `/equipo?p=${a.id}`,
+        texto: <><b>{nombre(a.id)}</b> {a.razones[0]}</>,
+        detalle: a.razones.slice(1).join(" · ") || "Toque para ver su ficha",
+      })),
+      vacio: hayUmbrales ? undefined : (
+        <p className="m-frase-nota">Cuando la empresa ponga sus umbrales (cumplimiento, días sin seguimiento), aquí sale quién necesita apoyo. <Link className="m-enlace" href="/equipo/ajustes">Poner umbrales</Link></p>
+      ),
+    },
+    {
+      titulo: `Para los próximos ${config.dias_proximos} días`,
+      filas: proximos.map((c) => {
+        const dias = diasEntre(hoyF, c.fecha_limite);
+        return {
+          clave: c.id, tono: "neu", icono: "reloj", ir: `/equipo?p=${c.asesora_id}`,
+          texto: <><b>{primerNombre(nombre(c.asesora_id))}</b> tiene que «{c.que}»</>,
+          detalle: `${dias === 0 ? "Vence hoy" : dias === 1 ? "Vence mañana" : `Vence el ${fecha(c.fecha_limite)}`} · avance ${c.avance} %`,
+        };
+      }),
+      proximos: true,
+    },
+    {
+      titulo: "Sesiones de esta semana",
+      filas: d.sesiones.filter((s) => s.estado !== "cancelada").map((s) => ({
+        clave: s.id, tono: s.estado === "hecha" ? "ok" : "neu", icono: "birrete",
+        texto: <><b>{s.titulo}</b></>,
+        detalle: `${fecha(s.fecha)}${s.hora ? " · " + s.hora.slice(0, 5) : ""} · ${s.punto_id ? d.puntos[s.punto_id] ?? "" : `Todos los ${t.puntos}`}`,
+      })),
+    },
+  ];
+
+  // En Equipo, lo que viene se ve en el calendario: aquí solo lo vencido, el apoyo y la semana.
+  const frases = todas.filter((f) => conProximos || !f.proximos);
+  const nada = frases.every((f) => !f.filas.length);
+  return (
+    <section className="m-columna" aria-label="Pendientes" data-recorrido="pendientes">
+      {nada && (
+        <div className="m-frase m-frase-ok">
+          <span className="m-frase-marca t-ok" aria-hidden="true">●</span>
+          <span className="m-frase-texto"><b>Todo al día.</b><span>No hay compromisos vencidos ni pendientes esta semana.</span></span>
+        </div>
+      )}
+      {frases.filter((f) => f.filas.length || f.vacio).map((f) => (
+        <div key={f.titulo} className="m-grupo">
+          <h2>{f.titulo}{f.filas.length > 0 && <span className="m-cuenta num">{f.filas.length}</span>}</h2>
+          {f.filas.length ? (
+            <ul className="m-lista">
+              {f.filas.slice(0, 6).map((x) => {
+                const cuerpo = (
+                  <>
+                    <span className={`m-frase-marca t-${x.tono}`} aria-hidden="true">
+                      {x.tono === "mal" ? "■" : x.tono === "rev" ? "▲" : x.tono === "ok" ? "●" : <Icono id={x.icono} />}
+                    </span>
+                    <span className="m-frase-texto">{x.texto}<span>{x.detalle}</span></span>
+                    {x.ir && <Icono id="derecha" />}
+                  </>
+                );
+                return <li key={x.clave}>{x.ir ? <Link className="m-frase" href={x.ir}>{cuerpo}</Link> : <div className="m-frase">{cuerpo}</div>}</li>;
+              })}
+            </ul>
+          ) : f.vacio}
+          {f.filas.length > 6 && <Link className="m-ver-mas" href="/equipo">Ver los {f.filas.length}</Link>}
+        </div>
+      ))}
+      {conAccion && <button className="m-frase m-frase-accion" onClick={() => registrar(undefined, "compromiso")}>
+        <span className="m-frase-marca t-marca" aria-hidden="true"><Icono id="mas" /></span>
+        <span className="m-frase-texto"><b>Registrar un compromiso</b><span>Qué, quién y para cuándo, en menos de 30 segundos</span></span>
+      </button>}
+    </section>
+  );
+}
+
