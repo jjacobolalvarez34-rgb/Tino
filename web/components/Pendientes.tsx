@@ -42,7 +42,11 @@ type Frase = { clave: string; tono: "mal" | "rev" | "ok" | "neu"; icono: string;
 
 export function Pendientes({ d, conProximos = true, conAccion = true }: { d: DatosPendientes; conProximos?: boolean; conAccion?: boolean }) {
   const hoyF = hoy();
-  const { config, registrar } = useMarco();
+  const { config, registrar, yo } = useMarco();
+  // El responsable de punto solo ve el seguimiento de su punto: si se le mostraran las demás
+  // personas, todas saldrían "sin seguimiento reciente" sin serlo.
+  const suPunto = yo.rol === "responsable_punto" ? yo.punto_id : null;
+  const deSuPunto = (g: Persona) => !suPunto || g.puntos.some((a) => a.punto_id === suPunto && (!a.hasta || a.hasta >= hoyF));
   const t = config.textos;
   const quien = new Map(d.gente.map((g) => [g.id, g]));
   const nombre = (id: string) => quien.get(id)?.nombre ?? `una ${t.persona}`;
@@ -59,7 +63,7 @@ export function Pendientes({ d, conProximos = true, conAccion = true }: { d: Dat
     || config.umbral_compromisos_vencidos != null;
   const apoyo: { id: string; razones: string[] }[] = [];
   if (hayUmbrales) {
-    for (const g of d.gente.filter((x) => x.activa && x.puntos.length)) {
+    for (const g of d.gente.filter((x) => x.activa && x.puntos.length && deSuPunto(x))) {
       const razones: string[] = [];
       const meta = metaDelPeriodo(d.metas, d.desde, d.hasta, (m) => m.asesora_id === g.id);
       if (config.umbral_cumplimiento != null && meta > 0) {
