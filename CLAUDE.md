@@ -5,8 +5,10 @@ los Excels diarios, Siigo, extractos bancarios, Bold, Redeban y avisos de
 transferencia; concilia los pagos, detecta descuadres con su causa probable y lo
 muestra claro, listo para copiar a Excel.
 
-Milagros (11 puntos) es el laboratorio: datos reales, usados con permiso, solo en
-el proyecto de pruebas.
+Milagros (11 puntos) fue el laboratorio hasta el 26 nov 2026: dejó de ser cliente (D-069). Sus
+datos reales siguen solo en el proyecto de pruebas y no se usan para nada nuevo. El rumbo vigente
+está en `docs/PLAN.md` §0: tres caras (Administración web, Vender web y App sin internet) sobre una
+sola base, y el Excel como salida.
 
 Jacobo López dirige el proyecto y revisa todo. Trabaja como "vibe engineer":
 quiere entender cada decisión, no solo recibir código.

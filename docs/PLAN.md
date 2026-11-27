@@ -4,6 +4,45 @@ El plan maestro que citan los demás documentos. Escrito el 20 nov 2026 a partir
 arquitectura, las tareas 001 a 010, las pantallas de diseño, la revisión de la dueña y lo que Jacobo
 pidió ese día. Se actualiza al cerrar cada fase. Estado: ✅ hecho · 🟡 en curso · ⏳ pendiente.
 
+## 0. Rumbo desde el 27 nov 2026 (manda sobre todo lo de abajo)
+
+**Qué pasó:** Milagros dejó de ser cliente: compró un POS con ERP y ya no usa el Excel (D-069). Lo
+construido no se pierde: nada de Tino quedó amarrado a Milagros (§1). Lo que sí cambia: Tino deja de
+depender del Excel de un cliente y pasa a **ser** lo que el cliente usa todos los días.
+
+**Tino son tres caras sobre una sola base** (D-068):
+
+| Cara | Para quién | Dónde | Qué hace | Estado |
+|---|---|---|---|---|
+| **Administración** | Dueño, encargada, finanzas, líder | Web (computador y celular) | Hoy, Equipo y formación, Ventas y reportes, Caja y conciliación, Configuración | ✅ funciona (tino-pruebas); falta producción |
+| **Vender** (facturas) | Asesoras en puntos con computador | Web | Vender y cobrar, facturar por el programa de facturación del cliente (D-063), inventario del día, cuadre de caja y cierre | ⏳ por construir |
+| **App** | Asesoras en el celular | App instalable que funciona sin internet | Lo mismo que Vender, guardado en el celular y sincronizado con la base (docs/PLAN_APP_MOVIL.md) | ⏳ por construir |
+
+**El Excel** deja de ser una entrada: es una salida que Tino genera (Descargar Excel, Copiar como
+números). Los lectores de Excel se quedan para **traer la historia** de un cliente nuevo al empezar.
+
+**Código y ramas:**
+- Un solo repositorio y una sola base. Se sigue trabajando en `main` y se sube igual a `arranque`
+  (Vercel publica desde el fork de Jacobo, que sigue `arranque`).
+- **Administración y Vender en la misma web** (`web/`), separadas por grupos de rutas: lo de hoy, y
+  `/vender` para el punto. Mismo inicio de sesión y mismos componentes: un cambio sirve para las dos.
+- **La App** empieza como versión instalable (PWA) de `/vender`, con su copia en el celular
+  (IndexedDB) y una cola que sincroniza con `sincronizar(lote)`. Si hace falta tienda de apps, se
+  empaca después con Capacitor, sin reescribir. Así no hay tres códigos que mantener.
+- Por qué así: una persona sola no sostiene tres proyectos distintos; con una base y una web, cada
+  arreglo llega a las tres caras.
+
+**Orden para salir a buscar clientes:**
+1. **Producción lista** (lo de Jacobo: conexión de producción, variable de Vercel, Site URL de Auth) y aplicar 0012–0015.
+2. **Kit de venta:** la demo con datos inventados, la portada, /precios, el instructivo y videos tutoriales de cada sección (al final de todo, pedido de Jacobo).
+3. **Administración completa:** los 4 reportes de docs/MAPA.md, ordenar el menú y Configuración, catálogo de productos con secciones.
+4. **Vender (web):** venta, cobro por medio de pago, inventario del día, cuadre de caja y cierre en Tino; factura por Siigo (u otro programa del cliente) cuando haya empresa de pruebas.
+5. **App:** Vender instalable y sin internet, con sincronización y choques sin pisarse.
+6. **Roles configurables** (docs/ROLES.md) cuando un cliente lo necesite.
+7. Unificar los demás proyectos de Jacobo dentro de Tino (por ejemplo, el conciliador de Redil como un banco más, D-060).
+
+Lo de las fases de abajo que nombra a Milagros queda como historia; vale el orden de esta sección.
+
 ## 1. El principio que manda: Tino no depende de la estructura de un cliente
 
 Tino es un solo producto multiempresa. Cada cliente llega con sus herramientas (un Excel, un Google
@@ -129,7 +168,7 @@ facturas electrónicas con fecha anterior a hoy (importa para vender sin interne
 - IVA en los precios (pendiente de Jacobo), dirección web de Mamut Herd, 5 clientes fundadores.
 - Vercel Pro con la primera venta (D-059).
 
-## 4. Orden recomendado para seguir
+## 4. Orden recomendado para seguir (reemplazado por §0 el 27 nov 2026)
 1. 1.4 y 1.5 (en cuanto Jacobo aplique 0012/0013 y ponga las llaves).
 2. 1.7 Siigo real guardado en Tino, y 2.2 venta sin facturar.
 3. 1.8 Cerrar el día y 1.9 pantallas de caja con Conciliación.

@@ -417,6 +417,16 @@ genera, nunca una base. Esto cambia la regla de la app vieja de registro de fact
 fuente oficial"): mientras convivan, hay que acordar desde cuándo manda Tino y qué pasa con lo que se
 corrija a mano en el Excel (pendiente de Jacobo). Plan: docs/PLAN_APP_MOVIL.md.
 
+### D-069 · Milagros deja de ser cliente; Tino son tres caras sobre una base
+27 nov 2026. Milagros compró un POS con ERP y ya no usa el Excel. Decisión de Jacobo: Tino sigue como
+producto para otros negocios, con tres caras sobre la misma base (D-068): Administración (web), Vender
+(web, para puntos con computador) y App (instalable, funciona sin internet). El Excel es una salida que
+Tino genera; los lectores de Excel quedan para traer la historia de un cliente nuevo. Administración y
+Vender comparten la misma web; la App empieza como versión instalable de Vender. Los datos reales de
+Milagros se quedan quietos en tino-pruebas (nada se borra) y no se usan para nada nuevo; las demos usan
+solo la empresa de demostración. Pendiente de Jacobo: si le pide a Milagros borrar o archivar sus datos.
+Rumbo y orden: docs/PLAN.md §0.
+
 ## Pendientes
 
 ### P-002 · ¿Un usuario en varias empresas?

@@ -15,6 +15,18 @@ Dudas:
 -
 ```
 
+## 2026-11-27 · Rumbo nuevo: Milagros se va, Tino son tres caras
+
+- Milagros compró un POS con ERP y deja de ser cliente (D-069). El Excel deja de ser entrada.
+- Plan actualizado (docs/PLAN.md §0): Administración web (funciona), Vender web y App sin internet
+  sobre una sola base (D-068); Administración y Vender en la misma web; la App como versión instalable de Vender.
+- docs/PLAN_APP_MOVIL.md sin el choque del Excel; la migración de la app vieja queda como guía para otros clientes.
+- docs/MAPA.md (26 nov): mapa de secciones, lo repetido y los 4 reportes que faltan, en espera de aprobación.
+- El contexto de la app vieja quedó fuera del repositorio, en Tino-datos/contexto.
+
+Falta (en este orden): producción (lo de Jacobo), kit de venta con videos tutoriales, reportes y menú,
+Vender, App, roles.
+
 ## 2026-11-26 · Formación y desempeño (tarea 011: A, B y diseño de C)
 
 Hecho:

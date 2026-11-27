@@ -8,13 +8,11 @@ Tino tiene **una sola base de datos**. La app móvil es otra cara de esa base, c
 usuarios, roles, permisos, puntos, asesoras y productos. La única copia aparte es la del celular, para
 trabajar sin internet, y se sincroniza con Tino. **El Excel es una salida que Tino genera, nunca una base.**
 
-### Choque con la app vieja (hay que resolverlo con Jacobo)
-La app vieja de registro de facturas («Milagros» / «Tino Lite») tiene como regla número 1 «el Excel
-(Google Sheets) es la fuente oficial de verdad» y la gente (Alexandra, Irina) **edita el Excel a mano**.
-La decisión nueva dice lo contrario. Mientras convivan, hay que acordar:
-- Desde qué día y en qué puntos manda Tino y el Excel pasa a ser solo una salida.
-- Qué pasa si alguien corrige el Excel a mano después: propuesta, ese cambio no entra solo; se anota
-  en Tino como corrección con nota (así no hay dos verdades).
+### El choque con la app vieja ya no aplica (27 nov 2026, D-069)
+Milagros dejó de ser cliente y ya no usa el Excel, así que no hay convivencia que acordar. La App de
+Tino nace sin Excel: lo que la asesora hace se guarda en Tino y el Excel solo sale de Tino. De la app
+vieja se aprovechan las ideas (lo que pidieron las asesoras: rápida, sin confirmaciones dobles, sin
+depender de la señal, pagos claros, «todo coincide» en el inventario), no su código ni su base.
 
 ## 2. Qué necesita la base para la app móvil
 
@@ -83,7 +81,9 @@ y desactivar; cambiar precio con fecha. Solo dueño y encargada (con roles confi
 
 **Trabajo:** base y pruebas 1 sesión · pantalla 1 sesión · catálogo en la app móvil con la app.
 
-## 5. Pasar la app vieja a Tino sin perder nada
+## 5. Pasar la app vieja a Tino sin perder nada (ya no hace falta para Milagros)
+
+Queda como guía para cualquier cliente nuevo que llegue con su propia app o base.
 
 La app vieja tiene su propia base Supabase, un Apps Script y 11 Google Sheets por mes.
 
@@ -103,7 +103,5 @@ La app vieja tiene su propia base Supabase, un Apps Script y 11 Google Sheets po
 ## 6. Lo que necesito de Jacobo
 
 1. Aprobar el plan (o cambiarlo).
-2. El choque del §1: desde cuándo manda Tino y qué hacer con las correcciones hechas a mano en el Excel.
-3. Acceso de lectura a la base vieja (solo para la migración y la comparación) cuando toque.
-4. Las preguntas que quedaron abiertas en el traspaso: si el descuento de Leal va siempre sobre venta
-   facturada, qué puntos tienen computador y cómo facturan hoy en el punto.
+2. Una empresa de pruebas del programa de facturación (Siigo u otro) para probar facturar sin
+   generar facturas reales.
