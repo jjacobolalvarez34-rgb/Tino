@@ -15,6 +15,16 @@ Dudas:
 -
 ```
 
+## 2026-11-27 (2) · Arranca el paso 3 del plan (pausado por el límite de uso)
+
+- Producción: "conexion" sigue vacía en produccion.json; no se aplicaron migraciones.
+- Hecho: web/lib/xlsx.ts, un .xlsx de una hoja sin librerías (números como números, encabezado en negrita,
+  probado abriéndolo con openpyxl). Todavía no está conectado a ninguna pantalla.
+- Sigue: botón "Descargar Excel" en components/Tabla.tsx (junto a Copiar como números), luego los 4
+  reportes de docs/MAPA.md (cumplimiento de todas las asesoras, venta por producto y punto, recopilado del
+  cuadre, comisiones y retenciones con la migración 0016 para separar retefuente, reteIVA y reteICA) y
+  ordenar el menú (Caja con pestañas, Configuración).
+
 ## 2026-11-27 · Rumbo nuevo: Milagros se va, Tino son tres caras
 
 - Milagros compró un POS con ERP y deja de ser cliente (D-069). El Excel deja de ser entrada.
